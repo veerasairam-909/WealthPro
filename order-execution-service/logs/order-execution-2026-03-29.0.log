@@ -1,0 +1,50 @@
+2026-03-29 15:57:03.276 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-29 15:57:03.330 [main] INFO  c.w.o.c.OrderControllerImplTest - Starting OrderControllerImplTest using Java 24.0.1 with PID 9468 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\order-execution-service)
+2026-03-29 15:57:03.330 [main] DEBUG c.w.o.c.OrderControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-29 15:57:03.331 [main] INFO  c.w.o.c.OrderControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-29 15:57:06.071 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-29 15:57:06.071 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-29 15:57:06.072 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-29 15:57:06.113 [main] INFO  c.w.o.c.OrderControllerImplTest - Started OrderControllerImplTest in 3.555 seconds (process running for 5.266)
+2026-03-29 15:58:01.604 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-29 15:58:01.661 [main] INFO  c.w.o.r.ExecutionFillRepositoryTest - Starting ExecutionFillRepositoryTest using Java 24.0.1 with PID 9368 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\order-execution-service)
+2026-03-29 15:58:01.662 [main] DEBUG c.w.o.r.ExecutionFillRepositoryTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-29 15:58:01.663 [main] INFO  c.w.o.r.ExecutionFillRepositoryTest - The following 1 profile is active: "test"
+2026-03-29 15:58:02.234 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-29 15:58:02.320 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 75 ms. Found 4 JPA repository interfaces.
+2026-03-29 15:58:02.384 [main] INFO  o.s.b.t.a.j.TestDatabaseAutoConfiguration$EmbeddedDataSourceBeanFactoryPostProcessor - Replacing 'dataSource' DataSource bean with embedded version
+2026-03-29 15:58:02.580 [main] INFO  o.s.j.d.e.EmbeddedDatabaseFactory - Starting embedded database: url='jdbc:h2:mem:87b6edce-3483-49ef-9705-abbd5b0e838e;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2026-03-29 15:58:02.968 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-29 15:58:03.072 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.42.Final
+2026-03-29 15:58:03.123 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-03-29 15:58:03.504 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-29 15:58:03.608 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory$EmbeddedDataSourceProxy@645ba24a']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-29 15:58:04.636 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-29 15:58:04.712 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-29 15:58:05.348 [main] INFO  c.w.o.r.ExecutionFillRepositoryTest - Started ExecutionFillRepositoryTest in 4.41 seconds (process running for 5.972)
+2026-03-29 15:58:06.510 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-29 15:58:06.511 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "FILL_QUANTITY"; SQL statement:
+insert into execution_fills (fill_date,fill_price,fill_quantity,order_id,status,venue,fill_id) values (?,?,?,?,?,?,default) [23502-232]
+2026-03-29 15:58:06.618 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.wealthpro.orderexecution.repository.AllocationRepositoryTest]: AllocationRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-29 15:58:06.629 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.wealthpro.orderexecution.OrderExecutionServiceApplication for test class com.wealthpro.orderexecution.repository.AllocationRepositoryTest
+2026-03-29 15:58:06.805 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-29 15:58:06.806 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "ACCOUNT_ID"; SQL statement:
+insert into allocations (account_id,alloc_date,alloc_price,alloc_quantity,order_id,allocation_id) values (?,?,?,?,?,default) [23502-232]
+2026-03-29 15:58:06.898 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.wealthpro.orderexecution.repository.PreTradeCheckRepositoryTest]: PreTradeCheckRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-29 15:58:06.906 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.wealthpro.orderexecution.OrderExecutionServiceApplication for test class com.wealthpro.orderexecution.repository.PreTradeCheckRepositoryTest
+2026-03-29 15:58:07.028 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-29 15:58:07.028 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "CHECK_TYPE"; SQL statement:
+insert into pre_trade_checks (check_type,checked_date,message,order_id,result,check_id) values (?,?,?,?,?,default) [23502-232]
+2026-03-29 15:58:07.104 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.wealthpro.orderexecution.repository.OrderRepositoryTest]: OrderRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-29 15:58:07.116 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.wealthpro.orderexecution.OrderExecutionServiceApplication for test class com.wealthpro.orderexecution.repository.OrderRepositoryTest
+2026-03-29 15:58:07.237 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-29 15:58:07.237 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "CLIENT_ID"; SQL statement:
+insert into orders (client_id,limit_price,order_date,price_type,quantity,routed_venue,security_id,side,status,order_id) values (?,?,?,?,?,?,?,?,?,default) [23502-232]
+2026-03-29 15:58:07.280 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'

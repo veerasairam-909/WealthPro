@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order-execution-service</a> &gt; <a href="index.source.html" class="el_package">com.wealthpro.orderexecution.service</a> &gt; <span class="el_source">OrderServiceImpl.java</span></div><h1>OrderServiceImpl.java</h1><pre class="source lang-java linenums">package com.wealthpro.orderexecution.service;
+
+import com.wealthpro.orderexecution.dto.*;
+import com.wealthpro.orderexecution.entities.*;
+import com.wealthpro.orderexecution.enums.*;
+import com.wealthpro.orderexecution.exception.ResourceNotFoundException;
+import com.wealthpro.orderexecution.repository.*;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * Implementation of {@link OrderService} containing the core business logic
+ * for the complete order lifecycle — from placement through pre-trade
+ * validation, routing, execution, allocation, and cancellation.
+ *
+ * @author WealthPro Team
+ * @version 2.0
+ */
+@Service
+@Transactional
+public class OrderServiceImpl implements OrderService {
+
+    private final OrderRepository orderRepository;
+    private final PreTradeCheckRepository preTradeCheckRepository;
+    private final ExecutionFillRepository executionFillRepository;
+    private final AllocationRepository allocationRepository;
+    private final ModelMapper modelMapper;
+
+    @Autowired
+    public OrderServiceImpl(OrderRepository orderRepository,
+                            PreTradeCheckRepository preTradeCheckRepository,
+                            ExecutionFillRepository executionFillRepository,
+                            AllocationRepository allocationRepository,
+<span class="fc" id="L45">                            ModelMapper modelMapper) {</span>
+<span class="fc" id="L46">        this.orderRepository = orderRepository;</span>
+<span class="fc" id="L47">        this.preTradeCheckRepository = preTradeCheckRepository;</span>
+<span class="fc" id="L48">        this.executionFillRepository = executionFillRepository;</span>
+<span class="fc" id="L49">        this.allocationRepository = allocationRepository;</span>
+<span class="fc" id="L50">        this.modelMapper = modelMapper;</span>
+<span class="fc" id="L51">    }</span>
+
+    // ======================== CRUD Operations ========================
+
+    @Override
+    public OrderResponseDTO createOrder(OrderRequestDTO requestDTO) {
+<span class="fc" id="L57">        Order order = modelMapper.map(requestDTO, Order.class);</span>
+<span class="fc" id="L58">        order.setStatus(OrderStatus.PLACED);</span>
+<span class="fc" id="L59">        order.setOrderDate(LocalDateTime.now());</span>
+
+<span class="fc" id="L61">        Order savedOrder = orderRepository.save(order);</span>
+<span class="fc" id="L62">        return modelMapper.map(savedOrder, OrderResponseDTO.class);</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = &quot;orders&quot;, key = &quot;#orderId&quot;)
+    public OrderResponseDTO getOrderById(Long orderId) {
+<span class="fc" id="L69">        Order order = findOrderOrThrow(orderId);</span>
+<span class="fc" id="L70">        return modelMapper.map(order, OrderResponseDTO.class);</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;OrderResponseDTO&gt; getAllOrders() {
+        // Convert each Order entity to OrderResponseDTO using stream + method reference
+<span class="fc" id="L77">        return orderRepository.findAll().stream()</span>
+<span class="fc" id="L78">                .map(order -&gt; modelMapper.map(order, OrderResponseDTO.class))</span>
+<span class="fc" id="L79">                .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;OrderResponseDTO&gt; getOrdersByClientId(Long clientId) {
+<span class="nc" id="L85">        return orderRepository.findByClientId(clientId).stream()</span>
+<span class="nc" id="L86">                .map(order -&gt; modelMapper.map(order, OrderResponseDTO.class))</span>
+<span class="nc" id="L87">                .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;OrderResponseDTO&gt; getOrdersByStatus(OrderStatus status) {
+<span class="nc" id="L93">        return orderRepository.findByStatus(status).stream()</span>
+<span class="nc" id="L94">                .map(order -&gt; modelMapper.map(order, OrderResponseDTO.class))</span>
+<span class="nc" id="L95">                .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    @CachePut(value = &quot;orders&quot;, key = &quot;#orderId&quot;)
+    public OrderResponseDTO updateOrder(Long orderId, OrderRequestDTO requestDTO) {
+<span class="nc" id="L101">        Order existingOrder = findOrderOrThrow(orderId);</span>
+
+<span class="nc" id="L103">        existingOrder.setClientId(requestDTO.getClientId());</span>
+<span class="nc" id="L104">        existingOrder.setSecurityId(requestDTO.getSecurityId());</span>
+<span class="nc" id="L105">        existingOrder.setSide(requestDTO.getSide());</span>
+<span class="nc" id="L106">        existingOrder.setQuantity(requestDTO.getQuantity());</span>
+<span class="nc" id="L107">        existingOrder.setPriceType(requestDTO.getPriceType());</span>
+<span class="nc" id="L108">        existingOrder.setLimitPrice(requestDTO.getLimitPrice());</span>
+
+<span class="nc" id="L110">        Order updatedOrder = orderRepository.save(existingOrder);</span>
+<span class="nc" id="L111">        return modelMapper.map(updatedOrder, OrderResponseDTO.class);</span>
+    }
+
+    @Override
+    @CacheEvict(value = &quot;orders&quot;, key = &quot;#orderId&quot;)
+    public void deleteOrder(Long orderId) {
+<span class="fc" id="L117">        Order order = findOrderOrThrow(orderId);</span>
+<span class="fc" id="L118">        orderRepository.delete(order);</span>
+<span class="fc" id="L119">    }</span>
+
+    // =================== Core Business Logic ===================
+
+    /**
+     * {@inheritDoc}
+     * &lt;p&gt;
+     * Runs all four simulated pre-trade checks (SUITABILITY, LIMIT, EXPOSURE, CASH).
+     * If every check passes, the order status is set to VALIDATED.
+     * If any check fails, the order status is set to REJECTED.
+     * &lt;/p&gt;
+     */
+    @Override
+    @CacheEvict(value = &quot;orders&quot;, key = &quot;#orderId&quot;)
+    public List&lt;PreTradeCheckResponseDTO&gt; runAllPreTradeChecks(Long orderId) {
+<span class="fc" id="L134">        Order order = findOrderOrThrow(orderId);</span>
+
+        // Pre-trade checks can only run on PLACED orders
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if (order.getStatus() != OrderStatus.PLACED) {</span>
+<span class="fc" id="L138">            throw new IllegalStateException(</span>
+<span class="fc" id="L139">                    &quot;Pre-trade checks can only run on PLACED orders. Current status: &quot; + order.getStatus());</span>
+        }
+
+        // Run each of the four check types using stream + map
+        // Arrays.stream creates a stream from the CheckType enum values,
+        // map applies the simulateCheck method to each, and collect gathers results
+<span class="fc" id="L145">        List&lt;PreTradeCheck&gt; checkResults = Arrays.stream(CheckType.values())</span>
+<span class="fc" id="L146">                .map(checkType -&gt; simulateSingleCheck(checkType, order))</span>
+<span class="fc" id="L147">                .collect(Collectors.toList());</span>
+
+        // Persist all check results
+<span class="fc" id="L150">        List&lt;PreTradeCheck&gt; savedChecks = preTradeCheckRepository.saveAll(checkResults);</span>
+
+        // Determine if ALL checks passed using stream allMatch
+        // allMatch returns true only if every element satisfies the predicate
+<span class="fc" id="L154">        boolean allPassed = savedChecks.stream()</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">                .allMatch(check -&gt; check.getResult() == CheckResult.PASS);</span>
+
+        // Update order status based on check results
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">        order.setStatus(allPassed ? OrderStatus.VALIDATED : OrderStatus.REJECTED);</span>
+<span class="fc" id="L159">        orderRepository.save(order);</span>
+
+        // Convert saved check entities to response DTOs
+<span class="fc" id="L162">        return savedChecks.stream()</span>
+<span class="fc" id="L163">                .map(this::mapCheckToResponseDTO)</span>
+<span class="fc" id="L164">                .collect(Collectors.toList());</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     * &lt;p&gt;Simulates routing by assigning a dummy venue name.&lt;/p&gt;
+     */
+    @Override
+    @CacheEvict(value = &quot;orders&quot;, key = &quot;#orderId&quot;)
+    public OrderResponseDTO routeOrder(Long orderId) {
+<span class="fc" id="L174">        Order order = findOrderOrThrow(orderId);</span>
+
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        if (order.getStatus() != OrderStatus.VALIDATED) {</span>
+<span class="fc" id="L177">            throw new IllegalStateException(</span>
+<span class="fc" id="L178">                    &quot;Only VALIDATED orders can be routed. Current status: &quot; + order.getStatus());</span>
+        }
+
+        // Simulate venue assignment based on price type
+<span class="pc bpc" id="L182" title="2 of 3 branches missed.">        String venue = switch (order.getPriceType()) {</span>
+<span class="fc" id="L183">            case MARKET -&gt; &quot;SIMULATED_NSE&quot;;</span>
+<span class="nc" id="L184">            case LIMIT -&gt; &quot;SIMULATED_BSE&quot;;</span>
+<span class="nc" id="L185">            case NAV -&gt; &quot;SIMULATED_MF_PLATFORM&quot;;</span>
+        };
+
+<span class="fc" id="L188">        order.setRoutedVenue(venue);</span>
+<span class="fc" id="L189">        order.setStatus(OrderStatus.ROUTED);</span>
+<span class="fc" id="L190">        Order updatedOrder = orderRepository.save(order);</span>
+
+<span class="fc" id="L192">        return modelMapper.map(updatedOrder, OrderResponseDTO.class);</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     * &lt;p&gt;
+     * Creates a fill and calculates the cumulative filled quantity to determine
+     * whether the order should move to PARTIALLY_FILLED or FILLED.
+     * &lt;/p&gt;
+     */
+    @Override
+    @CacheEvict(value = &quot;orders&quot;, key = &quot;#orderId&quot;)
+    public ExecutionFillResponseDTO executeFill(Long orderId, ExecutionFillRequestDTO requestDTO) {
+<span class="fc" id="L205">        Order order = findOrderOrThrow(orderId);</span>
+
+        // Fills can only be created for ROUTED or PARTIALLY_FILLED orders
+<span class="fc" id="L208">        Set&lt;OrderStatus&gt; fillableStatuses = Set.of(OrderStatus.ROUTED, OrderStatus.PARTIALLY_FILLED);</span>
+<span class="pc bpc" id="L209" title="1 of 2 branches missed.">        if (!fillableStatuses.contains(order.getStatus())) {</span>
+<span class="nc" id="L210">            throw new IllegalStateException(</span>
+                    &quot;Fills can only be applied to ROUTED or PARTIALLY_FILLED orders. Current status: &quot;
+<span class="nc" id="L212">                            + order.getStatus());</span>
+        }
+
+        // Build the fill entity
+<span class="fc" id="L216">        ExecutionFill fill = ExecutionFill.builder()</span>
+<span class="fc" id="L217">                .order(order)</span>
+<span class="fc" id="L218">                .fillQuantity(requestDTO.getFillQuantity())</span>
+<span class="fc" id="L219">                .fillPrice(requestDTO.getFillPrice())</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">                .venue(requestDTO.getVenue() != null ? requestDTO.getVenue() : order.getRoutedVenue())</span>
+<span class="fc" id="L221">                .fillDate(LocalDateTime.now())</span>
+<span class="fc" id="L222">                .status(FillStatus.COMPLETED)</span>
+<span class="fc" id="L223">                .build();</span>
+
+<span class="fc" id="L225">        ExecutionFill savedFill = executionFillRepository.save(fill);</span>
+
+        // Calculate total filled quantity across all COMPLETED fills using stream
+        // mapToInt extracts the integer fill quantity, sum() totals them
+<span class="fc" id="L229">        int totalFilled = executionFillRepository.findByOrder_OrderId(orderId).stream()</span>
+<span class="pc bpc" id="L230" title="1 of 2 branches missed.">                .filter(f -&gt; f.getStatus() == FillStatus.COMPLETED)</span>
+<span class="fc" id="L231">                .mapToInt(ExecutionFill::getFillQuantity)</span>
+<span class="fc" id="L232">                .sum();</span>
+
+        // Update order status based on fill progress
+<span class="pc bpc" id="L235" title="1 of 2 branches missed.">        if (totalFilled &gt;= order.getQuantity()) {</span>
+<span class="fc" id="L236">            order.setStatus(OrderStatus.FILLED);</span>
+        } else {
+<span class="nc" id="L238">            order.setStatus(OrderStatus.PARTIALLY_FILLED);</span>
+        }
+<span class="fc" id="L240">        orderRepository.save(order);</span>
+
+<span class="fc" id="L242">        return mapFillToResponseDTO(savedFill);</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     * &lt;p&gt;Only FILLED orders can have allocations created.&lt;/p&gt;
+     */
+    @Override
+    public AllocationResponseDTO allocateOrder(Long orderId, AllocationRequestDTO requestDTO) {
+<span class="nc" id="L251">        Order order = findOrderOrThrow(orderId);</span>
+
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (order.getStatus() != OrderStatus.FILLED) {</span>
+<span class="nc" id="L254">            throw new IllegalStateException(</span>
+<span class="nc" id="L255">                    &quot;Allocations can only be created for FILLED orders. Current status: &quot; + order.getStatus());</span>
+        }
+
+<span class="nc" id="L258">        Allocation allocation = Allocation.builder()</span>
+<span class="nc" id="L259">                .order(order)</span>
+<span class="nc" id="L260">                .accountId(requestDTO.getAccountId())</span>
+<span class="nc" id="L261">                .allocQuantity(requestDTO.getAllocQuantity())</span>
+<span class="nc" id="L262">                .allocPrice(requestDTO.getAllocPrice())</span>
+<span class="nc" id="L263">                .allocDate(LocalDateTime.now())</span>
+<span class="nc" id="L264">                .build();</span>
+
+<span class="nc" id="L266">        Allocation savedAllocation = allocationRepository.save(allocation);</span>
+<span class="nc" id="L267">        return mapAllocationToResponseDTO(savedAllocation);</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     * &lt;p&gt;Cancellation is only allowed for PLACED, VALIDATED, or ROUTED orders.&lt;/p&gt;
+     */
+    @Override
+    @CacheEvict(value = &quot;orders&quot;, key = &quot;#orderId&quot;)
+    public OrderResponseDTO cancelOrder(Long orderId) {
+<span class="fc" id="L277">        Order order = findOrderOrThrow(orderId);</span>
+
+        // Define which statuses allow cancellation
+<span class="fc" id="L280">        Set&lt;OrderStatus&gt; cancellableStatuses = Set.of(</span>
+                OrderStatus.PLACED, OrderStatus.VALIDATED, OrderStatus.ROUTED);
+
+<span class="fc bfc" id="L283" title="All 2 branches covered.">        if (!cancellableStatuses.contains(order.getStatus())) {</span>
+<span class="fc" id="L284">            throw new IllegalStateException(</span>
+<span class="fc" id="L285">                    &quot;Cannot cancel order in &quot; + order.getStatus() + &quot; status. &quot;</span>
+                            + &quot;Only PLACED, VALIDATED, or ROUTED orders can be cancelled.&quot;);
+        }
+
+<span class="fc" id="L289">        order.setStatus(OrderStatus.CANCELLED);</span>
+<span class="fc" id="L290">        Order updatedOrder = orderRepository.save(order);</span>
+
+<span class="fc" id="L292">        return modelMapper.map(updatedOrder, OrderResponseDTO.class);</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     * &lt;p&gt;Assembles the full lifecycle view by querying all related entities.&lt;/p&gt;
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public OrderLifecycleDTO getOrderLifecycle(Long orderId) {
+<span class="nc" id="L302">        Order order = findOrderOrThrow(orderId);</span>
+
+<span class="nc" id="L304">        OrderLifecycleDTO lifecycle = new OrderLifecycleDTO();</span>
+<span class="nc" id="L305">        lifecycle.setOrder(modelMapper.map(order, OrderResponseDTO.class));</span>
+
+        // Fetch and map all pre-trade checks for this order
+<span class="nc" id="L308">        lifecycle.setPreTradeChecks(</span>
+<span class="nc" id="L309">                preTradeCheckRepository.findByOrder_OrderId(orderId).stream()</span>
+<span class="nc" id="L310">                        .map(this::mapCheckToResponseDTO)</span>
+<span class="nc" id="L311">                        .collect(Collectors.toList()));</span>
+
+        // Fetch and map all fills for this order
+<span class="nc" id="L314">        lifecycle.setExecutionFills(</span>
+<span class="nc" id="L315">                executionFillRepository.findByOrder_OrderId(orderId).stream()</span>
+<span class="nc" id="L316">                        .map(this::mapFillToResponseDTO)</span>
+<span class="nc" id="L317">                        .collect(Collectors.toList()));</span>
+
+        // Fetch and map all allocations for this order
+<span class="nc" id="L320">        lifecycle.setAllocations(</span>
+<span class="nc" id="L321">                allocationRepository.findByOrder_OrderId(orderId).stream()</span>
+<span class="nc" id="L322">                        .map(this::mapAllocationToResponseDTO)</span>
+<span class="nc" id="L323">                        .collect(Collectors.toList()));</span>
+
+<span class="nc" id="L325">        return lifecycle;</span>
+    }
+
+    // =================== Private Helper Methods ===================
+
+    /**
+     * Finds an order by ID or throws {@link ResourceNotFoundException}.
+     */
+    private Order findOrderOrThrow(Long orderId) {
+<span class="fc" id="L334">        return orderRepository.findById(orderId)</span>
+<span class="fc" id="L335">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Order&quot;, orderId));</span>
+    }
+
+    /**
+     * Simulates a single pre-trade compliance check with dummy business rules.
+     * &lt;ul&gt;
+     *   &lt;li&gt;SUITABILITY: always passes (simulated)&lt;/li&gt;
+     *   &lt;li&gt;LIMIT: fails if quantity exceeds 10,000 units&lt;/li&gt;
+     *   &lt;li&gt;EXPOSURE: always passes (simulated)&lt;/li&gt;
+     *   &lt;li&gt;CASH: fails if limit price exceeds 50,000&lt;/li&gt;
+     * &lt;/ul&gt;
+     */
+    private PreTradeCheck simulateSingleCheck(CheckType checkType, Order order) {
+        CheckResult result;
+        String message;
+
+<span class="pc bpc" id="L351" title="1 of 5 branches missed.">        switch (checkType) {</span>
+            case SUITABILITY -&gt; {
+<span class="fc" id="L353">                result = CheckResult.PASS;</span>
+<span class="fc" id="L354">                message = &quot;Suitability check passed — client profile is compatible&quot;;</span>
+<span class="fc" id="L355">            }</span>
+            case LIMIT -&gt; {
+                // Dummy rule: fail if quantity &gt; 10,000
+<span class="pc bpc" id="L358" title="1 of 2 branches missed.">                boolean passed = order.getQuantity() &lt;= 10000;</span>
+<span class="pc bpc" id="L359" title="1 of 2 branches missed.">                result = passed ? CheckResult.PASS : CheckResult.FAIL;</span>
+<span class="pc bpc" id="L360" title="1 of 2 branches missed.">                message = passed</span>
+<span class="fc" id="L361">                        ? &quot;Limit check passed — quantity within threshold&quot;</span>
+<span class="pc" id="L362">                        : &quot;Limit check FAILED — quantity &quot; + order.getQuantity() + &quot; exceeds 10,000 limit&quot;;</span>
+<span class="fc" id="L363">            }</span>
+            case EXPOSURE -&gt; {
+<span class="fc" id="L365">                result = CheckResult.PASS;</span>
+<span class="fc" id="L366">                message = &quot;Exposure check passed — within portfolio exposure limits&quot;;</span>
+<span class="fc" id="L367">            }</span>
+            case CASH -&gt; {
+                // Dummy rule: fail if limitPrice &gt; 50,000
+<span class="pc bpc" id="L370" title="3 of 4 branches missed.">                boolean passed = order.getLimitPrice() == null || order.getLimitPrice() &lt;= 50000;</span>
+<span class="pc bpc" id="L371" title="1 of 2 branches missed.">                result = passed ? CheckResult.PASS : CheckResult.FAIL;</span>
+<span class="pc bpc" id="L372" title="1 of 2 branches missed.">                message = passed</span>
+<span class="fc" id="L373">                        ? &quot;Cash check passed — sufficient cash balance&quot;</span>
+<span class="pc" id="L374">                        : &quot;Cash check FAILED — limit price &quot; + order.getLimitPrice() + &quot; exceeds 50,000 cap&quot;;</span>
+<span class="fc" id="L375">            }</span>
+            default -&gt; {
+<span class="nc" id="L377">                result = CheckResult.PASS;</span>
+<span class="nc" id="L378">                message = &quot;Default check passed&quot;;</span>
+            }
+        }
+
+<span class="fc" id="L382">        return PreTradeCheck.builder()</span>
+<span class="fc" id="L383">                .order(order)</span>
+<span class="fc" id="L384">                .checkType(checkType)</span>
+<span class="fc" id="L385">                .result(result)</span>
+<span class="fc" id="L386">                .message(message)</span>
+<span class="fc" id="L387">                .checkedDate(LocalDateTime.now())</span>
+<span class="fc" id="L388">                .build();</span>
+    }
+
+    /** Maps a PreTradeCheck entity to its response DTO, setting the orderId. */
+    private PreTradeCheckResponseDTO mapCheckToResponseDTO(PreTradeCheck check) {
+<span class="fc" id="L393">        PreTradeCheckResponseDTO dto = modelMapper.map(check, PreTradeCheckResponseDTO.class);</span>
+<span class="fc" id="L394">        dto.setOrderId(check.getOrder().getOrderId());</span>
+<span class="fc" id="L395">        return dto;</span>
+    }
+
+    /** Maps an ExecutionFill entity to its response DTO, setting the orderId. */
+    private ExecutionFillResponseDTO mapFillToResponseDTO(ExecutionFill fill) {
+<span class="fc" id="L400">        ExecutionFillResponseDTO dto = modelMapper.map(fill, ExecutionFillResponseDTO.class);</span>
+<span class="fc" id="L401">        dto.setOrderId(fill.getOrder().getOrderId());</span>
+<span class="fc" id="L402">        return dto;</span>
+    }
+
+    /** Maps an Allocation entity to its response DTO, setting the orderId. */
+    private AllocationResponseDTO mapAllocationToResponseDTO(Allocation allocation) {
+<span class="nc" id="L407">        AllocationResponseDTO dto = modelMapper.map(allocation, AllocationResponseDTO.class);</span>
+<span class="nc" id="L408">        dto.setOrderId(allocation.getOrder().getOrderId());</span>
+<span class="nc" id="L409">        return dto;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

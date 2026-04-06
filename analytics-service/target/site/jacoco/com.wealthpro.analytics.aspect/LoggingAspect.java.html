@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoggingAspect.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">analytics-service</a> &gt; <a href="index.source.html" class="el_package">com.wealthpro.analytics.aspect</a> &gt; <span class="el_source">LoggingAspect.java</span></div><h1>LoggingAspect.java</h1><pre class="source lang-java linenums">package com.wealthpro.analytics.aspect;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+
+/**
+ * Centralized AOP Logging Aspect for the Analytics-Service.
+ *
+ * @author WealthPro Team
+ * @version 2.0
+ */
+@Aspect
+@Component
+<span class="nc" id="L21">public class LoggingAspect {</span>
+
+<span class="nc" id="L23">    private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);</span>
+
+<span class="nc" id="L25">    @Pointcut(&quot;execution(* com.wealthpro.analytics.controller..*(..))&quot;) public void controllerPointcut() {}</span>
+<span class="nc" id="L26">    @Pointcut(&quot;execution(* com.wealthpro.analytics.service..*(..))&quot;) public void servicePointcut() {}</span>
+
+    @Around(&quot;controllerPointcut() || servicePointcut()&quot;)
+    public Object logAroundMethod(ProceedingJoinPoint joinPoint) throws Throwable {
+<span class="nc" id="L30">        String className = joinPoint.getSignature().getDeclaringType().getSimpleName();</span>
+<span class="nc" id="L31">        String methodName = joinPoint.getSignature().getName();</span>
+<span class="nc" id="L32">        logger.info(&quot;&gt;&gt; ENTER: {}.{}() with arguments = {}&quot;, className, methodName, Arrays.toString(joinPoint.getArgs()));</span>
+<span class="nc" id="L33">        long startTime = System.currentTimeMillis();</span>
+        try {
+<span class="nc" id="L35">            Object result = joinPoint.proceed();</span>
+<span class="nc" id="L36">            long executionTime = System.currentTimeMillis() - startTime;</span>
+<span class="nc" id="L37">            logger.info(&quot;&lt;&lt; EXIT:  {}.{}() returned = {} | executed in {} ms&quot;, className, methodName, result, executionTime);</span>
+<span class="nc" id="L38">            return result;</span>
+<span class="nc" id="L39">        } catch (Exception ex) {</span>
+<span class="nc" id="L40">            long executionTime = System.currentTimeMillis() - startTime;</span>
+<span class="nc" id="L41">            logger.error(&quot;!! ERROR: {}.{}() threw {} after {} ms | message: {}&quot;, className, methodName, ex.getClass().getSimpleName(), executionTime, ex.getMessage());</span>
+<span class="nc" id="L42">            throw ex;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

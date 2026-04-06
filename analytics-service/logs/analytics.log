@@ -1,0 +1,121 @@
+2026-03-26 09:21:19.134 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-26 09:21:19.182 [main] INFO  c.w.a.r.ComplianceBreachRepositoryTest - Starting ComplianceBreachRepositoryTest using Java 24.0.1 with PID 5376 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-26 09:21:19.182 [main] DEBUG c.w.a.r.ComplianceBreachRepositoryTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-26 09:21:19.184 [main] INFO  c.w.a.r.ComplianceBreachRepositoryTest - The following 1 profile is active: "test"
+2026-03-26 09:21:19.701 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-26 09:21:19.771 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 62 ms. Found 3 JPA repository interfaces.
+2026-03-26 09:21:19.822 [main] INFO  o.s.b.t.a.j.TestDatabaseAutoConfiguration$EmbeddedDataSourceBeanFactoryPostProcessor - Replacing 'dataSource' DataSource bean with embedded version
+2026-03-26 09:21:19.980 [main] INFO  o.s.j.d.e.EmbeddedDatabaseFactory - Starting embedded database: url='jdbc:h2:mem:ffee3d09-8cd3-4033-b6dc-54e64380cbbe;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2026-03-26 09:21:20.258 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-26 09:21:20.324 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.42.Final
+2026-03-26 09:21:20.370 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-03-26 09:21:20.726 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-26 09:21:20.791 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory$EmbeddedDataSourceProxy@27db45f']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-26 09:21:21.556 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-26 09:21:21.588 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-26 09:21:22.090 [main] INFO  c.w.a.r.ComplianceBreachRepositoryTest - Started ComplianceBreachRepositoryTest in 3.595 seconds (process running for 5.004)
+2026-03-26 09:21:23.270 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-26 09:21:23.270 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "RULE_VIOLATED"; SQL statement:
+insert into compliance_breaches (account_id,description,detected_at,resolved_at,rule_violated,severity,status,breach_id) values (?,?,?,?,?,?,?,default) [23502-232]
+2026-03-26 09:21:23.382 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.wealthpro.analytics.repository.PerformanceRecordRepositoryTest]: PerformanceRecordRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-26 09:21:23.404 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.wealthpro.analytics.AnalyticsServiceApplication for test class com.wealthpro.analytics.repository.PerformanceRecordRepositoryTest
+2026-03-26 09:21:23.546 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-26 09:21:23.546 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "PORTFOLIO_ID"; SQL statement:
+insert into performance_records (account_id,benchmark_return_percentage,calculated_at,end_date,period,portfolio_id,return_percentage,start_date,record_id) values (?,?,?,?,?,?,?,?,default) [23502-232]
+2026-03-26 09:21:23.673 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.wealthpro.analytics.repository.RiskMeasureRepositoryTest]: RiskMeasureRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-26 09:21:23.684 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.wealthpro.analytics.AnalyticsServiceApplication for test class com.wealthpro.analytics.repository.RiskMeasureRepositoryTest
+2026-03-26 09:21:23.799 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-26 09:21:23.800 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "MEASURE_TYPE"; SQL statement:
+insert into risk_measures (account_id,calculated_at,description,measure_type,measure_value,measure_id) values (?,?,?,?,?,default) [23502-232]
+2026-03-26 09:21:23.861 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-26 09:22:13.992 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-26 09:22:14.176 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 26380 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-26 09:22:14.179 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-26 09:22:14.182 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-26 09:22:21.428 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-26 09:22:21.429 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-26 09:22:21.432 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-03-26 09:22:21.511 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 9.646 seconds (process running for 14.668)
+2026-03-26 09:22:22.685 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.wealthpro.analytics.repository.ComplianceBreachRepositoryTest]: ComplianceBreachRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-26 09:22:22.772 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.wealthpro.analytics.AnalyticsServiceApplication for test class com.wealthpro.analytics.repository.ComplianceBreachRepositoryTest
+2026-03-26 09:22:22.779 [main] INFO  o.s.b.d.r.RestartApplicationListener - Restart disabled due to context in which it is running
+2026-03-26 09:22:22.881 [main] INFO  c.w.a.r.ComplianceBreachRepositoryTest - Starting ComplianceBreachRepositoryTest using Java 24.0.1 with PID 26380 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-26 09:22:22.881 [main] DEBUG c.w.a.r.ComplianceBreachRepositoryTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-26 09:22:22.882 [main] INFO  c.w.a.r.ComplianceBreachRepositoryTest - The following 1 profile is active: "test"
+2026-03-26 09:22:23.497 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-26 09:22:23.678 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 148 ms. Found 3 JPA repository interfaces.
+2026-03-26 09:22:23.803 [main] INFO  o.s.b.t.a.j.TestDatabaseAutoConfiguration$EmbeddedDataSourceBeanFactoryPostProcessor - Replacing 'dataSource' DataSource bean with embedded version
+2026-03-26 09:22:23.974 [main] INFO  o.s.j.d.e.EmbeddedDatabaseFactory - Starting embedded database: url='jdbc:h2:mem:988cfee6-c76c-4b44-86b5-72e3fbc77e3b;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2026-03-26 09:22:25.355 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-26 09:22:25.604 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.42.Final
+2026-03-26 09:22:25.746 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-03-26 09:22:26.236 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-26 09:22:26.566 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory$EmbeddedDataSourceProxy@3d9cbe5d']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-26 09:22:29.409 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-26 09:22:29.537 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-26 09:22:30.520 [main] INFO  c.w.a.r.ComplianceBreachRepositoryTest - Started ComplianceBreachRepositoryTest in 7.742 seconds (process running for 23.678)
+2026-03-26 09:22:31.507 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-26 09:22:31.507 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "RULE_VIOLATED"; SQL statement:
+insert into compliance_breaches (account_id,description,detected_at,resolved_at,rule_violated,severity,status,breach_id) values (?,?,?,?,?,?,?,default) [23502-232]
+2026-03-26 09:22:31.675 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.wealthpro.analytics.repository.PerformanceRecordRepositoryTest]: PerformanceRecordRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-26 09:22:31.711 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.wealthpro.analytics.AnalyticsServiceApplication for test class com.wealthpro.analytics.repository.PerformanceRecordRepositoryTest
+2026-03-26 09:22:31.988 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-26 09:22:31.989 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "PORTFOLIO_ID"; SQL statement:
+insert into performance_records (account_id,benchmark_return_percentage,calculated_at,end_date,period,portfolio_id,return_percentage,start_date,record_id) values (?,?,?,?,?,?,?,?,default) [23502-232]
+2026-03-26 09:22:32.184 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.wealthpro.analytics.repository.RiskMeasureRepositoryTest]: RiskMeasureRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-26 09:22:32.208 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.wealthpro.analytics.AnalyticsServiceApplication for test class com.wealthpro.analytics.repository.RiskMeasureRepositoryTest
+2026-03-26 09:22:32.381 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-26 09:22:32.381 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "MEASURE_TYPE"; SQL statement:
+insert into risk_measures (account_id,calculated_at,description,measure_type,measure_value,measure_id) values (?,?,?,?,?,default) [23502-232]
+2026-03-26 09:22:33.814 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-26 09:28:13.782 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-26 09:28:13.826 [main] INFO  c.w.a.r.ComplianceBreachRepositoryTest - Starting ComplianceBreachRepositoryTest using Java 24.0.1 with PID 26576 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-26 09:28:13.827 [main] DEBUG c.w.a.r.ComplianceBreachRepositoryTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-26 09:28:13.828 [main] INFO  c.w.a.r.ComplianceBreachRepositoryTest - The following 1 profile is active: "test"
+2026-03-26 09:28:14.321 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-26 09:28:14.388 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 60 ms. Found 3 JPA repository interfaces.
+2026-03-26 09:28:14.435 [main] INFO  o.s.b.t.a.j.TestDatabaseAutoConfiguration$EmbeddedDataSourceBeanFactoryPostProcessor - Replacing 'dataSource' DataSource bean with embedded version
+2026-03-26 09:28:14.615 [main] INFO  o.s.j.d.e.EmbeddedDatabaseFactory - Starting embedded database: url='jdbc:h2:mem:045b3269-0434-49b5-b023-aaeb38ca0057;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2026-03-26 09:28:14.887 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-26 09:28:14.950 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.42.Final
+2026-03-26 09:28:14.984 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-03-26 09:28:15.333 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-26 09:28:15.397 [main] INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory$EmbeddedDataSourceProxy@70139a81']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-03-26 09:28:16.102 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-26 09:28:16.146 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-26 09:28:16.716 [main] INFO  c.w.a.r.ComplianceBreachRepositoryTest - Started ComplianceBreachRepositoryTest in 3.513 seconds (process running for 4.896)
+2026-03-26 09:28:17.738 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-26 09:28:17.738 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "RULE_VIOLATED"; SQL statement:
+insert into compliance_breaches (account_id,description,detected_at,resolved_at,rule_violated,severity,status,breach_id) values (?,?,?,?,?,?,?,default) [23502-232]
+2026-03-26 09:28:17.825 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.wealthpro.analytics.repository.PerformanceRecordRepositoryTest]: PerformanceRecordRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-26 09:28:17.843 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.wealthpro.analytics.AnalyticsServiceApplication for test class com.wealthpro.analytics.repository.PerformanceRecordRepositoryTest
+2026-03-26 09:28:17.951 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-26 09:28:17.951 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "PORTFOLIO_ID"; SQL statement:
+insert into performance_records (account_id,benchmark_return_percentage,calculated_at,end_date,period,portfolio_id,return_percentage,start_date,record_id) values (?,?,?,?,?,?,?,?,default) [23502-232]
+2026-03-26 09:28:18.039 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.wealthpro.analytics.repository.RiskMeasureRepositoryTest]: RiskMeasureRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-26 09:28:18.045 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.wealthpro.analytics.AnalyticsServiceApplication for test class com.wealthpro.analytics.repository.RiskMeasureRepositoryTest
+2026-03-26 09:28:18.130 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
+2026-03-26 09:28:18.130 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "MEASURE_TYPE"; SQL statement:
+insert into risk_measures (account_id,calculated_at,description,measure_type,measure_value,measure_id) values (?,?,?,?,?,default) [23502-232]
+2026-03-26 09:28:18.172 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'

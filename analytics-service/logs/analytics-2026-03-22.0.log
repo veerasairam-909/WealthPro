@@ -1,0 +1,136 @@
+2026-03-22 12:26:22.786 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 12:26:22.892 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 11836 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 12:26:22.894 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 12:26:22.895 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 12:26:26.450 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 12:26:26.450 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 12:26:26.451 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-22 12:26:26.503 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 4.979 seconds (process running for 7.861)
+2026-03-22 12:28:04.960 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 12:28:05.029 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 22708 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 12:28:05.030 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 12:28:05.031 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 12:28:07.577 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 12:28:07.578 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 12:28:07.580 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-03-22 12:28:07.628 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 3.294 seconds (process running for 4.629)
+2026-03-22 13:31:18.257 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 13:31:18.449 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 3152 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 13:31:18.451 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 13:31:18.452 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 13:31:24.115 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 13:31:24.116 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 13:31:24.118 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-03-22 13:31:24.184 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 7.509 seconds (process running for 10.033)
+2026-03-22 13:33:19.775 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 13:33:19.867 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 17044 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 13:33:19.868 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 13:33:19.869 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 13:33:23.273 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 13:33:23.273 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 13:33:23.275 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-03-22 13:33:23.334 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 4.451 seconds (process running for 6.531)
+2026-03-22 13:34:28.578 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 13:34:28.640 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 3796 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 13:34:28.642 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 13:34:28.643 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 13:34:31.388 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 13:34:31.388 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 13:34:31.389 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-22 13:34:31.417 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 3.413 seconds (process running for 4.81)
+2026-03-22 13:36:11.433 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 13:36:11.495 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 25628 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 13:36:11.496 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 13:36:11.497 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 13:36:14.271 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 13:36:14.271 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 13:36:14.272 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-22 13:36:14.305 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 3.597 seconds (process running for 5.11)
+2026-03-22 13:36:23.534 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 13:36:23.597 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 9616 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 13:36:23.598 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 13:36:23.599 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 13:36:26.172 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 13:36:26.173 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 13:36:26.174 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-22 13:36:26.203 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 3.31 seconds (process running for 4.715)
+2026-03-22 13:41:47.839 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 13:41:47.890 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 16640 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 13:41:47.891 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 13:41:47.892 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 13:41:50.422 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 13:41:50.423 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 13:41:50.424 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-22 13:41:50.459 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 3.168 seconds (process running for 4.482)
+2026-03-22 13:48:16.743 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 13:48:16.835 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 5464 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 13:48:16.837 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 13:48:16.838 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 13:48:20.076 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 13:48:20.077 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 13:48:20.078 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-22 13:48:20.119 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 4.317 seconds (process running for 6.646)
+2026-03-22 14:08:39.216 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 14:08:39.266 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 6776 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 14:08:39.267 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 14:08:39.268 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 14:08:41.921 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 14:08:41.922 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 14:08:41.924 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-03-22 14:08:41.962 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 3.413 seconds (process running for 4.891)
+2026-03-22 14:15:21.354 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 14:15:21.419 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 18872 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 14:15:21.420 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 14:15:21.422 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 14:15:23.885 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 14:15:23.886 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 14:15:23.889 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 3 ms
+2026-03-22 14:15:23.948 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 3.31 seconds (process running for 4.702)
+2026-03-22 14:16:03.592 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 14:16:03.686 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 19648 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 14:16:03.686 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 14:16:03.687 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 14:16:07.359 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 14:16:07.360 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 14:16:07.362 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-03-22 14:16:07.424 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 4.868 seconds (process running for 7.026)
+2026-03-22 14:16:37.306 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 14:16:37.358 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 23120 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 14:16:37.359 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 14:16:37.360 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 14:16:39.937 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 14:16:39.937 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 14:16:39.938 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-22 14:16:39.970 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 3.249 seconds (process running for 4.518)
+2026-03-22 14:28:55.698 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 14:28:55.811 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 8212 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 14:28:55.812 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 14:28:55.813 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 14:29:01.628 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 14:29:01.628 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 14:29:01.630 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-03-22 14:29:01.690 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 7.256 seconds (process running for 9.712)
+2026-03-22 14:29:42.363 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 14:29:42.431 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 18936 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 14:29:42.433 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 14:29:42.434 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 14:29:45.046 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 14:29:45.046 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 14:29:45.047 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-22 14:29:45.074 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 3.387 seconds (process running for 4.935)
+2026-03-22 14:31:58.921 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 14:31:59.020 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 2356 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 14:31:59.021 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 14:31:59.022 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 14:32:02.570 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 14:32:02.571 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 14:32:02.573 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-03-22 14:32:02.613 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 4.754 seconds (process running for 7.254)
+2026-03-22 14:36:00.997 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2026-03-22 14:36:01.094 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Starting AnalyticsControllerImplTest using Java 24.0.1 with PID 10380 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\analytics-service)
+2026-03-22 14:36:01.095 [main] DEBUG c.w.a.c.AnalyticsControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
+2026-03-22 14:36:01.095 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - No active profile set, falling back to 1 default profile: "default"
+2026-03-22 14:36:04.532 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-22 14:36:04.532 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-22 14:36:04.534 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-03-22 14:36:04.573 [main] INFO  c.w.a.c.AnalyticsControllerImplTest - Started AnalyticsControllerImplTest in 4.432 seconds (process running for 6.876)
