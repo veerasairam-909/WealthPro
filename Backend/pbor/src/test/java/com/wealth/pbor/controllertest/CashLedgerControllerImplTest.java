@@ -2,7 +2,6 @@ package com.wealth.pbor.controllertest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.wealth.pbor.controller.CashLedgerController;
 import com.wealth.pbor.controller.impl.CashLedgerControllerImpl;
 import com.wealth.pbor.dto.request.CashLedgerRequest;
 import com.wealth.pbor.dto.response.CashLedgerResponse;
@@ -29,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CashLedgerControllerImpl.class)
-class CashLedgerControllerTest {
+class CashLedgerControllerImplTest {
 
     @Autowired
     private MockMvc mockMvc;

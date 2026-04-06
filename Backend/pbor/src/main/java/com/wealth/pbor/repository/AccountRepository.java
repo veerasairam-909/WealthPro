@@ -16,11 +16,11 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     List<Account> findByStatus(AccountStatus status);
 
-   // List<Account> findByAccountType(AccountType accountType);
+   List<Account> findByAccountType(AccountType accountType);
 
-    //List<Account> findByClientIdAndStatus(Long clientId, AccountStatus status);
+    List<Account> findByClientIdAndStatus(Long clientId, AccountStatus status);
 
     boolean existsByClientIdAndAccountType(Long clientId, AccountType accountType);
 
-    //Optional<Account> findByClientIdAndAccountType(Long clientId, AccountType accountType);
+    Optional<Account> findByClientIdAndAccountType(Long clientId, AccountType accountType);
 }

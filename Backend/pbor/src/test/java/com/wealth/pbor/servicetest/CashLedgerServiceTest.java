@@ -73,6 +73,9 @@ class CashLedgerServiceTest {
         request.setTxnType(TxnType.SUBSCRIPTION);
         request.setAmount(new BigDecimal("5000.00"));
         request.setCurrency("INR");
+        request.setSecurityId(101L);
+        request.setPrice(new BigDecimal("500"));
+        request.setAmount(new BigDecimal("5000.00"));
         request.setTxnDate(LocalDate.now().minusDays(1));
         request.setNarrative("Test subscription");
 

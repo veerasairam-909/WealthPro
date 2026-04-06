@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -60,6 +61,12 @@ public class CashLedgerControllerImpl {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         List<CashLedgerResponse> responseList = cashLedgerService.getCashLedgerEntriesByAccountIdAndDateRange(accountId, from, to);
         return ResponseEntity.ok(responseList);
+    }
+
+    @GetMapping("/account/{accountId}/balance")
+    public ResponseEntity<BigDecimal> getBalanceByAccountId(@PathVariable Long accountId) {
+        BigDecimal balance = cashLedgerService.getBalanceByAccountId(accountId);
+        return ResponseEntity.ok(balance);
     }
 
     @PutMapping("/{ledgerId}")

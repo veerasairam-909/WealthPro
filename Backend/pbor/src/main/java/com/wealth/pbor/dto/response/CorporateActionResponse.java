@@ -1,10 +1,17 @@
 package com.wealth.pbor.dto.response;
 
 import com.wealth.pbor.enums.CAType;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
-@Data
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class CorporateActionResponse {
 
     private Long caId;

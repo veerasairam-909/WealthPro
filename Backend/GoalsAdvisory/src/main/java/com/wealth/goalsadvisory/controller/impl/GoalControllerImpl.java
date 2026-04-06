@@ -31,6 +31,7 @@ public class GoalControllerImpl implements GoalController {
     @GetMapping
     @Override
     public ResponseEntity<List<GoalResponse>> getAllGoals() {
+
         return ResponseEntity.ok(goalService.getAllGoals());
     }
 

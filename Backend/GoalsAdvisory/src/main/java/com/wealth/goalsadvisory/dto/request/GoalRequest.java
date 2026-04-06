@@ -19,7 +19,8 @@ public class GoalRequest {
     private GoalType goalType;
 
     @NotNull(message = "{com.wealth.goalsadvisory.dto.request.goalrequest.targetamount.blank}")
-    @DecimalMin(value = "100", message = "{com.wealth.goalsadvisory.dto.request.goalrequest.targetdate.error}")
+    @DecimalMin(value = "1000", message = "{com.wealth.goalsadvisory.dto.request.goalrequest.targetdate.error}")
+    @DecimalMin(value = "2000000", message = "{com.wealth.goalsadvisory.dto.request.goalrequest.targetdate.max}")
     private BigDecimal targetAmount;
 
     @NotNull(message = "{com.wealth.goalsadvisory.dto.request.goalrequest.targetdate.blank}")

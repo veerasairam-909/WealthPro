@@ -26,7 +26,15 @@ public class CashLedgerRequest {
     @NotNull(message = "{error.cashledger.txntype.required}")
     private TxnType txnType;
 
-    @NotNull(message = "{error.cashledger.amount.required}")
+    @Positive(message = "{error.cashledger.securityid.positive}")
+    private Long securityId;
+
+    @Positive(message = "{error.cashledger.quantity.positive}")
+    private BigDecimal quantity;
+
+    @Positive(message = "{error.cashledger.price.positive}")
+    private BigDecimal price;
+
     @Positive(message = "{error.cashledger.amount.positive}")
     private BigDecimal amount;
 

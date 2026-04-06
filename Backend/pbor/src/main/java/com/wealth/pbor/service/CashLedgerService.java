@@ -6,6 +6,7 @@ import com.wealth.pbor.dto.response.CashLedgerResponse;
 import com.wealth.pbor.dto.response.CashLedgerResponse;
 import com.wealth.pbor.enums.TxnType;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -22,6 +23,8 @@ public interface CashLedgerService {
     List<CashLedgerResponse> getCashLedgerEntriesByAccountIdAndTxnType(Long accountId, TxnType txnType);
 
     List<CashLedgerResponse> getCashLedgerEntriesByAccountIdAndDateRange(Long accountId, LocalDate from, LocalDate to);
+
+    BigDecimal getBalanceByAccountId(Long accountId);
 
     CashLedgerResponse updateCashLedgerEntry(Long ledgerId, CashLedgerRequest requestDTO);
 

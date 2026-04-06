@@ -18,16 +18,14 @@ public class ModelMapperConfiguration {
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
         mapper.typeMap(Holding.class, HoldingResponse.class)
-                .addMappings(m -> {
-                    m.map(src -> src.getAccount().getAccountId(),
-                            HoldingResponse::setAccountId);
-                });
+                .addMappings(m -> m.map(
+                        src -> src.getAccount().getAccountId(),
+                        HoldingResponse::setAccountId));
 
         mapper.typeMap(CashLedger.class, CashLedgerResponse.class)
-                .addMappings(m -> {
-                    m.map(src -> src.getAccount().getAccountId(),
-                            CashLedgerResponse::setAccountId);
-                });
+                .addMappings(m -> m.map(
+                        src -> src.getAccount().getAccountId(),
+                        CashLedgerResponse::setAccountId));
 
         return mapper;
     }

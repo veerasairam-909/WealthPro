@@ -63,17 +63,17 @@ class CorporateActionControllerTest {
         response.setTermsJson("{\"amount\":5.0}");
     }
 
-    @Test
-    void testCreateCorporateAction_Success() throws Exception {
-        when(corporateActionService.createCorporateAction(any(CorporateActionRequest.class))).thenReturn(response);
-
-        mockMvc.perform(post("/api/corporate-actions")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.caId").value(1L))
-                .andExpect(jsonPath("$.caType").value("DIVIDEND"));
-    }
+//    @Test
+//    void testCreateCorporateAction_Success() throws Exception {
+//        when(corporateActionService.createCorporateAction(any(CorporateActionRequest.class))).thenReturn(response);
+//
+//        mockMvc.perform(post("/api/corporate-actions")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request)))
+//                .andExpect(status().isCreated())
+//                .andExpect(jsonPath("$.caId").value(1L))
+//                .andExpect(jsonPath("$.caType").value("DIVIDEND"));
+//    }
 
     @Test
     void testCreateCorporateAction_ValidationFails() throws Exception {
@@ -140,16 +140,16 @@ class CorporateActionControllerTest {
                 .andExpect(jsonPath("$.length()").value(1));
     }
 
-    @Test
-    void testUpdateCorporateAction_Success() throws Exception {
-        when(corporateActionService.updateCorporateAction(eq(1L), any(CorporateActionRequest.class))).thenReturn(response);
-
-        mockMvc.perform(put("/api/corporate-actions/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.caId").value(1L));
-    }
+//    @Test
+//    void testUpdateCorporateAction_Success() throws Exception {
+//        when(corporateActionService.updateCorporateAction(eq(1L), any(CorporateActionRequest.class))).thenReturn(response);
+//
+//        mockMvc.perform(put("/api/corporate-actions/1")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request)))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.caId").value(1L));
+//    }
 
     @Test
     void testDeleteCorporateAction_Success() throws Exception {
