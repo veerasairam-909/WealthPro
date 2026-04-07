@@ -1,0 +1,40 @@
+package com.wealthpro.productcatalog.dto.request;
+
+import com.wealthpro.productcatalog.enums.AssetClass;
+import com.wealthpro.productcatalog.enums.SecurityStatus;
+import com.wealthpro.productcatalog.validation.ValidCurrencyCode;
+import com.wealthpro.productcatalog.validation.ValidSymbol;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class SecurityRequest {
+
+    @NotBlank(message = "Symbol is required")
+    @Size(max = 20, message = "Symbol must not exceed 20 characters")
+    @ValidSymbol
+    private String symbol;
+
+    @NotNull(message = "Asset class is required")
+    private AssetClass assetClass;
+
+    @NotBlank(message = "Currency is required")
+    @Size(max = 10, message = "Currency must not exceed 10 characters")
+    @ValidCurrencyCode
+    private String currency;
+
+    @NotBlank(message = "Country is required")
+    @Size(min=2,max = 50, message = "Country must not exceed 50 characters")
+    private String country;
+
+    @NotNull(message = "Status is required")
+    private SecurityStatus status;
+}
