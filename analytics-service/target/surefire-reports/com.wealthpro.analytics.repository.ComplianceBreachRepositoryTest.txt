@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.wealthpro.analytics.repository.ComplianceBreachRepositoryTest
--------------------------------------------------------------------------------
-Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.983 s -- in com.wealthpro.analytics.repository.ComplianceBreachRepositoryTest
