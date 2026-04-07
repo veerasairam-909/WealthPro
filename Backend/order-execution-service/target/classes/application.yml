@@ -1,0 +1,49 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: order-execution-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/order_execution_db
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  cache:
+    type: simple
+
+  boot:
+    admin:
+      client:
+        url: http://localhost:9090
+        instance:
+          prefer-ip: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  file:
+    name: logs/order-execution.log
+  level:
+    com.wealthpro.orderexecution: DEBUG

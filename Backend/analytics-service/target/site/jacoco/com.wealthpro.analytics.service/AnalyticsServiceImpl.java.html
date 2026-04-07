@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnalyticsServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">analytics-service</a> &gt; <a href="index.source.html" class="el_package">com.wealthpro.analytics.service</a> &gt; <span class="el_source">AnalyticsServiceImpl.java</span></div><h1>AnalyticsServiceImpl.java</h1><pre class="source lang-java linenums">package com.wealthpro.analytics.service;
+
+import com.wealthpro.analytics.dto.*;
+import com.wealthpro.analytics.entities.*;
+import com.wealthpro.analytics.enums.*;
+import com.wealthpro.analytics.exception.ResourceNotFoundException;
+import com.wealthpro.analytics.repository.*;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+/**
+ * Implementation of {@link AnalyticsService} containing simulated core
+ * business logic for:
+ * &lt;ul&gt;
+ *   &lt;li&gt;Daily and monthly return calculations&lt;/li&gt;
+ *   &lt;li&gt;Risk assessment (volatility, drawdown, VaR, tracking error)&lt;/li&gt;
+ *   &lt;li&gt;Compliance breach detection and lifecycle management&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ * &lt;p&gt;All calculations use dummy/simulated data for Phase-1 demonstration.&lt;/p&gt;
+ *
+ * @author WealthPro Team
+ * @version 2.0
+ */
+@Service
+@Transactional
+public class AnalyticsServiceImpl implements AnalyticsService {
+
+    private final PerformanceRecordRepository performanceRecordRepository;
+    private final RiskMeasureRepository riskMeasureRepository;
+    private final ComplianceBreachRepository complianceBreachRepository;
+    private final ModelMapper modelMapper;
+
+    // Seeded random for reproducible dummy calculations
+<span class="fc" id="L46">    private final Random random = new Random(42);</span>
+
+    @Autowired
+    public AnalyticsServiceImpl(PerformanceRecordRepository performanceRecordRepository,
+                                RiskMeasureRepository riskMeasureRepository,
+                                ComplianceBreachRepository complianceBreachRepository,
+<span class="fc" id="L52">                                ModelMapper modelMapper) {</span>
+<span class="fc" id="L53">        this.performanceRecordRepository = performanceRecordRepository;</span>
+<span class="fc" id="L54">        this.riskMeasureRepository = riskMeasureRepository;</span>
+<span class="fc" id="L55">        this.complianceBreachRepository = complianceBreachRepository;</span>
+<span class="fc" id="L56">        this.modelMapper = modelMapper;</span>
+<span class="fc" id="L57">    }</span>
+
+    // =================== Performance ===================
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = &quot;performanceRecords&quot;, key = &quot;#accountId&quot;)
+    public List&lt;PerformanceRecordResponseDTO&gt; getPerformanceByAccountId(Long accountId) {
+        // Fetch all records and convert each to DTO using stream + map
+<span class="fc" id="L66">        return performanceRecordRepository.findByAccountId(accountId).stream()</span>
+<span class="fc" id="L67">                .map(record -&gt; modelMapper.map(record, PerformanceRecordResponseDTO.class))</span>
+<span class="fc" id="L68">                .collect(Collectors.toList());</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     * &lt;p&gt;
+     * Simulates a daily return by generating a random return between -3% and +5%.
+     * A benchmark return (e.g. Nifty 50) is also generated for comparison.
+     * &lt;/p&gt;
+     */
+    @Override
+    @CacheEvict(value = &quot;performanceRecords&quot;, key = &quot;#accountId&quot;)
+    public PerformanceRecordResponseDTO calculateDailyReturn(Long accountId, Long portfolioId) {
+<span class="fc" id="L81">        LocalDate today = LocalDate.now();</span>
+
+        // Simulate portfolio daily return: random value between -3.0% and +5.0%
+<span class="fc" id="L84">        double portfolioReturn = Math.round((-3.0 + random.nextDouble() * 8.0) * 100.0) / 100.0;</span>
+
+        // Simulate benchmark (e.g. Nifty 50) daily return: random between -2.0% and +3.0%
+<span class="fc" id="L87">        double benchmarkReturn = Math.round((-2.0 + random.nextDouble() * 5.0) * 100.0) / 100.0;</span>
+
+<span class="fc" id="L89">        PerformanceRecord record = PerformanceRecord.builder()</span>
+<span class="fc" id="L90">                .accountId(accountId)</span>
+<span class="fc" id="L91">                .portfolioId(portfolioId)</span>
+<span class="fc" id="L92">                .period(Period.DAILY)</span>
+<span class="fc" id="L93">                .startDate(today)</span>
+<span class="fc" id="L94">                .endDate(today)</span>
+<span class="fc" id="L95">                .returnPercentage(portfolioReturn)</span>
+<span class="fc" id="L96">                .benchmarkReturnPercentage(benchmarkReturn)</span>
+<span class="fc" id="L97">                .calculatedAt(LocalDateTime.now())</span>
+<span class="fc" id="L98">                .build();</span>
+
+<span class="fc" id="L100">        PerformanceRecord saved = performanceRecordRepository.save(record);</span>
+<span class="fc" id="L101">        return modelMapper.map(saved, PerformanceRecordResponseDTO.class);</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     * &lt;p&gt;
+     * Aggregates existing daily records for the past 30 days using
+     * geometric-style compounding (simplified). If no daily records exist,
+     * a simulated monthly return is generated.
+     * &lt;/p&gt;
+     */
+    @Override
+    @CacheEvict(value = &quot;performanceRecords&quot;, key = &quot;#accountId&quot;)
+    public PerformanceRecordResponseDTO calculateMonthlyReturn(Long accountId, Long portfolioId) {
+<span class="fc" id="L115">        LocalDate endDate = LocalDate.now();</span>
+<span class="fc" id="L116">        LocalDate startDate = endDate.minusDays(30);</span>
+
+        // Fetch daily records for this account and calculate aggregate return
+<span class="fc" id="L119">        List&lt;PerformanceRecord&gt; dailyRecords = performanceRecordRepository</span>
+<span class="fc" id="L120">                .findByAccountIdAndPeriod(accountId, Period.DAILY);</span>
+
+        double monthlyReturn;
+        double benchmarkReturn;
+
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        if (!dailyRecords.isEmpty()) {</span>
+            // Aggregate daily returns: compounded return = product of (1 + r_i) - 1
+            // stream reduces all daily returns into a single compounded figure
+<span class="nc" id="L128">            monthlyReturn = dailyRecords.stream()</span>
+<span class="nc" id="L129">                    .mapToDouble(PerformanceRecord::getReturnPercentage)</span>
+<span class="nc" id="L130">                    .map(r -&gt; 1 + r / 100.0)</span>
+<span class="nc" id="L131">                    .reduce(1.0, (a, b) -&gt; a * b);</span>
+<span class="nc" id="L132">            monthlyReturn = Math.round((monthlyReturn - 1.0) * 10000.0) / 100.0;</span>
+
+<span class="nc" id="L134">            benchmarkReturn = dailyRecords.stream()</span>
+<span class="nc" id="L135">                    .mapToDouble(PerformanceRecord::getBenchmarkReturnPercentage)</span>
+<span class="nc" id="L136">                    .map(r -&gt; 1 + r / 100.0)</span>
+<span class="nc" id="L137">                    .reduce(1.0, (a, b) -&gt; a * b);</span>
+<span class="nc" id="L138">            benchmarkReturn = Math.round((benchmarkReturn - 1.0) * 10000.0) / 100.0;</span>
+        } else {
+            // No daily data — generate simulated monthly figures
+<span class="fc" id="L141">            monthlyReturn = Math.round((-5.0 + random.nextDouble() * 15.0) * 100.0) / 100.0;</span>
+<span class="fc" id="L142">            benchmarkReturn = Math.round((-3.0 + random.nextDouble() * 10.0) * 100.0) / 100.0;</span>
+        }
+
+<span class="fc" id="L145">        PerformanceRecord record = PerformanceRecord.builder()</span>
+<span class="fc" id="L146">                .accountId(accountId)</span>
+<span class="fc" id="L147">                .portfolioId(portfolioId)</span>
+<span class="fc" id="L148">                .period(Period.MONTHLY)</span>
+<span class="fc" id="L149">                .startDate(startDate)</span>
+<span class="fc" id="L150">                .endDate(endDate)</span>
+<span class="fc" id="L151">                .returnPercentage(monthlyReturn)</span>
+<span class="fc" id="L152">                .benchmarkReturnPercentage(benchmarkReturn)</span>
+<span class="fc" id="L153">                .calculatedAt(LocalDateTime.now())</span>
+<span class="fc" id="L154">                .build();</span>
+
+<span class="fc" id="L156">        PerformanceRecord saved = performanceRecordRepository.save(record);</span>
+<span class="fc" id="L157">        return modelMapper.map(saved, PerformanceRecordResponseDTO.class);</span>
+    }
+
+    // =================== Risk ===================
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = &quot;riskMeasures&quot;, key = &quot;#accountId&quot;)
+    public List&lt;RiskMeasureResponseDTO&gt; getRiskMeasuresByAccountId(Long accountId) {
+<span class="nc" id="L166">        return riskMeasureRepository.findByAccountId(accountId).stream()</span>
+<span class="nc" id="L167">                .map(measure -&gt; modelMapper.map(measure, RiskMeasureResponseDTO.class))</span>
+<span class="nc" id="L168">                .collect(Collectors.toList());</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     * &lt;p&gt;
+     * Calculates four risk metrics with dummy/simulated market data:
+     * &lt;ul&gt;
+     *   &lt;li&gt;&lt;b&gt;VOLATILITY&lt;/b&gt;: annualised standard deviation (simulated 5%–25%)&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;MAX_DRAWDOWN&lt;/b&gt;: peak-to-trough loss (simulated -2% to -20%)&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;VAR_95&lt;/b&gt;: Value-at-Risk at 95% confidence (simulated 1%–5%)&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;TRACKING_ERROR&lt;/b&gt;: deviation from benchmark (simulated 0.5%–4%)&lt;/li&gt;
+     * &lt;/ul&gt;
+     * &lt;/p&gt;
+     */
+    @Override
+    @CacheEvict(value = &quot;riskMeasures&quot;, key = &quot;#accountId&quot;)
+    public List&lt;RiskMeasureResponseDTO&gt; runRiskAssessment(Long accountId) {
+<span class="fc" id="L186">        List&lt;RiskMeasure&gt; measures = new ArrayList&lt;&gt;();</span>
+
+        // Volatility — annualised standard deviation (simulated 5% to 25%)
+<span class="fc" id="L189">        measures.add(RiskMeasure.builder()</span>
+<span class="fc" id="L190">                .accountId(accountId)</span>
+<span class="fc" id="L191">                .measureType(MeasureType.VOLATILITY)</span>
+<span class="fc" id="L192">                .measureValue(Math.round((5.0 + random.nextDouble() * 20.0) * 100.0) / 100.0)</span>
+<span class="fc" id="L193">                .description(&quot;Annualised portfolio volatility based on simulated daily returns&quot;)</span>
+<span class="fc" id="L194">                .calculatedAt(LocalDateTime.now())</span>
+<span class="fc" id="L195">                .build());</span>
+
+        // Max Drawdown — peak to trough (simulated -2% to -20%)
+<span class="fc" id="L198">        measures.add(RiskMeasure.builder()</span>
+<span class="fc" id="L199">                .accountId(accountId)</span>
+<span class="fc" id="L200">                .measureType(MeasureType.MAX_DRAWDOWN)</span>
+<span class="fc" id="L201">                .measureValue(Math.round((-2.0 - random.nextDouble() * 18.0) * 100.0) / 100.0)</span>
+<span class="fc" id="L202">                .description(&quot;Maximum peak-to-trough drawdown from simulated NAV series&quot;)</span>
+<span class="fc" id="L203">                .calculatedAt(LocalDateTime.now())</span>
+<span class="fc" id="L204">                .build());</span>
+
+        // VaR at 95% confidence (simulated 1% to 5%)
+<span class="fc" id="L207">        measures.add(RiskMeasure.builder()</span>
+<span class="fc" id="L208">                .accountId(accountId)</span>
+<span class="fc" id="L209">                .measureType(MeasureType.VAR_95)</span>
+<span class="fc" id="L210">                .measureValue(Math.round((1.0 + random.nextDouble() * 4.0) * 100.0) / 100.0)</span>
+<span class="fc" id="L211">                .description(&quot;Value-at-Risk at 95% confidence level using historical simulation&quot;)</span>
+<span class="fc" id="L212">                .calculatedAt(LocalDateTime.now())</span>
+<span class="fc" id="L213">                .build());</span>
+
+        // Tracking Error (simulated 0.5% to 4%)
+<span class="fc" id="L216">        measures.add(RiskMeasure.builder()</span>
+<span class="fc" id="L217">                .accountId(accountId)</span>
+<span class="fc" id="L218">                .measureType(MeasureType.TRACKING_ERROR)</span>
+<span class="fc" id="L219">                .measureValue(Math.round((0.5 + random.nextDouble() * 3.5) * 100.0) / 100.0)</span>
+<span class="fc" id="L220">                .description(&quot;Tracking error vs. benchmark calculated from return differentials&quot;)</span>
+<span class="fc" id="L221">                .calculatedAt(LocalDateTime.now())</span>
+<span class="fc" id="L222">                .build());</span>
+
+        // Persist all measures and map to DTOs
+<span class="fc" id="L225">        List&lt;RiskMeasure&gt; saved = riskMeasureRepository.saveAll(measures);</span>
+<span class="fc" id="L226">        return saved.stream()</span>
+<span class="fc" id="L227">                .map(m -&gt; modelMapper.map(m, RiskMeasureResponseDTO.class))</span>
+<span class="fc" id="L228">                .collect(Collectors.toList());</span>
+    }
+
+    // =================== Compliance ===================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List&lt;ComplianceBreachResponseDTO&gt; getBreachesByAccountId(Long accountId) {
+<span class="nc" id="L236">        return complianceBreachRepository.findByAccountId(accountId).stream()</span>
+<span class="nc" id="L237">                .map(breach -&gt; modelMapper.map(breach, ComplianceBreachResponseDTO.class))</span>
+<span class="nc" id="L238">                .collect(Collectors.toList());</span>
+    }
+
+    /**
+     * {@inheritDoc}
+     * &lt;p&gt;
+     * Scans for three types of violations using simulated portfolio data:
+     * &lt;ul&gt;
+     *   &lt;li&gt;&lt;b&gt;CONCENTRATION&lt;/b&gt;: single holding &amp;gt; 15% of portfolio&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;EXPOSURE_LIMIT&lt;/b&gt;: sector exposure &amp;gt; 30%&lt;/li&gt;
+     *   &lt;li&gt;&lt;b&gt;RESTRICTED_SECURITY&lt;/b&gt;: holding a sanctioned/restricted security&lt;/li&gt;
+     * &lt;/ul&gt;
+     * Uses random chance (30%) to simulate whether each violation is detected.
+     * &lt;/p&gt;
+     */
+    @Override
+    public List&lt;ComplianceBreachResponseDTO&gt; runComplianceScan(Long accountId) {
+<span class="nc" id="L255">        List&lt;ComplianceBreach&gt; breaches = new ArrayList&lt;&gt;();</span>
+
+        // Simulate concentration breach (30% chance of detection)
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        if (random.nextDouble() &lt; 0.30) {</span>
+<span class="nc" id="L259">            breaches.add(ComplianceBreach.builder()</span>
+<span class="nc" id="L260">                    .accountId(accountId)</span>
+<span class="nc" id="L261">                    .ruleViolated(&quot;CONCENTRATION_LIMIT&quot;)</span>
+<span class="nc" id="L262">                    .severity(Severity.HIGH)</span>
+<span class="nc" id="L263">                    .description(&quot;Single holding 'RELIANCE' exceeds 15% concentration limit at 22.5%&quot;)</span>
+<span class="nc" id="L264">                    .status(BreachStatus.OPEN)</span>
+<span class="nc" id="L265">                    .detectedAt(LocalDateTime.now())</span>
+<span class="nc" id="L266">                    .build());</span>
+        }
+
+        // Simulate exposure limit breach (30% chance)
+<span class="nc bnc" id="L270" title="All 2 branches missed.">        if (random.nextDouble() &lt; 0.30) {</span>
+<span class="nc" id="L271">            breaches.add(ComplianceBreach.builder()</span>
+<span class="nc" id="L272">                    .accountId(accountId)</span>
+<span class="nc" id="L273">                    .ruleViolated(&quot;SECTOR_EXPOSURE_LIMIT&quot;)</span>
+<span class="nc" id="L274">                    .severity(Severity.MEDIUM)</span>
+<span class="nc" id="L275">                    .description(&quot;Technology sector exposure at 35% exceeds 30% policy limit&quot;)</span>
+<span class="nc" id="L276">                    .status(BreachStatus.OPEN)</span>
+<span class="nc" id="L277">                    .detectedAt(LocalDateTime.now())</span>
+<span class="nc" id="L278">                    .build());</span>
+        }
+
+        // Simulate restricted security breach (30% chance)
+<span class="nc bnc" id="L282" title="All 2 branches missed.">        if (random.nextDouble() &lt; 0.30) {</span>
+<span class="nc" id="L283">            breaches.add(ComplianceBreach.builder()</span>
+<span class="nc" id="L284">                    .accountId(accountId)</span>
+<span class="nc" id="L285">                    .ruleViolated(&quot;RESTRICTED_SECURITY&quot;)</span>
+<span class="nc" id="L286">                    .severity(Severity.CRITICAL)</span>
+<span class="nc" id="L287">                    .description(&quot;Portfolio holds restricted security 'XYZ Corp' — sanctioned entity&quot;)</span>
+<span class="nc" id="L288">                    .status(BreachStatus.OPEN)</span>
+<span class="nc" id="L289">                    .detectedAt(LocalDateTime.now())</span>
+<span class="nc" id="L290">                    .build());</span>
+        }
+
+<span class="nc bnc" id="L293" title="All 2 branches missed.">        if (breaches.isEmpty()) {</span>
+            // No violations detected — return empty list
+<span class="nc" id="L295">            return List.of();</span>
+        }
+
+<span class="nc" id="L298">        List&lt;ComplianceBreach&gt; saved = complianceBreachRepository.saveAll(breaches);</span>
+<span class="nc" id="L299">        return saved.stream()</span>
+<span class="nc" id="L300">                .map(b -&gt; modelMapper.map(b, ComplianceBreachResponseDTO.class))</span>
+<span class="nc" id="L301">                .collect(Collectors.toList());</span>
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public ComplianceBreachResponseDTO acknowledgeBreach(Long breachId) {
+<span class="fc" id="L307">        ComplianceBreach breach = complianceBreachRepository.findById(breachId)</span>
+<span class="pc" id="L308">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;ComplianceBreach&quot;, breachId));</span>
+
+<span class="fc bfc" id="L310" title="All 2 branches covered.">        if (breach.getStatus() != BreachStatus.OPEN) {</span>
+<span class="fc" id="L311">            throw new IllegalStateException(</span>
+<span class="fc" id="L312">                    &quot;Can only acknowledge OPEN breaches. Current status: &quot; + breach.getStatus());</span>
+        }
+
+<span class="fc" id="L315">        breach.setStatus(BreachStatus.ACKNOWLEDGED);</span>
+<span class="fc" id="L316">        ComplianceBreach saved = complianceBreachRepository.save(breach);</span>
+<span class="fc" id="L317">        return modelMapper.map(saved, ComplianceBreachResponseDTO.class);</span>
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public ComplianceBreachResponseDTO closeBreach(Long breachId) {
+<span class="fc" id="L323">        ComplianceBreach breach = complianceBreachRepository.findById(breachId)</span>
+<span class="fc" id="L324">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;ComplianceBreach&quot;, breachId));</span>
+
+<span class="fc bfc" id="L326" title="All 2 branches covered.">        if (breach.getStatus() != BreachStatus.ACKNOWLEDGED) {</span>
+<span class="fc" id="L327">            throw new IllegalStateException(</span>
+<span class="fc" id="L328">                    &quot;Can only close ACKNOWLEDGED breaches. Current status: &quot; + breach.getStatus());</span>
+        }
+
+<span class="fc" id="L331">        breach.setStatus(BreachStatus.CLOSED);</span>
+<span class="fc" id="L332">        breach.setResolvedAt(LocalDateTime.now());</span>
+<span class="fc" id="L333">        ComplianceBreach saved = complianceBreachRepository.save(breach);</span>
+<span class="fc" id="L334">        return modelMapper.map(saved, ComplianceBreachResponseDTO.class);</span>
+    }
+
+    // =================== Dashboard ===================
+
+    /** {@inheritDoc} */
+    @Override
+    @Transactional(readOnly = true)
+    public AccountDashboardDTO getAccountDashboard(Long accountId) {
+<span class="fc" id="L343">        AccountDashboardDTO dashboard = new AccountDashboardDTO();</span>
+<span class="fc" id="L344">        dashboard.setAccountId(accountId);</span>
+
+        // Aggregate performance records
+<span class="fc" id="L347">        dashboard.setPerformanceRecords(</span>
+<span class="fc" id="L348">                performanceRecordRepository.findByAccountId(accountId).stream()</span>
+<span class="pc" id="L349">                        .map(r -&gt; modelMapper.map(r, PerformanceRecordResponseDTO.class))</span>
+<span class="fc" id="L350">                        .collect(Collectors.toList()));</span>
+
+        // Aggregate risk measures
+<span class="fc" id="L353">        dashboard.setRiskMeasures(</span>
+<span class="fc" id="L354">                riskMeasureRepository.findByAccountId(accountId).stream()</span>
+<span class="pc" id="L355">                        .map(m -&gt; modelMapper.map(m, RiskMeasureResponseDTO.class))</span>
+<span class="fc" id="L356">                        .collect(Collectors.toList()));</span>
+
+        // Show only OPEN breaches on the dashboard
+<span class="fc" id="L359">        dashboard.setComplianceBreaches(</span>
+<span class="fc" id="L360">                complianceBreachRepository.findByAccountIdAndStatus(accountId, BreachStatus.OPEN).stream()</span>
+<span class="pc" id="L361">                        .map(b -&gt; modelMapper.map(b, ComplianceBreachResponseDTO.class))</span>
+<span class="fc" id="L362">                        .collect(Collectors.toList()));</span>
+
+<span class="fc" id="L364">        return dashboard;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

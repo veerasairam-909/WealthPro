@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order-execution-service</a> &gt; <a href="index.source.html" class="el_package">com.wealthpro.orderexecution.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.wealthpro.orderexecution.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Global exception handler for the Order-Execution-Service.
+ * &lt;p&gt;
+ * Catches well-known exceptions and returns standardised
+ * JSON error responses with appropriate HTTP status codes.
+ * &lt;/p&gt;
+ *
+ * @author WealthPro Team
+ * @version 2.0
+ */
+@RestControllerAdvice
+<span class="fc" id="L24">public class GlobalExceptionHandler {</span>
+
+    /**
+     * Handles Bean Validation failures from {@code @Valid} annotations.
+     *
+     * @param ex the MethodArgumentNotValidException
+     * @return 400 BAD_REQUEST with a map of field → error message
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+
+<span class="fc" id="L36">        Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L37">        Map&lt;String, String&gt; fieldErrors = new HashMap&lt;&gt;();</span>
+
+        // Collect each field-level validation error into a map
+<span class="fc" id="L40">        ex.getBindingResult().getFieldErrors().forEach(error -&gt;</span>
+<span class="fc" id="L41">                fieldErrors.put(error.getField(), error.getDefaultMessage())</span>
+        );
+
+<span class="fc" id="L44">        response.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="fc" id="L45">        response.put(&quot;status&quot;, HttpStatus.BAD_REQUEST.value());</span>
+<span class="fc" id="L46">        response.put(&quot;errors&quot;, fieldErrors);</span>
+
+<span class="fc" id="L48">        return new ResponseEntity&lt;&gt;(response, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    /**
+     * Handles resource-not-found scenarios.
+     *
+     * @param ex the ResourceNotFoundException
+     * @return 404 NOT_FOUND with the error message
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleResourceNotFoundException(
+            ResourceNotFoundException ex) {
+
+<span class="fc" id="L61">        Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L62">        response.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="fc" id="L63">        response.put(&quot;status&quot;, HttpStatus.NOT_FOUND.value());</span>
+<span class="fc" id="L64">        response.put(&quot;message&quot;, ex.getMessage());</span>
+
+<span class="fc" id="L66">        return new ResponseEntity&lt;&gt;(response, HttpStatus.NOT_FOUND);</span>
+    }
+
+    /**
+     * Handles resource-already-exists / conflict scenarios.
+     *
+     * @param ex the ResourceAlreadyExistsException
+     * @return 409 CONFLICT with the error message
+     */
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleResourceAlreadyExistsException(
+            ResourceAlreadyExistsException ex) {
+
+<span class="nc" id="L79">        Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L80">        response.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L81">        response.put(&quot;status&quot;, HttpStatus.CONFLICT.value());</span>
+<span class="nc" id="L82">        response.put(&quot;message&quot;, ex.getMessage());</span>
+
+<span class="nc" id="L84">        return new ResponseEntity&lt;&gt;(response, HttpStatus.CONFLICT);</span>
+    }
+
+    /**
+     * Handles invalid state transitions (e.g. cancelling a FILLED order).
+     *
+     * @param ex the IllegalStateException
+     * @return 400 BAD_REQUEST with the error message
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleIllegalStateException(
+            IllegalStateException ex) {
+
+<span class="nc" id="L97">        Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L98">        response.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L99">        response.put(&quot;status&quot;, HttpStatus.BAD_REQUEST.value());</span>
+<span class="nc" id="L100">        response.put(&quot;message&quot;, ex.getMessage());</span>
+
+<span class="nc" id="L102">        return new ResponseEntity&lt;&gt;(response, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    /**
+     * Fallback handler for all other uncaught exceptions.
+     *
+     * @param ex the Exception
+     * @return 500 INTERNAL_SERVER_ERROR
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleGenericException(Exception ex) {
+
+<span class="nc" id="L114">        Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L115">        response.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L116">        response.put(&quot;status&quot;, HttpStatus.INTERNAL_SERVER_ERROR.value());</span>
+<span class="nc" id="L117">        response.put(&quot;message&quot;, &quot;Something went wrong: &quot; + ex.getMessage());</span>
+
+<span class="nc" id="L119">        return new ResponseEntity&lt;&gt;(response, HttpStatus.INTERNAL_SERVER_ERROR);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
