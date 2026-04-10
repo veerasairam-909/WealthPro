@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
     // ─────────────────────────────────────────
     // 400 - File Too Large
     // Triggered by: uploading a KYC document image bigger than
-    //               spring.servlet.multipart.max-file-size in application.properties
+    //               spring.servlet.multipart.max-file-size in application.yml
     // ─────────────────────────────────────────
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Map<String, Object>> handleMaxUploadSizeExceededException(

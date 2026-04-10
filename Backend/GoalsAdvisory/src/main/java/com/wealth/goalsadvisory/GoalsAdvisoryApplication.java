@@ -9,5 +9,4 @@ public class GoalsAdvisoryApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(GoalsAdvisoryApplication.class, args);
 	}
-
 }

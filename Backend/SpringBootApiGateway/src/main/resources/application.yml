@@ -1,0 +1,46 @@
+server:
+  port: 9999
+
+spring:
+  application:
+    name: SpringBootApiGateway
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/EmployeeDB
+    username: root
+    password: sai123
+    pool:
+      enabled: true
+      initial-size: 5
+      max-size: 10
+  cloud:
+    gateway:
+      routes:
+        - id: hr-service-route
+          uri: lb://HR-SERVICE
+          predicates:
+            - Path=/api/employees
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: hrServiceCB
+                redis-rate-limiter.replenishRate: 10 #request allowed per second
+                redis-rate-limiter.burstCapacity: 20 #max burst
+                fallbackUri: forward:/fallback/hr
+
+        - id: attendance-service-route
+          uri: lb://ATTENDANCE-SERVICE
+          predicates:
+            - Path=/api/attendance
+
+        - id: travel-service-route
+          uri: lb://TRAVEL-SERVICE
+          predicates:
+            - Path=/api/travels
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+jwt:
+  secret: jwtsecret
