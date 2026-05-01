@@ -1,8 +1,0 @@
-2026-03-25 08:58:37.300 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
-2026-03-25 08:58:37.423 [main] INFO  c.w.o.c.OrderControllerImplTest - Starting OrderControllerImplTest using Java 24.0.1 with PID 2248 (started by 2478178 in C:\Users\2478178\OneDrive - Cognizant\Documents\WealthPro - Project\order-execution-service)
-2026-03-25 08:58:37.426 [main] DEBUG c.w.o.c.OrderControllerImplTest - Running with Spring Boot v3.5.11, Spring v6.2.16
-2026-03-25 08:58:37.427 [main] INFO  c.w.o.c.OrderControllerImplTest - No active profile set, falling back to 1 default profile: "default"
-2026-03-25 08:58:42.382 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
-2026-03-25 08:58:42.383 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
-2026-03-25 08:58:42.385 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
-2026-03-25 08:58:42.440 [main] INFO  c.w.o.c.OrderControllerImplTest - Started OrderControllerImplTest in 6.808 seconds (process running for 10.373)
