@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WealthPro — Final Theme (Zerodha + Groww inspired)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Inspired by Zerodha Kite (#387ED1) + Groww (#00B386 / #5367FF) */
+    --bg:        #FFFFFF;
+    --surface:   #FAFBFC;
+    --surface-2: #F4F6F8;
+    --border:    #E5E7EB;
+    --hairline:  #EEF1F4;
+
+    --text:      #1A1F36;
+    --text-2:    #5C6B82;
+    --text-3:    #98A2B3;
+
+    --primary:   #387ED1;       /* Kite blue */
+    --primary-d: #2C68B0;
+    --primary-s: #EAF2FB;
+
+    --success:   #00B386;       /* Groww green */
+    --success-s: #E0F7EF;
+    --danger:    #EB5B3C;       /* Kite red */
+    --danger-s:  #FCEAE5;
+    --warn:      #F4A41E;
+    --warn-s:    #FFF4DD;
+    --accent:    #5367FF;       /* Groww purple */
+    --accent-s:  #ECEEFF;
+
+    --shadow-sm: 0 1px 2px rgba(20,30,55,.04);
+    --shadow:    0 4px 14px rgba(20,30,55,.06);
+  }
+
+  *,*::before,*::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--surface-2); color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono, .num { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+
+  .top {
+    position: sticky; top: 0; z-index: 100;
+    background: white; border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+  }
+  .top h1 { margin: 0 0 4px 0; font-size: 17px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+  .top p { margin: 0; font-size: 13px; color: var(--text-2); }
+
+  .container { padding: 32px; max-width: 1400px; margin: 0 auto; }
+  .section-title {
+    font-size: 11px; font-weight: 600; color: var(--text-2);
+    text-transform: uppercase; letter-spacing: .12em;
+    margin: 32px 0 16px;
+  }
+
+  /* ------- generic UI primitives ------- */
+  .panel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .panel-h {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--hairline);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .panel-h h3 { margin: 0; font-size: 14px; font-weight: 600; letter-spacing: -.005em; }
+  .panel-b { padding: 20px 24px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 14px;
+    font-size: 11px; font-weight: 500;
+  }
+  .pill.ok    { background: var(--success-s); color: var(--success); }
+  .pill.bad   { background: var(--danger-s);  color: var(--danger); }
+  .pill.warn  { background: var(--warn-s);    color: #B07308; }
+  .pill.info  { background: var(--primary-s); color: var(--primary); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: 8px;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    border: 1px solid transparent; letter-spacing: -.005em;
+    transition: all .12s ease;
+  }
+  .btn.primary { background: var(--primary); color: white; }
+  .btn.primary:hover { background: var(--primary-d); }
+  .btn.success { background: var(--success); color: white; }
+  .btn.danger  { background: var(--danger);  color: white; }
+  .btn.ghost   { background: transparent; color: var(--text); border-color: var(--border); }
+  .btn.ghost:hover { background: var(--surface); }
+  .btn.sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+
+  .label { font-size: 11px; color: var(--text-2); font-weight: 500; letter-spacing: .02em; }
+  .num-big { font-size: 26px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
+  .num-md  { font-size: 16px; font-weight: 500; letter-spacing: -.005em; }
+  .delta-up   { color: var(--success); font-weight: 500; }
+  .delta-down { color: var(--danger);  font-weight: 500; }
+
+  .input {
+    width: 100%; padding: 10px 12px; font-size: 13px;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--bg); color: var(--text); font-family: inherit;
+    transition: border .12s, box-shadow .12s;
+  }
+  .input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(56,126,209,.15); }
+
+  /* ============ SCREEN 1: LOGIN ============ */
+  .screen-login {
+    display: grid; grid-template-columns: 1fr 1fr;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; min-height: 480px;
+  }
+  .login-left {
+    padding: 56px 48px;
+    background: linear-gradient(180deg, #FAFBFC 0%, #FFFFFF 100%);
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .login-brand {
+    display:flex; align-items:center; gap: 10px;
+    font-weight: 700; font-size: 18px; letter-spacing: -.01em;
+  }
+  .logo-mark {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--primary); color: white;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size: 14px;
+  }
+  .login-hero h2 { font-size: 28px; font-weight: 700; margin: 24px 0 12px; letter-spacing: -.025em; line-height: 1.15; }
+  .login-hero p  { font-size: 14px; color: var(--text-2); max-width: 360px; line-height: 1.6; }
+  .login-meta { font-size: 12px; color: var(--text-3); }
+  .login-meta b { color: var(--text-2); }
+
+  .login-right { padding: 56px 48px; }
+  .login-right h3 { font-size: 20px; font-weight: 600; margin: 0 0 6px; letter-spacing: -.015em; }
+  .login-right p  { font-size: 13px; color: var(--text-2); margin: 0 0 28px; }
+  .field { margin-bottom: 14px; }
+  .field-l { font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; display:block; }
+  .login-right .btn.primary { width: 100%; padding: 12px; font-size: 14px; justify-content: center; margin-top: 6px; }
+  .login-right .alt { font-size: 12px; text-align:center; color: var(--text-2); margin-top: 16px; }
+  .login-right .alt a { color: var(--primary); text-decoration: none; font-weight: 500; }
+
+  /* ============ SCREEN 2: CLIENT DASHBOARD ============ */
+  .dash {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden;
+  }
+  .dash-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px; background: var(--bg); border-bottom: 1px solid var(--border);
+  }
+  .dash-nav .left { display: flex; align-items: center; gap: 24px; }
+  .dash-nav .links { display: flex; gap: 4px; }
+  .dash-nav .links a { font-size: 13px; padding: 6px 12px; border-radius: 6px; color: var(--text-2); text-decoration:none; font-weight: 500; }
+  .dash-nav .links a.active { background: var(--primary-s); color: var(--primary); }
+  .dash-nav .right { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-s); color: var(--accent); display:flex; align-items:center; justify-content:center; font-weight:600; font-size: 12px; }
+
+  .dash-body { padding: 24px; }
+  .dash-greeting h2 { font-size: 22px; font-weight: 600; margin: 0 0 4px; letter-spacing: -.015em; }
+  .dash-greeting p  { font-size: 13px; color: var(--text-2); margin: 0 0 20px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+  .kpi-card .label { display:block; margin-bottom: 8px; }
+  .kpi-card .v   { font-size: 22px; font-weight: 600; letter-spacing: -.015em; line-height: 1.1; font-family: 'IBM Plex Mono'; }
+  .kpi-card .d   { font-size: 12px; margin-top: 6px; }
+
+  .row-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .chart-mock {
+    background: linear-gradient(180deg, rgba(56,126,209,.05) 0%, rgba(56,126,209,0) 70%);
+    height: 180px; position: relative; border-radius: 8px; margin-top: 12px;
+  }
+  .chart-mock svg { width: 100%; height: 100%; }
+  .alloc-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--hairline); font-size: 13px; }
+  .alloc-row:last-child { border: 0; }
+  .alloc-bar { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+  .alloc-bar > div { height: 100%; background: var(--primary); border-radius: 3px; }
+  .alloc-row .lbl { display:flex; flex-direction:column; gap:2px; flex:1; margin-right:12px; }
+
+  /* ============ SCREEN 3: HOLDINGS TABLE (Zerodha-style dense) ============ */
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.tbl thead th {
+    text-align: left; padding: 12px 16px;
+    font-weight: 500; font-size: 11px; letter-spacing: .03em; text-transform: uppercase;
+    color: var(--text-2); background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  table.tbl thead th.r { text-align: right; }
+  table.tbl tbody td {
+    padding: 14px 16px; border-bottom: 1px solid var(--hairline);
+    vertical-align: middle;
+  }
+  table.tbl tbody tr:hover { background: var(--surface); }
+  table.tbl tbody tr:last-child td { border-bottom: 0; }
+  table.tbl td.r { text-align: right; font-family: 'IBM Plex Mono'; }
+  table.tbl td.sym { font-weight: 500; }
+  table.tbl td.tag { font-size: 11px; color: var(--text-2); }
+
+  /* ============ SCREEN 4: ORDER PLACEMENT ============ */
+  .order-card { max-width: 380px; margin: 0 auto; }
+  .order-tabs { display: flex; padding: 14px 24px 0; gap: 0; border-bottom: 1px solid var(--hairline); margin-bottom: 18px; background: var(--bg); border-top-left-radius: 12px; border-top-right-radius: 12px; }
+  .order-tab {
+    flex: 1; padding: 12px 0;
+    text-align: center; font-size: 13px; font-weight: 500;
+    color: var(--text-2); border-bottom: 2px solid transparent; cursor: pointer;
+  }
+  .order-tab.buy.active { color: var(--success); border-bottom-color: var(--success); }
+  .order-tab.sell { color: var(--text-3); }
+  .order-summary { background: var(--surface); border-radius: 8px; padding: 14px; margin: 14px 0; font-size: 12px; }
+  .order-summary .ln { display: flex; justify-content: space-between; padding: 4px 0; }
+  .order-summary .ln .v { font-family: 'IBM Plex Mono'; }
+  .order-summary .ln.total { padding-top: 8px; margin-top: 6px; border-top: 1px solid var(--border); font-weight: 600; }
+
+  .annot {
+    background: white; border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 22px; font-size: 13px; color: var(--text-2); line-height: 1.6; margin-top: 32px;
+  }
+  .annot h4 { margin: 0 0 6px; font-size: 13px; font-weight: 600; color: var(--text); }
+  .annot ul { margin: 6px 0 0; padding-left: 20px; }
+  .annot li { margin: 3px 0; }
+  .annot code { font-family: 'IBM Plex Mono'; background: var(--surface-2); padding: 1px 6px; border-radius: 4px; font-size: 12px; color: var(--text); }
+
+  .dot { display:inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: middle; margin-right: 6px; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>WealthPro — Single Theme Preview</h1>
+  <p>Inspired by Zerodha Kite (blue, monospace numbers) + Groww (green, friendly whitespace). Light only. Hairline borders. No shadows. 4 real screens shown below.</p>
+</div>
+
+<div class="container">
+
+<!-- ================== SCREEN 1: LOGIN ================== -->
+<div class="section-title">1. Login Screen</div>
+<div class="screen-login">
+  <div class="login-left">
+    <div class="login-brand">
+      <span class="logo-mark">W</span>
+      <span>WealthPro</span>
+    </div>
+    <div class="login-hero">
+      <h2>Manage your wealth with confidence.</h2>
+      <p>Track your portfolio, place orders, monitor compliance, and grow toward your financial goals — all in one place.</p>
+    </div>
+    <div class="login-meta">
+      <b>Trusted by 10,000+ investors</b><br>SEBI registered • Bank-grade encryption
+    </div>
+  </div>
+  <div class="login-right">
+    <h3>Sign in to your account</h3>
+    <p>Enter your credentials to continue.</p>
+    <div class="field">
+      <label class="field-l">Username</label>
+      <input class="input" type="text" value="rohan.verma" />
+    </div>
+    <div class="field">
+      <label class="field-l">Password</label>
+      <input class="input" type="password" value="••••••••••" />
+    </div>
+    <button class="btn primary">Sign in →</button>
+    <p class="alt">New here? <a>Create a free account</a></p>
+  </div>
+</div>
+
+<!-- ================== SCREEN 2: CLIENT DASHBOARD ================== -->
+<div class="section-title">2. Client Dashboard</div>
+<div class="dash">
+  <!-- top nav -->
+  <div class="dash-nav">
+    <div class="left">
+      <div class="login-brand">
+        <span class="logo-mark">W</span>
+        <span>WealthPro</span>
+      </div>
+      <div class="links">
+        <a class="active">Dashboard</a>
+        <a>Holdings</a>
+        <a>Orders</a>
+        <a>Goals</a>
+        <a>Reviews</a>
+      </div>
+    </div>
+    <div class="right">
+      <span class="pill info">CLIENT</span>
+      <div class="avatar">RV</div>
+    </div>
+  </div>
+
+  <div class="dash-body">
+    <div class="dash-greeting">
+      <h2>Good morning, Rohan</h2>
+      <p>Here's how your portfolio is performing today.</p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="label">Total value</span>
+        <div class="v">₹12,45,820</div>
+        <div class="d delta-up">▲ ₹4,820 (+0.39%)</div>
+      </div>
+      <div class="kpi-card">
+        <span class="label">Today's P&amp;L</span>
+        <div class="v" style="color:var(--success)">+₹4,820</div>
+        <div class="d delta-up">▲ 0.39%</div>
+      </div>
+      <div class="kpi-card">
+        <span class="label">Total returns</span>
+        <div class="v">+₹2,18,420</div>
+        <div class="d delta-up">▲ 21.27% overall</div>
+      </div>
+      <div class="kpi-card">
+        <span class="label">Cash available</span>
+        <div class="v">₹84,200</div>
+        <div class="d" style="color:var(--text-2)">3 pending settlements</div>
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="panel">
+        <div class="panel-h">
+          <h3>Performance — last 12 months</h3>
+          <div style="display:flex;gap:6px">
+            <button class="btn ghost sm">1M</button>
+            <button class="btn ghost sm" style="background:var(--primary-s);color:var(--primary);border-color:transparent">1Y</button>
+            <button class="btn ghost sm">All</button>
+          </div>
+        </div>
+        <div class="panel-b">
+          <div class="chart-mock">
+            <svg viewBox="0 0 400 180" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="lg" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0" stop-color="#387ED1" stop-opacity=".18"/>
+                  <stop offset="1" stop-color="#387ED1" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,140 C40,130 60,80 100,90 S160,30 200,50 S280,20 320,35 S380,25 400,40 L400,180 L0,180 Z" fill="url(#lg)"/>
+              <path d="M0,140 C40,130 60,80 100,90 S160,30 200,50 S280,20 320,35 S380,25 400,40" fill="none" stroke="#387ED1" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><h3>Asset allocation</h3></div>
+        <div class="panel-b">
+          <div class="alloc-row">
+            <div class="lbl"><span><span class="dot" style="background:#387ED1"></span>Equity</span></div>
+            <span class="num">54%</span>
+          </div>
+          <div class="alloc-bar"><div style="width:54%; background:#387ED1"></div></div>
+          <div class="alloc-row" style="margin-top:14px">
+            <div class="lbl"><span><span class="dot" style="background:#00B386"></span>Mutual Funds</span></div>
+            <span class="num">28%</span>
+          </div>
+          <div class="alloc-bar"><div style="width:28%; background:#00B386"></div></div>
+          <div class="alloc-row" style="margin-top:14px">
+            <div class="lbl"><span><span class="dot" style="background:#5367FF"></span>Bonds</span></div>
+            <span class="num">12%</span>
+          </div>
+          <div class="alloc-bar"><div style="width:12%; background:#5367FF"></div></div>
+          <div class="alloc-row" style="margin-top:14px">
+            <div class="lbl"><span><span class="dot" style="background:#F4A41E"></span>Cash</span></div>
+            <span class="num">6%</span>
+          </div>
+          <div class="alloc-bar"><div style="width:6%; background:#F4A41E"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================== SCREEN 3: HOLDINGS TABLE ================== -->
+<div class="section-title">3. Holdings Table — Zerodha-style dense view</div>
+<div class="panel">
+  <div class="panel-h">
+    <h3>Holdings (12)</h3>
+    <div style="display:flex;gap:8px">
+      <button class="btn ghost sm">Filter</button>
+      <button class="btn ghost sm">Export</button>
+    </div>
+  </div>
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th>Instrument</th>
+        <th class="r">Qty</th>
+        <th class="r">Avg cost</th>
+        <th class="r">LTP</th>
+        <th class="r">Cur. value</th>
+        <th class="r">P&amp;L</th>
+        <th class="r">Net chg.</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="sym">HDFCBANK <span class="tag">EQ</span></td><td class="r">50</td><td class="r">1,620.50</td><td class="r">1,648.50</td><td class="r">82,425</td><td class="r delta-up">+1,400</td><td class="r delta-up">+1.73%</td></tr>
+      <tr><td class="sym">RELIANCE <span class="tag">EQ</span></td><td class="r">25</td><td class="r">2,820.00</td><td class="r">2,895.30</td><td class="r">72,382</td><td class="r delta-up">+1,883</td><td class="r delta-up">+2.67%</td></tr>
+      <tr><td class="sym">SBIBLUECHIP <span class="tag">MF</span></td><td class="r">500.00</td><td class="r">52.75</td><td class="r">54.20</td><td class="r">27,100</td><td class="r delta-up">+725</td><td class="r delta-up">+2.75%</td></tr>
+      <tr><td class="sym">INFY <span class="tag">EQ</span></td><td class="r">40</td><td class="r">1,918.00</td><td class="r">1,945.20</td><td class="r">77,808</td><td class="r delta-up">+1,088</td><td class="r delta-up">+1.42%</td></tr>
+      <tr><td class="sym">TATASTEEL <span class="tag">EQ</span></td><td class="r">100</td><td class="r">145.75</td><td class="r">144.85</td><td class="r">14,485</td><td class="r delta-down">−90</td><td class="r delta-down">−0.62%</td></tr>
+      <tr><td class="sym">NIFTYBEES <span class="tag">ETF</span></td><td class="r">300</td><td class="r">213.25</td><td class="r">218.40</td><td class="r">65,520</td><td class="r delta-up">+1,545</td><td class="r delta-up">+2.42%</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ================== SCREEN 4: ORDER PLACEMENT ================== -->
+<div class="section-title">4. Place Order — focused modal-style form</div>
+<div class="order-card">
+  <div class="panel">
+    <div class="order-tabs">
+      <div class="order-tab buy active">Buy</div>
+      <div class="order-tab sell">Sell</div>
+    </div>
+    <div class="panel-b" style="padding-top:6px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px">
+        <div>
+          <h3 style="margin:0;font-size:18px;letter-spacing:-.01em">HDFCBANK</h3>
+          <p style="margin:2px 0 0;font-size:12px;color:var(--text-2)">HDFC Bank Ltd  •  NSE</p>
+        </div>
+        <div style="text-align:right">
+          <div class="num" style="font-size:18px;font-weight:600">₹1,648.50</div>
+          <div class="delta-up" style="font-size:12px">▲ +28.20 (+1.74%)</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div class="field">
+          <label class="field-l">Quantity</label>
+          <input class="input mono" type="text" value="100"/>
+        </div>
+        <div class="field">
+          <label class="field-l">Price (₹)</label>
+          <input class="input mono" type="text" value="1648.50"/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-l">Order type</label>
+        <div style="display:flex;gap:6px;background:var(--surface);padding:4px;border-radius:8px">
+          <button class="btn sm" style="flex:1;background:white;color:var(--text);border-color:var(--border)">Market</button>
+          <button class="btn sm" style="flex:1;background:var(--primary);color:white;border-color:transparent">Limit</button>
+          <button class="btn sm" style="flex:1;background:transparent;color:var(--text-2);border-color:transparent">Stop-loss</button>
+        </div>
+      </div>
+
+      <div class="order-summary">
+        <div class="ln"><span>Qty × Price</span><span class="v">100 × 1,648.50</span></div>
+        <div class="ln"><span>Brokerage &amp; charges</span><span class="v">₹35.40</span></div>
+        <div class="ln total"><span>Total order value</span><span class="v">₹1,64,885.40</span></div>
+      </div>
+
+      <button class="btn success" style="width:100%;justify-content:center;padding:12px;font-size:14px">Place buy order →</button>
+      <p style="font-size:11px;color:var(--text-3);margin-top:10px;text-align:center">Margin required: <b style="color:var(--text-2)">₹1,64,885.40</b>  •  Available: <b style="color:var(--text-2)">₹84,200</b></p>
+    </div>
+  </div>
+</div>
+
+<!-- ================== ANNOTATION ================== -->
+<div class="annot">
+  <h4>What this theme is</h4>
+  <ul>
+    <li><b>Palette:</b> White (<code>#FFFFFF</code>) + neutral greys, Kite-blue primary (<code>#387ED1</code>), Groww-green for gains (<code>#00B386</code>), Kite-red for losses (<code>#EB5B3C</code>), purple accent (<code>#5367FF</code>) for badges.</li>
+    <li><b>Typography:</b> Inter for everything UI; IBM Plex Mono for all numbers (P&amp;L, prices, qty) — you instantly see "this is a real trading app".</li>
+    <li><b>No shadows. No gradients</b> (except subtle chart fill). Hairline 1px borders. Rounded-8px corners. Looks like both Zerodha Kite and Groww at the same time.</li>
+    <li><b>Color is information only</b>: green = gain, red = loss, blue = primary CTA, neutral grey for everything else.</li>
+    <li>Works for all 6 roles — same visual language; just the menu items + KPIs change per role.</li>
+  </ul>
+</div>
+
+<div class="annot" style="background:#EAF2FB; border-color:#C9DDF2">
+  <h4>Tell me one of these and we lock it in:</h4>
+  <ul>
+    <li>"Looks good — start the build"</li>
+    <li>"Make the primary darker / lighter / a different blue"</li>
+    <li>"I want green as the primary instead of blue (more Groww, less Kite)"</li>
+    <li>"Too sparse — add subtle shadows"</li>
+    <li>Or any specific tweak: "less rounded", "tighter spacing", "different number font", etc.</li>
+  </ul>
+</div>
+
+</div>
+</body>
+</html>

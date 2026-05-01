@@ -1,0 +1,62 @@
+# ───── Maven / Build artifacts ─────
+target/
+*.class
+*.jar
+*.war
+*.ear
+!.mvn/wrapper/maven-wrapper.jar
+
+# ───── Runtime logs ─────
+logs/
+*.log
+*.log.*
+
+# ───── IntelliJ IDEA ─────
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# ───── Eclipse / STS ─────
+.classpath
+.project
+.settings/
+.factorypath
+.springBeans
+.sts4-cache/
+
+# ───── VS Code ─────
+.vscode/
+
+# ───── NetBeans ─────
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ───── OS junk ─────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ───── Environment / secrets ─────
+.env
+.env.local
+*.env
+application-local.yml
+application-local.properties
+
+# ───── Node / Frontend (if added later) ─────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ───── Misc ─────
+*.bak
+*.swp
+*.tmp
+hs_err_pid*.log

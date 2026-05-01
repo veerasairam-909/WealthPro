@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WealthPro — Architecture Diagrams</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 30px; background: #f4f6f8; color: #222; }
+  h1 { color: #2E5C8A; margin-bottom: 4px; }
+  h2 { color: #1F3A5F; margin-top: 40px; border-bottom: 2px solid #2E5C8A; padding-bottom: 6px; }
+  .hint { background: #fff7e0; border-left: 4px solid #d98b20; padding: 12px 16px; margin: 10px 0 24px; border-radius: 4px; }
+  .download { display: inline-block; margin: 6px 10px 6px 0; padding: 8px 14px; background: #2E5C8A; color: #fff; text-decoration: none; border-radius: 4px; font-size: 14px; }
+  .download:hover { background: #1F3A5F; }
+  .diagram { background: #fff; border: 1px solid #ccd6e0; border-radius: 8px; padding: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); overflow-x: auto; }
+  .diagram img { width: 100%; max-width: 1400px; display: block; margin: 0 auto; }
+  .small { font-size: 13px; color: #666; margin-top: 6px; }
+</style>
+</head>
+<body>
+  <h1>WealthPro — Architecture &amp; Security Diagrams</h1>
+  <p class="small">Open this file in your browser. Right-click any diagram → <b>Save Image As</b> for PNG, or use the download buttons for the original SVG.</p>
+
+  <div class="hint">
+    <b>Tip:</b> SVG is resolution-independent — print, zoom, or embed in Word/PowerPoint without quality loss. To convert to PNG: open the SVG in a browser, take a screenshot, or use an online converter (svgtopng.com).
+  </div>
+
+  <h2>1. Complete Application Architecture &amp; Workflow</h2>
+  <a class="download" href="application_architecture.svg" download>⬇ Download SVG</a>
+  <a class="download" href="application_architecture.svg" target="_blank">↗ Open full-size</a>
+  <div class="diagram">
+    <img src="application_architecture.svg" alt="Application Architecture"/>
+  </div>
+  <p class="small">Shows: client layer → gateway → 9 business microservices → MySQL schemas → observability → 13-act end-to-end client lifecycle.</p>
+
+  <h2>2. Security &amp; Authentication Flow</h2>
+  <a class="download" href="security_flow.svg" download>⬇ Download SVG</a>
+  <a class="download" href="security_flow.svg" target="_blank">↗ Open full-size</a>
+  <div class="diagram">
+    <img src="security_flow.svg" alt="Security Flow"/>
+  </div>
+  <p class="small">Shows: login sequence → JWT issuance → authenticated request pipeline → failure/rejection paths → 9 defense-in-depth controls.</p>
+
+</body>
+</html>

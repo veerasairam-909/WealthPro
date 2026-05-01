@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: #F4F6F8;
+  color: #1A1F36;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+}
+
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.btn-primary { background: #387ED1; color: white; }
+.btn-primary:hover { background: #2C68B0; }
+.btn-success { background: #00B386; color: white; }
+.btn-danger  { background: #EB5B3C; color: white; }
+.btn-ghost   { background: transparent; color: #1A1F36; border-color: #E5E7EB; }
+.btn-ghost:hover { background: #FAFBFC; }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+
+/* form inputs */
+.input {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 13px;
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+}
+.input:focus {
+  outline: none;
+  border-color: #387ED1;
+}
+
+/* small status pills */
+.pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.pill-info    { background: #EAF2FB; color: #387ED1; }
+.pill-success { background: #E0F7EF; color: #00B386; }
+.pill-danger  { background: #FCEAE5; color: #EB5B3C; }
+.pill-warn    { background: #FFF4DD; color: #B07308; }
+
+/* card / panel */
+.panel {
+  background: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+}
+.panel-h {
+  padding: 14px 22px;
+  border-bottom: 1px solid #EEF1F4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.panel-h h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+.panel-b {
+  padding: 18px 22px;
+}
+
+.label {
+  font-size: 11px;
+  color: #5C6B82;
+  font-weight: 500;
+}

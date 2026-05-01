@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 1600" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2E5C8A"/>
+    </marker>
+    <marker id="ar-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#27AE60"/>
+    </marker>
+    <marker id="ar-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#C0392B"/>
+    </marker>
+    <filter id="shd" x="-10%" y="-10%" width="120%" height="130%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="1" dy="2"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.25"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Title bar -->
+  <rect x="0" y="0" width="1300" height="64" fill="#1F3A5F"/>
+  <text x="650" y="40" fill="#fff" font-size="24" font-weight="700" text-anchor="middle">
+    WealthPro — Security Flow (Sequence Diagram)
+  </text>
+
+  <!-- Swimlane headers -->
+  <g font-size="15" font-weight="700" text-anchor="middle">
+    <rect x="40" y="90" width="220" height="50" rx="6" fill="#4A90D9" filter="url(#shd)"/>
+    <text x="150" y="122" fill="#fff">👤  CLIENT / User</text>
+
+    <rect x="300" y="90" width="260" height="50" rx="6" fill="#E67E22" filter="url(#shd)"/>
+    <text x="430" y="122" fill="#fff">🛡️  API GATEWAY (:9999)</text>
+
+    <rect x="600" y="90" width="220" height="50" rx="6" fill="#27AE60" filter="url(#shd)"/>
+    <text x="710" y="122" fill="#fff">🗄️  gateway_db</text>
+
+    <rect x="860" y="90" width="400" height="50" rx="6" fill="#8E44AD" filter="url(#shd)"/>
+    <text x="1060" y="122" fill="#fff">⚙️  DOWNSTREAM SERVICE (e.g. :8081)</text>
+  </g>
+
+  <!-- Vertical lifelines (dashed) -->
+  <g stroke="#AAB2BA" stroke-dasharray="5,4" stroke-width="1">
+    <line x1="150" y1="145" x2="150" y2="1420"/>
+    <line x1="430" y1="145" x2="430" y2="1420"/>
+    <line x1="710" y1="145" x2="710" y2="1420"/>
+    <line x1="1060" y1="145" x2="1060" y2="1420"/>
+  </g>
+
+  <!-- ================= PHASE 1: LOGIN ================= -->
+  <rect x="30" y="160" width="1240" height="30" rx="4" fill="#EAF2F8"/>
+  <text x="50" y="180" font-size="15" font-weight="700" fill="#1F3A5F">PHASE 1 — LOGIN (get a JWT)</text>
+
+  <!-- Step 1 -->
+  <g>
+    <circle cx="150" cy="220" r="16" fill="#2E5C8A"/>
+    <text x="150" y="225" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">1</text>
+    <line x1="168" y1="220" x2="430" y2="220" stroke="#2E5C8A" stroke-width="2" marker-end="url(#ar)"/>
+    <text x="299" y="213" text-anchor="middle" font-size="12" font-weight="600" fill="#2E5C8A">POST /auth/login</text>
+    <text x="299" y="228" text-anchor="middle" font-size="11" fill="#555">{ username, password }</text>
+  </g>
+
+  <!-- Step 2 -->
+  <g>
+    <circle cx="430" cy="270" r="16" fill="#2E5C8A"/>
+    <text x="430" y="275" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">2</text>
+    <line x1="448" y1="270" x2="710" y2="270" stroke="#2E5C8A" stroke-width="2" marker-end="url(#ar)"/>
+    <text x="579" y="263" text-anchor="middle" font-size="12" font-weight="600" fill="#2E5C8A">SELECT * FROM users WHERE username=?</text>
+    <text x="579" y="278" text-anchor="middle" font-size="11" fill="#555">(R2DBC reactive query)</text>
+  </g>
+
+  <!-- Step 3 -->
+  <g>
+    <line x1="710" y1="320" x2="432" y2="320" stroke="#27AE60" stroke-width="2" marker-end="url(#ar-ok)"/>
+    <text x="571" y="313" text-anchor="middle" font-size="12" font-weight="600" fill="#27AE60">User row (bcrypt hash)</text>
+  </g>
+
+  <!-- Step 4 box on gateway lane -->
+  <g filter="url(#shd)">
+    <rect x="290" y="340" width="280" height="70" rx="6" fill="#FFF7E6" stroke="#E67E22" stroke-width="1.5"/>
+    <circle cx="310" cy="360" r="13" fill="#E67E22"/>
+    <text x="310" y="365" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">3</text>
+    <text x="430" y="365" text-anchor="middle" font-size="12" font-weight="700" fill="#8A5A10">BCrypt verify (strength 12)</text>
+    <text x="430" y="384" text-anchor="middle" font-size="11" fill="#555">Build JWT: { username, roles, clientId }</text>
+    <text x="430" y="400" text-anchor="middle" font-size="11" fill="#555">Sign HS512 using JWT_SECRET</text>
+  </g>
+
+  <!-- Step 5: JWT back to client -->
+  <g>
+    <circle cx="430" cy="445" r="16" fill="#27AE60"/>
+    <text x="430" y="450" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">4</text>
+    <line x1="412" y1="445" x2="168" y2="445" stroke="#27AE60" stroke-width="2" marker-end="url(#ar-ok)"/>
+    <text x="290" y="438" text-anchor="middle" font-size="12" font-weight="600" fill="#27AE60">200 OK</text>
+    <text x="290" y="453" text-anchor="middle" font-size="11" fill="#555">JWT token returned</text>
+  </g>
+
+  <!-- Divider -->
+  <line x1="30" y1="490" x2="1270" y2="490" stroke="#CCC" stroke-dasharray="3,3"/>
+
+  <!-- ================= PHASE 2: AUTHENTICATED REQUEST ================= -->
+  <rect x="30" y="500" width="1240" height="30" rx="4" fill="#EAF2F8"/>
+  <text x="50" y="520" font-size="15" font-weight="700" fill="#1F3A5F">PHASE 2 — AUTHENTICATED REQUEST (e.g. GET /api/clients/5)</text>
+
+  <!-- Step 5: client hits gateway with bearer -->
+  <g>
+    <circle cx="150" cy="560" r="16" fill="#2E5C8A"/>
+    <text x="150" y="565" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">5</text>
+    <line x1="168" y1="560" x2="430" y2="560" stroke="#2E5C8A" stroke-width="2" marker-end="url(#ar)"/>
+    <text x="299" y="553" text-anchor="middle" font-size="12" font-weight="600" fill="#2E5C8A">GET /api/clients/5</text>
+    <text x="299" y="568" text-anchor="middle" font-size="11" fill="#555">Authorization: Bearer &lt;JWT&gt;</text>
+  </g>
+
+  <!-- Gateway processing box -->
+  <g filter="url(#shd)">
+    <rect x="290" y="590" width="280" height="120" rx="6" fill="#FFF7E6" stroke="#E67E22" stroke-width="1.5"/>
+    <circle cx="310" cy="610" r="13" fill="#E67E22"/>
+    <text x="310" y="615" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">6</text>
+    <text x="430" y="615" text-anchor="middle" font-size="12" font-weight="700" fill="#8A5A10">Gateway runs pipeline:</text>
+    <text x="300" y="635" font-size="11" fill="#333">a) Verify JWT signature + expiry</text>
+    <text x="300" y="652" font-size="11" fill="#333">b) Match role against URL rule</text>
+    <text x="300" y="669" font-size="11" fill="#333">c) Strip Authorization header</text>
+    <text x="300" y="686" font-size="11" fill="#333">d) Inject X-Auth-Username/Roles/Client-Id</text>
+    <text x="300" y="703" font-size="11" fill="#333">e) Wrap call in Circuit Breaker</text>
+  </g>
+
+  <!-- Audit side trip -->
+  <g>
+    <line x1="450" y1="720" x2="710" y2="720" stroke="#888" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ar)"/>
+    <text x="580" y="714" text-anchor="middle" font-size="11" fill="#666">(async) write audit entry</text>
+  </g>
+
+  <!-- Step 7: forward to service -->
+  <g>
+    <circle cx="430" cy="755" r="16" fill="#2E5C8A"/>
+    <text x="430" y="760" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">7</text>
+    <line x1="448" y1="755" x2="1060" y2="755" stroke="#2E5C8A" stroke-width="2" marker-end="url(#ar)"/>
+    <text x="754" y="748" text-anchor="middle" font-size="12" font-weight="600" fill="#2E5C8A">Forward via Eureka lookup  → lb://WEALTHPRO-SERVICE</text>
+    <text x="754" y="763" text-anchor="middle" font-size="11" fill="#555">Headers: X-Auth-Username, X-Auth-Roles, X-Auth-Client-Id</text>
+  </g>
+
+  <!-- Service ownership guard box -->
+  <g filter="url(#shd)">
+    <rect x="880" y="790" width="360" height="100" rx="6" fill="#F4E8FF" stroke="#8E44AD" stroke-width="1.5"/>
+    <circle cx="900" cy="810" r="13" fill="#8E44AD"/>
+    <text x="900" y="815" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">8</text>
+    <text x="1060" y="815" text-anchor="middle" font-size="12" font-weight="700" fill="#4A1B6B">Service checks identity:</text>
+    <text x="890" y="836" font-size="11" fill="#333">AuthContext ctx = from headers</text>
+    <text x="890" y="853" font-size="11" fill="#333">if (ctx.isClient() &amp;&amp; !ctx.ownsClient(5))</text>
+    <text x="890" y="870" font-size="11" fill="#C0392B" font-weight="700">    → throw 403 Forbidden</text>
+    <text x="890" y="886" font-size="11" fill="#27AE60" font-weight="700">else → proceed to business logic</text>
+  </g>
+
+  <!-- Step 9: return -->
+  <g>
+    <circle cx="1060" cy="920" r="16" fill="#27AE60"/>
+    <text x="1060" y="925" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">9</text>
+    <line x1="1042" y1="920" x2="448" y2="920" stroke="#27AE60" stroke-width="2" marker-end="url(#ar-ok)"/>
+    <text x="745" y="913" text-anchor="middle" font-size="12" font-weight="600" fill="#27AE60">200 OK  Client data JSON</text>
+  </g>
+
+  <!-- Step 10: gateway → client -->
+  <g>
+    <circle cx="430" cy="960" r="16" fill="#27AE60"/>
+    <text x="430" y="965" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">10</text>
+    <line x1="412" y1="960" x2="168" y2="960" stroke="#27AE60" stroke-width="2" marker-end="url(#ar-ok)"/>
+    <text x="290" y="953" text-anchor="middle" font-size="12" font-weight="600" fill="#27AE60">200 OK (response relayed)</text>
+  </g>
+
+  <!-- Divider -->
+  <line x1="30" y1="1000" x2="1270" y2="1000" stroke="#CCC" stroke-dasharray="3,3"/>
+
+  <!-- ================= PHASE 3: REJECTION EXAMPLE ================= -->
+  <rect x="30" y="1010" width="1240" height="30" rx="4" fill="#FCEDED"/>
+  <text x="50" y="1030" font-size="15" font-weight="700" fill="#8E1C1C">PHASE 3 — REJECTION EXAMPLE (CLIENT tries to access ANOTHER client's data — IDOR attempt)</text>
+
+  <!-- client request with JWT for client#3 -->
+  <g>
+    <circle cx="150" cy="1075" r="16" fill="#C0392B"/>
+    <text x="150" y="1080" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">X</text>
+    <line x1="168" y1="1075" x2="430" y2="1075" stroke="#C0392B" stroke-width="2" marker-end="url(#ar-bad)"/>
+    <text x="299" y="1068" text-anchor="middle" font-size="12" font-weight="600" fill="#C0392B">GET /api/clients/5</text>
+    <text x="299" y="1083" text-anchor="middle" font-size="11" fill="#555">(but JWT says I am client 3)</text>
+  </g>
+
+  <!-- gateway happy, forwards -->
+  <g>
+    <line x1="448" y1="1120" x2="1060" y2="1120" stroke="#2E5C8A" stroke-width="2" marker-end="url(#ar)"/>
+    <text x="754" y="1113" text-anchor="middle" font-size="11" fill="#2E5C8A">Gateway role check passes (CLIENT allowed on /api/clients/**)</text>
+    <text x="754" y="1128" text-anchor="middle" font-size="11" fill="#555">headers: X-Auth-Client-Id=3</text>
+  </g>
+
+  <!-- service rejects -->
+  <g filter="url(#shd)">
+    <rect x="880" y="1145" width="360" height="65" rx="6" fill="#FCEDED" stroke="#C0392B" stroke-width="1.5"/>
+    <text x="1060" y="1170" text-anchor="middle" font-size="12" font-weight="700" fill="#8E1C1C">Service: ctx.ownsClient(5)  == FALSE</text>
+    <text x="1060" y="1190" text-anchor="middle" font-size="11" fill="#333">throw ResponseStatusException(FORBIDDEN)</text>
+    <text x="1060" y="1205" text-anchor="middle" font-size="11" fill="#555">caught by GlobalExceptionHandler → 403</text>
+  </g>
+
+  <!-- return 403 -->
+  <g>
+    <line x1="1042" y1="1240" x2="448" y2="1240" stroke="#C0392B" stroke-width="2" marker-end="url(#ar-bad)"/>
+    <text x="745" y="1233" text-anchor="middle" font-size="12" font-weight="600" fill="#C0392B">403 Forbidden</text>
+    <line x1="412" y1="1270" x2="168" y2="1270" stroke="#C0392B" stroke-width="2" marker-end="url(#ar-bad)"/>
+    <text x="290" y="1263" text-anchor="middle" font-size="12" font-weight="600" fill="#C0392B">403 Forbidden (relayed)</text>
+    <text x="290" y="1278" text-anchor="middle" font-size="11" fill="#555">"You can only view your own data."</text>
+  </g>
+
+  <!-- Divider -->
+  <line x1="30" y1="1310" x2="1270" y2="1310" stroke="#CCC" stroke-dasharray="3,3"/>
+
+  <!-- ================= KEY TAKEAWAYS ================= -->
+  <rect x="30" y="1320" width="1240" height="30" rx="4" fill="#E8F5E9"/>
+  <text x="50" y="1340" font-size="15" font-weight="700" fill="#1B5E20">KEY TAKEAWAYS</text>
+
+  <g font-size="12">
+    <g filter="url(#shd)">
+      <rect x="40" y="1360" width="300" height="80" rx="6" fill="#fff" stroke="#27AE60"/>
+      <text x="190" y="1382" text-anchor="middle" font-weight="700" fill="#1B5E20">Two-layer security</text>
+      <text x="50" y="1402">1. Gateway — JWT + role check</text>
+      <text x="50" y="1420">2. Service — ownership check</text>
+      <text x="50" y="1435" fill="#555">Both layers must pass.</text>
+    </g>
+
+    <g filter="url(#shd)">
+      <rect x="355" y="1360" width="300" height="80" rx="6" fill="#fff" stroke="#27AE60"/>
+      <text x="505" y="1382" text-anchor="middle" font-weight="700" fill="#1B5E20">JWT is never forwarded</text>
+      <text x="365" y="1402">Gateway strips it and injects</text>
+      <text x="365" y="1420">X-Auth-* headers instead so</text>
+      <text x="365" y="1435" fill="#555">downstream never sees raw token.</text>
+    </g>
+
+    <g filter="url(#shd)">
+      <rect x="670" y="1360" width="300" height="80" rx="6" fill="#fff" stroke="#27AE60"/>
+      <text x="820" y="1382" text-anchor="middle" font-weight="700" fill="#1B5E20">403 preserved end-to-end</text>
+      <text x="680" y="1402">ResponseStatusException caught</text>
+      <text x="680" y="1420">by GlobalExceptionHandler →</text>
+      <text x="680" y="1435" fill="#555">clean 403 (not 500).</text>
+    </g>
+
+    <g filter="url(#shd)">
+      <rect x="985" y="1360" width="285" height="80" rx="6" fill="#fff" stroke="#27AE60"/>
+      <text x="1127" y="1382" text-anchor="middle" font-weight="700" fill="#1B5E20">Every call audited</text>
+      <text x="995" y="1402">AuditGlobalFilter writes</text>
+      <text x="995" y="1420">gateway_db.auditlog row</text>
+      <text x="995" y="1435" fill="#555">with user + method + path.</text>
+    </g>
+  </g>
+
+  <!-- Legend -->
+  <g font-size="12" transform="translate(40, 1480)">
+    <text x="0" y="0" font-weight="700" fill="#333">LEGEND:</text>
+    <line x1="80" y1="-5" x2="120" y2="-5" stroke="#2E5C8A" stroke-width="2" marker-end="url(#ar)"/>
+    <text x="128" y="0">request</text>
+    <line x1="200" y1="-5" x2="240" y2="-5" stroke="#27AE60" stroke-width="2" marker-end="url(#ar-ok)"/>
+    <text x="248" y="0">success response</text>
+    <line x1="370" y1="-5" x2="410" y2="-5" stroke="#C0392B" stroke-width="2" marker-end="url(#ar-bad)"/>
+    <text x="418" y="0">rejection (4xx)</text>
+    <line x1="530" y1="-5" x2="570" y2="-5" stroke="#888" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#ar)"/>
+    <text x="578" y="0">async / side-effect</text>
+    <circle cx="715" cy="-5" r="10" fill="#2E5C8A"/>
+    <text x="715" y="0" text-anchor="middle" fill="#fff" font-weight="700" font-size="11">N</text>
+    <text x="735" y="0">step number (follow in order)</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="650" y="1570" font-size="11" text-anchor="middle" fill="#888">
+    WealthPro • Read top-to-bottom: each numbered step is one HTTP hop
+  </text>
+</svg>

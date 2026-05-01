@@ -1,0 +1,284 @@
+server:
+  port: 9999
+
+spring:
+  application:
+    name: api-gateway
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/gateway_db
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    pool:
+      enabled: true
+      initial-size: 5
+      max-size: 10
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+
+        # ── Wealthpro Service (IAM, Client Onboarding, KYC, Risk Profiling) ──
+        - id: wealthpro-clients
+          uri: lb://WEALTHPRO-SERVICE
+          predicates:
+            - Path=/api/clients/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: wealthproServiceCB
+                fallbackUri: forward:/fallback/wealthpro
+
+        - id: wealthpro-suitability-rules
+          uri: lb://WEALTHPRO-SERVICE
+          predicates:
+            - Path=/api/suitability-rules/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: wealthproServiceCB
+                fallbackUri: forward:/fallback/wealthpro
+
+        - id: wealthpro-aml-flags
+          uri: lb://WEALTHPRO-SERVICE
+          predicates:
+            - Path=/api/aml-flags/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: wealthproServiceCB
+                fallbackUri: forward:/fallback/wealthpro
+
+        # ── Analytics Service (Performance, Risk, Compliance Analytics) ──
+        - id: analytics-service
+          uri: lb://ANALYTICS-SERVICE
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: analyticsServiceCB
+                fallbackUri: forward:/fallback/analytics
+
+        - id: analytics-compliance-breaches
+          uri: lb://ANALYTICS-SERVICE
+          predicates:
+            - Path=/api/compliance-breaches/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: analyticsServiceCB
+                fallbackUri: forward:/fallback/analytics
+
+        # ── Order Execution Service (Orders, Pre-Trade, Fills, Allocations) ──
+        - id: order-execution-service
+          uri: lb://ORDER-EXECUTION-SERVICE
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: orderServiceCB
+                fallbackUri: forward:/fallback/order-execution
+
+        # ── Product Catalog Service (Securities, Product Terms, Research) ──
+        - id: productcatalog-securities
+          uri: lb://PRODUCTCATALOG-SERVICE
+          predicates:
+            - Path=/api/securities/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: productCatalogServiceCB
+                fallbackUri: forward:/fallback/productcatalog
+
+        - id: productcatalog-product-terms
+          uri: lb://PRODUCTCATALOG-SERVICE
+          predicates:
+            - Path=/api/product-terms/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: productCatalogServiceCB
+                fallbackUri: forward:/fallback/productcatalog
+
+        - id: productcatalog-research-notes
+          uri: lb://PRODUCTCATALOG-SERVICE
+          predicates:
+            - Path=/api/research-notes/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: productCatalogServiceCB
+                fallbackUri: forward:/fallback/productcatalog
+
+        # ── Goals Advisory Service (Goals, Model Portfolios, Recommendations) ──
+        - id: goalsadvisory-goals
+          uri: lb://GOALS-ADVISORY-SERVICE
+          predicates:
+            - Path=/api/goals/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: goalsAdvisoryServiceCB
+                fallbackUri: forward:/fallback/goalsadvisory
+
+        - id: goalsadvisory-model-portfolios
+          uri: lb://GOALS-ADVISORY-SERVICE
+          predicates:
+            - Path=/api/model-portfolios/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: goalsAdvisoryServiceCB
+                fallbackUri: forward:/fallback/goalsadvisory
+
+        - id: goalsadvisory-recommendations
+          uri: lb://GOALS-ADVISORY-SERVICE
+          predicates:
+            - Path=/api/recommendations/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: goalsAdvisoryServiceCB
+                fallbackUri: forward:/fallback/goalsadvisory
+
+        # ── Review Service (Reviews, Statements) ──
+        - id: review-reviews
+          uri: lb://REVIEW-SERVICE
+          predicates:
+            - Path=/api/reviews/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: reviewServiceCB
+                fallbackUri: forward:/fallback/review
+
+        - id: review-statements
+          uri: lb://REVIEW-SERVICE
+          predicates:
+            - Path=/api/statements/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: reviewServiceCB
+                fallbackUri: forward:/fallback/review
+
+        # ── PBOR Service (Accounts, Holdings, Cash Ledger, Corporate Actions) ──
+        - id: pbor-accounts
+          uri: lb://PBOR-SERVICE
+          predicates:
+            - Path=/api/accounts/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: pborServiceCB
+                fallbackUri: forward:/fallback/pbor
+
+        - id: pbor-holdings
+          uri: lb://PBOR-SERVICE
+          predicates:
+            - Path=/api/holdings/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: pborServiceCB
+                fallbackUri: forward:/fallback/pbor
+
+        - id: pbor-cash-ledger
+          uri: lb://PBOR-SERVICE
+          predicates:
+            - Path=/api/cash-ledger/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: pborServiceCB
+                fallbackUri: forward:/fallback/pbor
+
+        - id: pbor-corporate-actions
+          uri: lb://PBOR-SERVICE
+          predicates:
+            - Path=/api/corporate-actions/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: pborServiceCB
+                fallbackUri: forward:/fallback/pbor
+
+        # ── Notifications Service ──
+        - id: notifications-service
+          uri: lb://NOTIFICATIONS-SERVICE
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: notificationsServiceCB
+                fallbackUri: forward:/fallback/notifications
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      wealthproServiceCB:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+      analyticsServiceCB:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+      orderServiceCB:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+      productCatalogServiceCB:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+      goalsAdvisoryServiceCB:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+      reviewServiceCB:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+      pborServiceCB:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+      notificationsServiceCB:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+
+jwt:
+  secret: ${JWT_SECRET:jwtsecret}
+  expiration-seconds: ${JWT_EXPIRATION_SECONDS:18000}  # default 5 hours
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200,http://localhost:5173,http://127.0.0.1:5173}
+
+# ── Admin account ──────────────────────────────────────────────────────────────
+# The admin user is stored directly in the MySQL gateway_db.users table.
+# Credentials are NOT defined here. Run admin_seed.sql once on gateway_db
+# to insert the admin record with a BCrypt-hashed password.
+# See: src/main/resources/admin_seed.sql
