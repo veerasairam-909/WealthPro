@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(Get-Content \"C:\\\\Users\\\\2478178\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-2478178-Downloads-WealthPro-WealthPro\\\\622a063c-7443-4624-9f16-7bdc4b68cfbe\\\\tasks\\\\bvat2315f.output\" -Wait -Tail 20)",
-      "Bash(Select-Object -First 20)"
-    ]
-  }
-}
