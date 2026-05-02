@@ -5,6 +5,9 @@ import { getHoldingsByAccountId } from '@/api/holdings';
 import { getBalanceByAccountId } from '@/api/cashLedger';
 import { getAllSecurities } from '@/api/securities';
 import { placeOrder } from '@/api/orders';
+import { TableSkeleton, CardSkeleton } from '@/components/Skeleton';
+import EmptyState from '@/components/EmptyState';
+import { AlertTriangle, Landmark, Inbox } from 'lucide-react';
 import {
   PieChart, Pie, Cell, Sector, Tooltip, Legend, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList,
@@ -259,7 +262,7 @@ export default function Holdings() {
     setSellSubmitting(false);
   }
 
-  if (!clientId) return <div className="p-10 text-center text-text-2">Loading...</div>;
+  if (!clientId) return <CardSkeleton count={4} />;
 
   return (
     <div>
@@ -480,25 +483,25 @@ export default function Holdings() {
       {/* holdings table */}
       <div className="panel">
         {loading ? (
-          <div className="panel-b text-center text-text-2 py-10">Loading holdings...</div>
+          <TableSkeleton rows={5} cols={9} />
         ) : pborDown ? (
-          <div className="panel-b text-center py-10">
-            <p className="text-3xl mb-2">⚠️</p>
-            <p className="font-semibold">Portfolio service unavailable</p>
-            <p className="text-sm text-text-2 mt-1">PBOR service is not running. Ask your administrator.</p>
-          </div>
+          <EmptyState
+            icon={<AlertTriangle size={26} />}
+            title="Portfolio service unavailable"
+            description="PBOR service is not running. Ask your administrator."
+          />
         ) : !account ? (
-          <div className="panel-b text-center py-10">
-            <p className="text-3xl mb-2">🏦</p>
-            <p className="font-semibold">No investment account yet</p>
-            <p className="text-sm text-text-2 mt-1">Your RM will set up your account during onboarding.</p>
-          </div>
+          <EmptyState
+            icon={<Landmark size={26} />}
+            title="No investment account yet"
+            description="Your RM will set up your account during onboarding."
+          />
         ) : holdings.length === 0 ? (
-          <div className="panel-b text-center py-10">
-            <p className="text-3xl mb-2">📭</p>
-            <p className="font-semibold">No holdings yet</p>
-            <p className="text-sm text-text-2 mt-1">Your portfolio will appear here once your orders are filled and allocated.</p>
-          </div>
+          <EmptyState
+            icon={<Inbox size={26} />}
+            title="No holdings yet"
+            description="Your portfolio will appear here once your orders are filled and allocated."
+          />
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-surface">

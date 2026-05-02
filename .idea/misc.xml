@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/WealthPro/Backend/AdminServer/pom.xml" />
+        <option value="$PROJECT_DIR$/WealthPro/Backend/analytics-service/pom.xml" />
+        <option value="$PROJECT_DIR$/WealthPro/Backend/EurekaServer/pom.xml" />
+        <option value="$PROJECT_DIR$/WealthPro/Backend/GoalsAdvisory/pom.xml" />
+        <option value="$PROJECT_DIR$/WealthPro/Backend/order-execution-service/pom.xml" />
+        <option value="$PROJECT_DIR$/WealthPro/Backend/pbor/pom.xml" />
+        <option value="$PROJECT_DIR$/WealthPro/Backend/ProductCatalog/pom.xml" />
+        <option value="$PROJECT_DIR$/WealthPro/Backend/Review/pom.xml" />
+        <option value="$PROJECT_DIR$/WealthPro/Backend/SpringBootApiGateway/pom.xml" />
+        <option value="$PROJECT_DIR$/WealthPro/Backend/Wealthpro/pom.xml" />
+        <option value="$PROJECT_DIR$/WealthPro/Backend/wealthpro_notify/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_24" default="true" project-jdk-name="24" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>

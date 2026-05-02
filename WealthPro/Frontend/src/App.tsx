@@ -14,6 +14,7 @@ import Users from './pages/admin/Users';
 import RegisterStaff from './pages/admin/RegisterStaff';
 import Audit from './pages/admin/Audit';
 import ModelPortfolios from './pages/admin/ModelPortfolios';
+import AdminSecurities from './pages/admin/AdminSecurities';
 
 // rm
 import Clients from './pages/rm/Clients';
@@ -23,6 +24,7 @@ import RmNotifications from './pages/rm/RmNotifications';
 import RmRecommendations from './pages/rm/RmRecommendations';
 import RmGoals from './pages/rm/RmGoals';
 import CorporateActions from './pages/rm/CorporateActions';
+import RmAnalytics from './pages/rm/RmAnalytics';
 
 // client
 import Dashboard from './pages/client/Dashboard';
@@ -72,6 +74,7 @@ export default function App() {
           <Route path="/admin/users/register" element={<RegisterStaff />} />
           <Route path="/admin/audit" element={<Audit />} />
           <Route path="/admin/model-portfolios" element={<ModelPortfolios />} />
+          <Route path="/admin/securities" element={<AdminSecurities />} />
         </Route>
 
         {/* RM routes */}
@@ -81,6 +84,7 @@ export default function App() {
           <Route path="/rm/onboard" element={<OnboardClient />} />
           <Route path="/rm/recommendations" element={<RmRecommendations />} />
           <Route path="/rm/goals" element={<RmGoals />} />
+          <Route path="/rm/analytics" element={<RmAnalytics />} />
           <Route path="/rm/notifications" element={<RmNotifications />} />
           <Route path="/rm/corporate-actions" element={<CorporateActions />} />
         </Route>

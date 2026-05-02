@@ -5,6 +5,9 @@ import {
   markAllAsRead,
   markNotificationRead,
 } from '@/api/notifications';
+import { TableSkeleton } from '@/components/Skeleton';
+import EmptyState from '@/components/EmptyState';
+import { Bell, BellOff } from 'lucide-react';
 
 // localStorage key per client so different clients don't share read state
 function storageKey(clientId: number) {
@@ -175,17 +178,13 @@ export default function Notifications() {
 
       <div className="panel">
         {loading ? (
-          <div className="panel-b text-center text-text-2 py-10">Loading notifications...</div>
+          <TableSkeleton rows={5} cols={3} />
         ) : allFiltered.length === 0 ? (
-          <div className="panel-b text-center py-10">
-            <p className="text-3xl mb-2">🔔</p>
-            <p className="font-semibold">
-              {filter === 'UNREAD' ? 'No unread notifications' : 'No notifications yet'}
-            </p>
-            <p className="text-sm text-text-2 mt-1">
-              You'll get notified when your orders are routed, filled, or rejected.
-            </p>
-          </div>
+          <EmptyState
+            icon={filter === 'UNREAD' ? <BellOff size={26} /> : <Bell size={26} />}
+            title={filter === 'UNREAD' ? 'No unread notifications' : 'No notifications yet'}
+            description="You'll get notified when your orders are routed, filled, or rejected."
+          />
         ) : (
           <div>
             {/* ── Unread section ── */}

@@ -5,6 +5,9 @@ import { getRecommendationsByClientId } from '@/api/recommendations';
 import { getAccountsByClientId } from '@/api/accounts';
 import { getHoldingsByAccountId } from '@/api/holdings';
 import { getAllSecurities } from '@/api/securities';
+import { TableSkeleton } from '@/components/Skeleton';
+import EmptyState from '@/components/EmptyState';
+import { Target } from 'lucide-react';
 
 const GOAL_TYPES = ['RETIREMENT', 'EDUCATION', 'WEALTH', 'CUSTOM'];
 
@@ -269,17 +272,19 @@ export default function Goals() {
       </div>
 
       {loading ? (
-        <div className="panel"><div className="panel-b text-center text-text-2 py-10">Loading goals...</div></div>
+        <div className="panel"><TableSkeleton rows={3} cols={4} /></div>
       ) : goals.length === 0 ? (
         <div className="panel mb-4">
-          <div className="panel-b text-center py-12">
-            <p className="text-4xl mb-3">🎯</p>
-            <p className="font-semibold text-lg">No goals yet</p>
-            <p className="text-sm text-text-2 mt-1 mb-4">
-              Set your first financial goal — retirement, education, or wealth creation.
-            </p>
-            <button onClick={openModal} className="btn btn-primary btn-sm">+ Create your first goal</button>
-          </div>
+          <EmptyState
+            icon={<Target size={28} />}
+            title="No goals yet"
+            description="Set your first financial goal — retirement, education, or wealth creation."
+            action={
+              <button onClick={openModal} className="btn btn-primary btn-sm">
+                + Create your first goal
+              </button>
+            }
+          />
         </div>
       ) : (
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">

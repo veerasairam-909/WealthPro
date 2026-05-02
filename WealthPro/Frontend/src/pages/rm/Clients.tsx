@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllClients } from '@/api/clients';
+import { TableSkeleton } from '@/components/Skeleton';
+import EmptyState from '@/components/EmptyState';
+import Pagination from '@/components/Pagination';
+import { Users } from 'lucide-react';
 
 const SEGMENTS = ['ALL', 'Retail', 'HNI', 'UHNI'];
 const STATUSES = ['ALL', 'Active', 'Inactive', 'PENDING_KYC'];
+const PAGE_SIZE = 12;
 
 export default function Clients() {
   const [clients, setClients] = useState<any[]>([]);
@@ -11,6 +16,7 @@ export default function Clients() {
   const [search, setSearch] = useState('');
   const [segmentFilter, setSegmentFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
     loadClients();
@@ -42,6 +48,8 @@ export default function Clients() {
     }
     return true;
   });
+
+  const pagedClients = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   function getSegmentClass(seg: string): string {
     if (seg === 'UHNI') return 'pill-warn';
@@ -113,47 +121,59 @@ export default function Clients() {
       {/* clients table */}
       <div className="panel">
         {loading ? (
-          <div className="panel-b text-center text-text-2 py-10">Loading clients...</div>
+          <TableSkeleton rows={7} cols={7} />
         ) : filtered.length === 0 ? (
-          <div className="panel-b text-center text-text-2 py-10">No clients found</div>
+          <EmptyState
+            icon={<Users size={26} />}
+            title="No clients found"
+            description="Try adjusting your search or filters."
+          />
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-surface">
-              <tr>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">ID</th>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Name</th>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Username</th>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">DOB</th>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Segment</th>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Status</th>
-                <th className="text-right px-5 py-3 text-xs uppercase font-medium text-text-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((c) => (
-                <tr key={c.clientId} className="border-t border-border-hairline">
-                  <td className="px-5 py-3 mono text-xs text-text-2">{c.clientId}</td>
-                  <td className="px-5 py-3 font-medium">{c.name}</td>
-                  <td className="px-5 py-3 mono text-xs text-text-2">{c.username || '-'}</td>
-                  <td className="px-5 py-3 mono text-xs text-text-2">{c.dob || '-'}</td>
-                  <td className="px-5 py-3">
-                    <span className={'pill ' + getSegmentClass(c.segment)}>{c.segment}</span>
-                  </td>
-                  <td className="px-5 py-3">
-                    <span className={'pill ' + getStatusClass(c.status)}>{c.status}</span>
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <Link
-                      to={'/rm/clients/' + c.clientId}
-                      className="text-xs text-primary font-medium"
-                    >
-                      View →
-                    </Link>
-                  </td>
+          <>
+            <table className="w-full text-sm">
+              <thead className="bg-surface">
+                <tr>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">ID</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Name</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Username</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">DOB</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Segment</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Status</th>
+                  <th className="text-right px-5 py-3 text-xs uppercase font-medium text-text-2">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {pagedClients.map((c) => (
+                  <tr key={c.clientId} className="border-t border-border-hairline hover:bg-surface">
+                    <td className="px-5 py-3 mono text-xs text-text-2">{c.clientId}</td>
+                    <td className="px-5 py-3 font-medium">{c.name}</td>
+                    <td className="px-5 py-3 mono text-xs text-text-2">{c.username || '-'}</td>
+                    <td className="px-5 py-3 mono text-xs text-text-2">{c.dob || '-'}</td>
+                    <td className="px-5 py-3">
+                      <span className={'pill ' + getSegmentClass(c.segment)}>{c.segment}</span>
+                    </td>
+                    <td className="px-5 py-3">
+                      <span className={'pill ' + getStatusClass(c.status)}>{c.status}</span>
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <Link
+                        to={'/rm/clients/' + c.clientId}
+                        className="text-xs text-primary font-medium"
+                      >
+                        View →
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <Pagination
+              page={page}
+              total={filtered.length}
+              pageSize={PAGE_SIZE}
+              onChange={(p) => setPage(p)}
+            />
+          </>
         )}
       </div>
     </div>

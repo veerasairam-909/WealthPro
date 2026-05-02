@@ -3,8 +3,13 @@ import { Link } from 'react-router-dom';
 import { getAllOrders } from '@/api/orders';
 import { getAllSecurities } from '@/api/securities';
 import { cachedFetch } from '@/lib/fetchUtils';
+import { TableSkeleton } from '@/components/Skeleton';
+import EmptyState from '@/components/EmptyState';
+import Pagination from '@/components/Pagination';
+import { Layers } from 'lucide-react';
 
 const STATUSES = ['ALL', 'PLACED', 'VALIDATED', 'ROUTED', 'PARTIALLY_FILLED', 'FILLED', 'CANCELLED', 'REJECTED'];
+const PAGE_SIZE = 15;
 
 export default function OrderBlotter() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -12,6 +17,7 @@ export default function OrderBlotter() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
     loadAll();
@@ -62,6 +68,8 @@ export default function OrderBlotter() {
     }
     return true;
   });
+
+  const pagedOrders = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   function getStatusPill(status: string): string {
     if (status === 'FILLED' || status === 'PARTIALLY_FILLED') return 'pill-success';
@@ -135,53 +143,65 @@ export default function OrderBlotter() {
       {/* orders table */}
       <div className="panel">
         {loading ? (
-          <div className="panel-b text-center text-text-2 py-10">Loading orders...</div>
+          <TableSkeleton rows={8} cols={10} />
         ) : filtered.length === 0 ? (
-          <div className="panel-b text-center text-text-2 py-10">No matching orders</div>
+          <EmptyState
+            icon={<Layers size={26} />}
+            title="No matching orders"
+            description="Try adjusting the status filter or search query."
+          />
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-surface">
-              <tr>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Order</th>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Date</th>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Client</th>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Symbol</th>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Side</th>
-                <th className="text-right px-5 py-3 text-xs uppercase font-medium text-text-2">Qty</th>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Price Type</th>
-                <th className="text-right px-5 py-3 text-xs uppercase font-medium text-text-2">Limit</th>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Venue</th>
-                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((o: any) => {
-                const sec = secMap[o.securityId];
-                return (
-                  <tr key={o.orderId} className="border-t border-border-hairline hover:bg-surface">
-                    <td className="px-5 py-3 mono text-xs">
-                      <Link to={'/dealer/orders/' + o.orderId} className="text-primary font-medium">
-                        {o.orderId}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3 mono text-xs text-text-2">
-                      {(o.orderDate || '').replace('T', ' ').slice(0, 19)}
-                    </td>
-                    <td className="px-5 py-3 mono text-xs">{o.clientId}</td>
-                    <td className="px-5 py-3 font-medium mono">{sec ? sec.symbol : o.securityId}</td>
-                    <td className="px-5 py-3 font-semibold">{o.side}</td>
-                    <td className="px-5 py-3 mono text-right">{o.quantity}</td>
-                    <td className="px-5 py-3 text-xs text-text-2">{o.priceType}</td>
-                    <td className="px-5 py-3 mono text-right">{o.limitPrice ? '₹' + o.limitPrice : '-'}</td>
-                    <td className="px-5 py-3 text-xs text-text-2">{o.routedVenue || '-'}</td>
-                    <td className="px-5 py-3">
-                      <span className={'pill ' + getStatusPill(o.status)}>{o.status}</span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <>
+            <table className="w-full text-sm">
+              <thead className="bg-surface">
+                <tr>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Order</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Date</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Client</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Symbol</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Side</th>
+                  <th className="text-right px-5 py-3 text-xs uppercase font-medium text-text-2">Qty</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Price Type</th>
+                  <th className="text-right px-5 py-3 text-xs uppercase font-medium text-text-2">Limit</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Venue</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pagedOrders.map((o: any) => {
+                  const sec = secMap[o.securityId];
+                  return (
+                    <tr key={o.orderId} className="border-t border-border-hairline hover:bg-surface">
+                      <td className="px-5 py-3 mono text-xs">
+                        <Link to={'/dealer/orders/' + o.orderId} className="text-primary font-medium">
+                          {o.orderId}
+                        </Link>
+                      </td>
+                      <td className="px-5 py-3 mono text-xs text-text-2">
+                        {(o.orderDate || '').replace('T', ' ').slice(0, 19)}
+                      </td>
+                      <td className="px-5 py-3 mono text-xs">{o.clientId}</td>
+                      <td className="px-5 py-3 font-medium mono">{sec ? sec.symbol : o.securityId}</td>
+                      <td className="px-5 py-3 font-semibold">{o.side}</td>
+                      <td className="px-5 py-3 mono text-right">{o.quantity}</td>
+                      <td className="px-5 py-3 text-xs text-text-2">{o.priceType}</td>
+                      <td className="px-5 py-3 mono text-right">{o.limitPrice ? '₹' + o.limitPrice : '-'}</td>
+                      <td className="px-5 py-3 text-xs text-text-2">{o.routedVenue || '-'}</td>
+                      <td className="px-5 py-3">
+                        <span className={'pill ' + getStatusPill(o.status)}>{o.status}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <Pagination
+              page={page}
+              total={filtered.length}
+              pageSize={PAGE_SIZE}
+              onChange={(p) => setPage(p)}
+            />
+          </>
         )}
       </div>
     </div>
