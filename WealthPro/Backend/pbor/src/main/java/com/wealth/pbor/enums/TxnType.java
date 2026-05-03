@@ -4,5 +4,7 @@ public enum TxnType {
     SUBSCRIPTION,
     REDEMPTION,
     DIVIDEND,
-    FEE
+    FEE,
+    CREDIT,
+    DEBIT
 }

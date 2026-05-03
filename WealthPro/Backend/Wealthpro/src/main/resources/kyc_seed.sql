@@ -24,8 +24,6 @@ ALTER TABLE suitability_rule AUTO_INCREMENT = 1;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ── 1. client ────────────────────────────────────────────────
--- username column links to gateway_db.users.username so a logged-in CLIENT
--- can be resolved to their clientId for row-level ownership checks.
 INSERT INTO client (clientid, username, name, dob, contact_info, segment, status) VALUES
 (1,  'client1',  'Priya Sharma',   '1990-05-15', '{"email":"priya.sharma@gmail.com","phone":"9123456781","address":"Andheri West, Mumbai"}',          'Retail', 'Active'),
 (2,  'client2',  'Rohan Verma',    '1985-03-22', '{"email":"rohan.verma@gmail.com","phone":"9123456782","address":"Bandra, Mumbai"}',                  'HNI',    'Active'),
@@ -65,17 +63,32 @@ INSERT INTO risk_profile (riskid, client_id, questionnairejson, risk_score, risk
 (10, 10, '{"q1":"B","q2":"C","q3":"B","q4":"C","q5":"B"}', 62.00, 'Balanced',     '2024-05-22');
 
 -- ── 4. suitability_rule ──────────────────────────────────────
+-- Only the 6 rules that have all required context variables available.
+-- Expression returns TRUE = rule TRIGGERED = order REJECTED.
+-- Available context: riskClass, assetClass, side, priceType,
+--                    quantity, segment, status, orderValue, currency
 INSERT INTO suitability_rule (ruleid, description, expression, status) VALUES
-(1,  'Conservative clients cannot buy equity securities',           'riskClass == CONSERVATIVE && side == BUY && assetClass == EQUITY',                           'Active'),
-(2,  'Order quantity must not exceed 10000 units',                  'quantity <= 10000',                                                                          'Active'),
-(3,  'Total exposure per security must not exceed 10000 units',     'existingQuantity + orderQuantity <= 10000',                                                  'Active'),
-(4,  'Cash balance must be sufficient to cover order value',        'cashBalance >= orderQuantity * limitPrice',                                                  'Active'),
-(5,  'HNI clients minimum investment must be above 1 lakh',        'segment == HNI && orderValue >= 100000',                                                     'Active'),
-(6,  'UHNI clients cannot hold more than 50% in single asset',     'segment == UHNI && singleAssetExposure <= 0.50',                                             'Active'),
-(7,  'Mutual fund subscription minimum 1000 units',                 'assetClass == MUTUAL_FUND && side == SUBSCRIBE && quantity >= 1000',                        'Active'),
-(8,  'Bond investment minimum holding period 1 year',              'assetClass == BOND && holdingPeriodDays >= 365',                                             'Inactive'),
-(9,  'ETF order must use LIMIT or MARKET price type only',          'assetClass == ETF && (priceType == LIMIT || priceType == MARKET)',                          'Active'),
-(10, 'Structured product restricted to UHNI clients only',         'assetClass == STRUCTURED && segment == UHNI',                                                'Active');
+(1, 'Conservative clients cannot buy equity securities',
+    'riskClass == CONSERVATIVE AND side == BUY AND assetClass == EQUITY',
+    'Active'),
+(2, 'Order quantity must not exceed 10000 units',
+    'quantity > 10000',
+    'Active'),
+(3, 'HNI clients minimum investment must be above 1 lakh',
+    'segment == HNI AND orderValue < 100000',
+    'Active'),
+(7, 'UHNI clients minimum investment must be above 10 lakhs',
+    'segment == UHNI AND orderValue < 1000000',
+    'Active'),
+(4, 'Mutual fund subscription minimum 1000 units',
+    'assetClass == MUTUAL_FUND AND side == BUY AND quantity < 1000',
+    'Active'),
+(5, 'ETF order must use LIMIT or MARKET price type only',
+    'assetClass == ETF AND priceType != LIMIT AND priceType != MARKET',
+    'Active'),
+(6, 'Structured product restricted to UHNI clients only',
+    'assetClass == STRUCTURED AND segment != UHNI',
+    'Active');
 
 -- ── Verify ───────────────────────────────────────────────────
 SELECT 'client'           AS tbl, COUNT(*) AS row_count FROM client

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getOrdersByClient } from '@/api/orders';
+import { getOrdersByClient, getOrderLifecycle } from '@/api/orders';
 import { getAllSecurities } from '@/api/securities';
 import { useAuth } from '@/auth/store';
 
@@ -10,6 +10,14 @@ export default function MyOrders() {
   const [orders, setOrders] = useState<any[]>([]);
   const [secMap, setSecMap] = useState<{ [id: number]: any }>({});
   const [loading, setLoading] = useState(true);
+
+  // Rejection reason state — keyed by orderId
+  // null  = not loaded yet
+  // []    = loaded, no failed checks found
+  // [...]  = loaded, array of {checkType, message}
+  const [reasons, setReasons]           = useState<{ [orderId: number]: { checkType: string; message: string }[] | null }>({});
+  const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
+  const [loadingReason, setLoadingReason] = useState<number | null>(null);
 
   useEffect(() => {
     if (clientId) loadAll();
@@ -46,6 +54,29 @@ export default function MyOrders() {
     } catch (e) {
     }
     setLoading(false);
+  }
+
+  async function toggleReason(orderId: number) {
+    // Collapse if already open
+    if (expandedOrder === orderId) {
+      setExpandedOrder(null);
+      return;
+    }
+    setExpandedOrder(orderId);
+    // Already fetched — don't fetch again
+    if (reasons[orderId] !== undefined) return;
+
+    setLoadingReason(orderId);
+    try {
+      const lifecycle = await getOrderLifecycle(orderId);
+      const failedChecks = (lifecycle.preTradeChecks || [])
+        .filter((c: any) => c.result === 'FAIL')
+        .map((c: any) => ({ checkType: c.checkType, message: c.message || '' }));
+      setReasons((prev) => ({ ...prev, [orderId]: failedChecks }));
+    } catch {
+      setReasons((prev) => ({ ...prev, [orderId]: [] }));
+    }
+    setLoadingReason(null);
   }
 
   function getStatusPill(status: string): string {
@@ -102,23 +133,67 @@ export default function MyOrders() {
             <tbody>
               {orders.map((o: any) => {
                 const sec = secMap[o.securityId];
+                const isRejected = o.status === 'REJECTED';
+                const isExpanded = expandedOrder === o.orderId;
+                const orderReasons = reasons[o.orderId];
                 return (
-                  <tr key={o.orderId} className="border-t border-border-hairline">
-                    <td className="px-5 py-3 mono text-xs text-text-2">
-                      {(o.orderDate || '').replace('T', ' ').slice(0, 19)}
-                    </td>
-                    <td className="px-5 py-3 font-medium mono">{sec ? sec.symbol : '#' + o.securityId}</td>
-                    <td className={'px-5 py-3 font-semibold ' + getSideColor(o.side)}>
-                      {o.side}
-                    </td>
-                    <td className="px-5 py-3 mono text-right">{o.quantity}</td>
-                    <td className="px-5 py-3 text-xs text-text-2">{o.priceType}</td>
-                    <td className="px-5 py-3 mono text-right">{o.limitPrice ? '₹' + o.limitPrice : '-'}</td>
-                    <td className="px-5 py-3 text-xs text-text-2">{o.routedVenue || '-'}</td>
-                    <td className="px-5 py-3">
-                      <span className={'pill ' + getStatusPill(o.status)}>{o.status}</span>
-                    </td>
-                  </tr>
+                  <>
+                    <tr key={o.orderId} className={'border-t border-border-hairline ' + (isRejected ? 'bg-danger-soft/20' : '')}>
+                      <td className="px-5 py-3 mono text-xs text-text-2">
+                        {(o.orderDate || '').replace('T', ' ').slice(0, 19)}
+                      </td>
+                      <td className="px-5 py-3 font-medium mono">{sec ? sec.symbol : '#' + o.securityId}</td>
+                      <td className={'px-5 py-3 font-semibold ' + getSideColor(o.side)}>
+                        {o.side}
+                      </td>
+                      <td className="px-5 py-3 mono text-right">{o.quantity}</td>
+                      <td className="px-5 py-3 text-xs text-text-2">{o.priceType}</td>
+                      <td className="px-5 py-3 mono text-right">{o.limitPrice ? '₹' + o.limitPrice : '-'}</td>
+                      <td className="px-5 py-3 text-xs text-text-2">{o.routedVenue || '-'}</td>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className={'pill ' + getStatusPill(o.status)}>{o.status}</span>
+                          {isRejected && (
+                            <button
+                              onClick={() => toggleReason(o.orderId)}
+                              className="text-xs text-danger underline hover:no-underline shrink-0"
+                            >
+                              {isExpanded ? 'Hide' : 'Why?'}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* Rejection reason expandable row */}
+                    {isRejected && isExpanded && (
+                      <tr key={o.orderId + '-reason'} className="bg-danger-soft/30">
+                        <td colSpan={8} className="px-5 pb-3 pt-0">
+                          {loadingReason === o.orderId ? (
+                            <p className="text-xs text-text-2 py-2">Loading rejection details...</p>
+                          ) : orderReasons && orderReasons.length > 0 ? (
+                            <div className="border border-danger/20 rounded-lg p-3 bg-white mt-1">
+                              <p className="text-xs font-semibold text-danger mb-2">
+                                ⛔ Rejection reason{orderReasons.length > 1 ? 's' : ''}
+                              </p>
+                              <div className="space-y-1.5">
+                                {orderReasons.map((r, i) => (
+                                  <div key={i} className="flex gap-2 text-xs">
+                                    <span className="font-medium text-text-2 shrink-0 w-24">{r.checkType}</span>
+                                    <span className="text-danger">{r.message}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-text-2 py-2 italic">
+                              No detailed rejection reason recorded.
+                            </p>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 );
               })}
             </tbody>

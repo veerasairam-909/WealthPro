@@ -18,17 +18,22 @@ ALTER TABLE recommendations  AUTO_INCREMENT = 1;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ── 1. Model Portfolios ───────────────────────────────────────
+-- Conservative portfolios: BOND, MUTUAL_FUND, ETF only — NO EQUITY, NO STRUCTURED
+--   (Suitability Rule 1: Conservative clients cannot buy EQUITY)
+-- Balanced portfolios: EQUITY allowed — NO STRUCTURED
+--   (Suitability Rule 6: STRUCTURED restricted to UHNI segment only)
+-- Aggressive portfolios: EQUITY allowed — STRUCTURED only in UHNI-targeted funds
 INSERT INTO model_portfolios (model_id, name, risk_class, weights_json, status) VALUES
-(1,  'Conservative Shield',   'CONSERVATIVE', '{"BOND":55,"MUTUAL_FUND":25,"ETF":15,"EQUITY":5}',              'ACTIVE'),
+(1,  'Conservative Shield',   'CONSERVATIVE', '{"BOND":60,"MUTUAL_FUND":25,"ETF":15}',                         'ACTIVE'),
 (2,  'Balanced Growth',       'BALANCED',     '{"EQUITY":40,"BOND":30,"MUTUAL_FUND":20,"ETF":10}',             'ACTIVE'),
 (3,  'Aggressive Alpha',      'AGGRESSIVE',   '{"EQUITY":70,"ETF":15,"MUTUAL_FUND":10,"BOND":5}',              'ACTIVE'),
 (4,  'HNI Wealth Builder',    'BALANCED',     '{"EQUITY":45,"BOND":25,"MUTUAL_FUND":20,"ETF":10}',             'ACTIVE'),
-(5,  'Retirement Cornerstone','CONSERVATIVE', '{"BOND":60,"MUTUAL_FUND":25,"ETF":10,"EQUITY":5}',              'ACTIVE'),
+(5,  'Retirement Cornerstone','CONSERVATIVE', '{"BOND":65,"MUTUAL_FUND":25,"ETF":10}',                         'ACTIVE'),
 (6,  'UHNI Alpha Plus',       'AGGRESSIVE',   '{"EQUITY":65,"STRUCTURED":15,"ETF":12,"MUTUAL_FUND":8}',        'ACTIVE'),
-(7,  'Income Plus',           'CONSERVATIVE', '{"BOND":65,"MUTUAL_FUND":20,"ETF":10,"EQUITY":5}',              'ACTIVE'),
+(7,  'Income Plus',           'CONSERVATIVE', '{"BOND":70,"MUTUAL_FUND":20,"ETF":10}',                         'ACTIVE'),
 (8,  'Blue Chip Select',      'BALANCED',     '{"EQUITY":50,"BOND":25,"MUTUAL_FUND":15,"ETF":10}',             'ACTIVE'),
-(9,  'Multi Asset Dynamic',   'BALANCED',     '{"EQUITY":35,"BOND":25,"MUTUAL_FUND":25,"ETF":10,"STRUCTURED":5}','ACTIVE'),
-(10, 'Capital Protect Plus',  'CONSERVATIVE', '{"BOND":70,"MUTUAL_FUND":20,"ETF":8,"EQUITY":2}',               'INACTIVE');
+(9,  'Multi Asset Dynamic',   'BALANCED',     '{"EQUITY":40,"BOND":25,"MUTUAL_FUND":25,"ETF":10}',             'ACTIVE'),
+(10, 'Capital Protect Plus',  'CONSERVATIVE', '{"BOND":72,"MUTUAL_FUND":20,"ETF":8}',                          'INACTIVE');
 
 -- ── 2. Goals ──────────────────────────────────────────────────
 -- client_id → kyc.Client.ClientID
@@ -53,11 +58,11 @@ INSERT INTO recommendations (reco_id, client_id, goal_id, model_id, proposal_jso
 (3,  3,  3,  2,  '{"targetReturn":9.0,"timeHorizon":"10 years","SIP":10000,"allocation":{"EQUITY":40,"BOND":30,"MUTUAL_FUND":20,"ETF":10}}',                             '2025-02-01', 'SUBMITTED'),
 (4,  4,  4,  6,  '{"targetReturn":15.0,"timeHorizon":"15 years","lumpsum":2000000,"SIP":50000,"allocation":{"EQUITY":65,"STRUCTURED":15,"ETF":12,"MUTUAL_FUND":8}}',    '2025-02-05', 'APPROVED'),
 (5,  5,  5,  2,  '{"targetReturn":11.0,"timeHorizon":"3 years","SIP":20000,"allocation":{"EQUITY":40,"BOND":30,"MUTUAL_FUND":20,"ETF":10}}',                             '2025-02-10', 'APPROVED'),
-(6,  6,  6,  1,  '{"targetReturn":8.0,"timeHorizon":"7 years","SIP":8000,"allocation":{"BOND":55,"MUTUAL_FUND":25,"ETF":15,"EQUITY":5}}',                                '2025-02-15', 'SUBMITTED'),
+(6,  6,  6,  1,  '{"targetReturn":8.0,"timeHorizon":"7 years","SIP":8000,"allocation":{"BOND":60,"MUTUAL_FUND":25,"ETF":15}}',                                         '2025-02-15', 'SUBMITTED'),
 (7,  7,  7,  4,  '{"targetReturn":11.5,"timeHorizon":"18 years","SIP":35000,"allocation":{"EQUITY":45,"BOND":25,"MUTUAL_FUND":20,"ETF":10}}',                            '2025-03-01', 'DRAFT'),
 (8,  8,  8,  6,  '{"targetReturn":16.0,"timeHorizon":"13 years","lumpsum":5000000,"SIP":100000,"allocation":{"EQUITY":65,"STRUCTURED":15,"ETF":12,"MUTUAL_FUND":8}}',   '2025-03-05', 'APPROVED'),
-(9,  9,  NULL,7, '{"targetReturn":7.5,"timeHorizon":"2 years","lumpsum":100000,"allocation":{"BOND":65,"MUTUAL_FUND":20,"ETF":10,"EQUITY":5}}',                           '2025-03-10', 'REJECTED'),
-(10, 10, 10, 5,  '{"targetReturn":9.5,"timeHorizon":"18 years","SIP":30000,"allocation":{"BOND":60,"MUTUAL_FUND":25,"ETF":10,"EQUITY":5}}',                              '2025-03-15', 'DRAFT');
+(9,  9,  NULL,7, '{"targetReturn":7.5,"timeHorizon":"2 years","lumpsum":100000,"allocation":{"BOND":68,"MUTUAL_FUND":22,"ETF":10}}',                                    '2025-03-10', 'REJECTED'),
+(10, 10, 10, 5,  '{"targetReturn":9.5,"timeHorizon":"18 years","SIP":30000,"allocation":{"BOND":65,"MUTUAL_FUND":25,"ETF":10}}',                                         '2025-03-15', 'DRAFT');
 
 -- ── Verify ────────────────────────────────────────────────────
 SELECT 'model_portfolios'  AS tbl, COUNT(*) AS row_count FROM model_portfolios

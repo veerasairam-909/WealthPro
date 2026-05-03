@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/auth/store';
 import { getAccountsByClientId } from '@/api/accounts';
@@ -8,6 +8,7 @@ import { getOrdersByClient } from '@/api/orders';
 import { getAllSecurities } from '@/api/securities';
 import { getUnreadNotifications } from '@/api/notifications';
 import { getPerformanceByAccount, getRiskMeasuresByAccount } from '@/api/analytics';
+import { getRecommendationsByClientId } from '@/api/recommendations';
 import {
   PieChart, Pie, Cell, Sector, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine, LabelList,
@@ -90,21 +91,53 @@ export default function Dashboard() {
   const [activeAllocIdx, setActiveAllocIdx] = useState(-1);
   const [perfRecords, setPerfRecords] = useState<any[]>([]);
   const [riskMeasures, setRiskMeasures] = useState<any[]>([]);
+  const [pendingRecos, setPendingRecos] = useState<any[]>([]);
+
+  const loadPendingRecos = useCallback(async () => {
+    if (!clientId) return;
+    try {
+      const res = await getRecommendationsByClientId(clientId);
+      if (Array.isArray(res)) {
+        setPendingRecos(res.filter((r: any) => r.status === 'SUBMITTED'));
+      }
+    } catch (e) {}
+  }, [clientId]);
 
   useEffect(() => {
     if (clientId) loadAll();
   }, [clientId]);
 
+  // Re-check pending recommendations whenever the tab comes back into focus
+  // so the banner updates if the RM added a new recommendation while the
+  // client was away
+  useEffect(() => {
+    function onFocus() {
+      if (clientId) loadPendingRecos();
+    }
+    document.addEventListener('visibilitychange', onFocus);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', onFocus);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [clientId, loadPendingRecos]);
+
   async function loadAll() {
     if (!clientId) return;
     setLoading(true);
     try {
-      const [accsRes, secsRes, ordersRes, notifsRes] = await Promise.allSettled([
+      const [accsRes, secsRes, ordersRes, notifsRes, recosRes] = await Promise.allSettled([
         getAccountsByClientId(clientId),
         getAllSecurities(),
         getOrdersByClient(clientId),
         getUnreadNotifications(clientId),
+        getRecommendationsByClientId(clientId),
       ]);
+
+      // pending recommendations (SUBMITTED = awaiting client action)
+      if (recosRes.status === 'fulfilled' && Array.isArray(recosRes.value)) {
+        setPendingRecos(recosRes.value.filter((r: any) => r.status === 'SUBMITTED'));
+      }
 
       // build security map
       if (secsRes.status === 'fulfilled' && Array.isArray(secsRes.value)) {
@@ -226,6 +259,29 @@ export default function Dashboard() {
         </div>
         <Link to="/me/products" className="btn btn-success btn-sm">+ Invest</Link>
       </div>
+
+      {/* Pending RM recommendations alert */}
+      {pendingRecos.length > 0 && (
+        <div className="bg-primary-soft border border-primary/30 rounded-lg p-4 mb-5 flex items-center gap-4">
+          <div className="text-2xl shrink-0">📋</div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-primary">
+              {pendingRecos.length === 1
+                ? 'Your RM has prepared 1 investment recommendation for you'
+                : `Your RM has prepared ${pendingRecos.length} investment recommendations for you`}
+            </p>
+            <p className="text-sm text-text-2 mt-0.5">
+              Review the proposal, select a security, and place an order — or decline if you prefer.
+            </p>
+          </div>
+          <Link
+            to="/me/recommendations"
+            className="btn btn-primary btn-sm shrink-0"
+          >
+            Review now →
+          </Link>
+        </div>
+      )}
 
       {/* portfolio KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">

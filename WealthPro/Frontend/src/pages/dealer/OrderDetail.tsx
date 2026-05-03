@@ -45,13 +45,14 @@ export default function OrderDetail() {
     if (orderId) loadAll();
   }, [orderId]);
 
-  // For SELL / REDEEM orders: pre-fill quantities so the dealer doesn't
-  // have to re-enter what the client already specified.
+  // Fix 1 & 4 — Pre-fill qty for ALL orders (BUY and SELL), not just SELL.
+  // Fill qty  = remaining units the client hasn't had filled yet.
+  // Alloc qty = filled units that haven't been allocated to PBOR yet.
+  // Alloc price is taken from the last completed fill so the dealer doesn't
+  // have to re-type it.
   useEffect(() => {
     if (!lifecycle?.order) return;
     const o = lifecycle.order;
-    const isSell = o.side === 'SELL' || o.side === 'REDEEM';
-    if (!isSell) return;
 
     const completedFills = (lifecycle.executionFills || []).filter((f: any) => f.status === 'COMPLETED');
     const filledSoFar = completedFills.reduce((s: number, f: any) => s + (f.fillQuantity || 0), 0);
@@ -63,11 +64,22 @@ export default function OrderDetail() {
     if (remFill > 0)  setFillQty(String(remFill));
     if (remAlloc > 0) {
       setAllocQty(String(remAlloc));
-      // also pre-fill alloc price from the last completed fill price
+      // Pre-fill alloc price from the last completed fill price
       const lastFill = completedFills[completedFills.length - 1];
       if (lastFill?.fillPrice) setAllocPrice(String(lastFill.fillPrice));
     }
   }, [lifecycle]);
+
+  // Fix 2 — Pre-fill fill price from the security's current market price.
+  // Only applied when the order is in a fillable state and the dealer
+  // hasn't typed anything yet (prev is empty).
+  useEffect(() => {
+    if (!security?.currentPrice) return;
+    if (!lifecycle?.order) return;
+    const { status } = lifecycle.order;
+    if (status !== 'ROUTED' && status !== 'PARTIALLY_FILLED') return;
+    setFillPrice((prev) => prev || String(security.currentPrice));
+  }, [security, lifecycle]);
 
   async function loadAll() {
     setLoading(true);
@@ -325,6 +337,18 @@ export default function OrderDetail() {
             <Field label="Quantity" value={order.quantity} />
             <Field label="Price type" value={order.priceType} />
             <Field label="Limit price" value={order.limitPrice ? '₹' + order.limitPrice : '-'} />
+            {/* Fix 3 — Show total order value so dealer can instantly see the ₹ amount */}
+            <Field
+              label="Order value (est.)"
+              value={
+                '₹' +
+                (
+                  order.quantity *
+                  (order.limitPrice ?? security?.currentPrice ?? 0)
+                ).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              }
+            />
+            <Field label="Market price" value={security?.currentPrice ? '₹' + security.currentPrice : '-'} />
             <Field label="Venue" value={order.routedVenue || '-'} />
             <Field label="Order date" value={(order.orderDate || '').replace('T', ' ').slice(0, 19)} />
             <Field label="Filled" value={totalFilled + ' / ' + order.quantity} />
@@ -370,11 +394,12 @@ export default function OrderDetail() {
           <form onSubmit={handleFill} className="panel-b">
             <p className="text-sm text-text-2 mb-3">
               {remainingToFill} units remaining out of {order.quantity}.
-              {(order.side === 'SELL' || order.side === 'REDEEM') && (
-                <span className="ml-2 text-xs text-primary font-medium">
-                  ⓘ Quantity pre-filled from client's sell order — enter actual execution price.
-                </span>
-              )}
+              <span className="ml-2 text-xs text-primary font-medium">
+                ⓘ Quantity pre-filled from client's order.
+                {security?.currentPrice
+                  ? ` Fill price pre-filled from current market price (₹${security.currentPrice}).`
+                  : ' Enter the actual execution price.'}
+              </span>
             </p>
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div>
@@ -415,11 +440,9 @@ export default function OrderDetail() {
           <form onSubmit={handleAllocate} className="panel-b">
             <p className="text-sm text-text-2 mb-3">
               {remainingToAllocate} of {totalFilled} filled units remaining to allocate.
-              {(order.side === 'SELL' || order.side === 'REDEEM') && (
-                <span className="ml-2 text-xs text-primary font-medium">
-                  ⓘ Quantity and price pre-filled from the recorded fill.
-                </span>
-              )}
+              <span className="ml-2 text-xs text-primary font-medium">
+                ⓘ Quantity and price pre-filled from the recorded fill.
+              </span>
             </p>
             {accounts.length === 0 ? (
               <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
@@ -495,11 +518,21 @@ export default function OrderDetail() {
           {checks.length === 0 ? (
             <div className="panel-b text-center text-text-2 text-sm py-6">No checks yet</div>
           ) : (
-            <div className="panel-b text-sm space-y-2">
+            <div className="panel-b text-sm space-y-3">
               {checks.map((c: any) => (
-                <div key={c.checkId} className="flex justify-between border-b border-border-hairline pb-1.5">
-                  <span className="text-text-2">{c.checkType}</span>
-                  <span className={'pill text-xs ' + getStatusPill(c.result)}>{c.result}</span>
+                <div key={c.checkId} className="border-b border-border-hairline pb-2">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-medium text-text">{c.checkType}</span>
+                    <span className={'pill text-xs ' + getStatusPill(c.result)}>{c.result}</span>
+                  </div>
+                  {c.message && (
+                    <p className={
+                      'text-xs leading-relaxed ' +
+                      (c.result === 'FAIL' ? 'text-danger' : 'text-text-2')
+                    }>
+                      {c.result === 'FAIL' ? '⛔ ' : '✓ '}{c.message}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

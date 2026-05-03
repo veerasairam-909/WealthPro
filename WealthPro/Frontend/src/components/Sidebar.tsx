@@ -63,15 +63,16 @@ function buildMenu(role: Role): MenuItem[] {
   }
   // CLIENT
   return [
-    { to: '/me/dashboard',    label: 'Dashboard',       Icon: LayoutDashboard },
-    { to: '/me/products',     label: 'Browse & Invest', Icon: ShoppingBag },
-    { to: '/me/orders',       label: 'My Orders',       Icon: Receipt },
-    { to: '/me/holdings',     label: 'Holdings',        Icon: PieChart },
-    { to: '/me/kyc',          label: 'My KYC',          Icon: CreditCard },
-    { to: '/me/risk-profile', label: 'Risk Profile',    Icon: ShieldCheck },
-    { to: '/me/goals',        label: 'Goals',           Icon: Target },
-    { to: '/me/notifications', label: 'Notifications',  Icon: Bell },
-    { to: '/me/reviews',      label: 'Reviews',         Icon: ClipboardList },
+    { to: '/me/dashboard',       label: 'Dashboard',        Icon: LayoutDashboard },
+    { to: '/me/products',        label: 'Product Catalog',  Icon: ShoppingBag },
+    { to: '/me/orders',          label: 'My Orders',        Icon: Receipt },
+    { to: '/me/holdings',        label: 'Holdings',         Icon: PieChart },
+    { to: '/me/kyc',             label: 'My KYC',           Icon: CreditCard },
+    { to: '/me/risk-profile',    label: 'Risk Profile',     Icon: ShieldCheck },
+    { to: '/me/goals',           label: 'Goals',            Icon: Target },
+    { to: '/me/recommendations', label: 'Recommendations',  Icon: BookMarked },
+    { to: '/me/notifications',   label: 'Notifications',    Icon: Bell },
+    { to: '/me/reviews',         label: 'Reviews',          Icon: ClipboardList },
   ];
 }
 

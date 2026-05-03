@@ -49,11 +49,11 @@ export default function ModelPortfolios() {
   }
 
   function openEdit(p: any) {
-    setEditingId(p.portfolioId);
+    setEditingId(p.modelId ?? p.portfolioId);
     setName(p.name || '');
     setRiskClass(p.riskClass || 'BALANCED');
     setStatus(p.status || 'ACTIVE');
-    setAllocationJson(p.allocationJson || '');
+    setAllocationJson(p.weightsJson || '');   // backend field is weightsJson
     setFormError('');
     setShowForm(true);
   }
@@ -70,12 +70,47 @@ export default function ModelPortfolios() {
       return;
     }
 
-    // validate JSON if provided
+    // validate JSON + suitability constraints
     if (allocationJson.trim()) {
+      let parsed: Record<string, number>;
       try {
-        JSON.parse(allocationJson);
+        parsed = JSON.parse(allocationJson);
       } catch {
         setFormError('Allocation JSON is not valid JSON. Example: {"EQUITY": 60, "BOND": 40}');
+        return;
+      }
+
+      const assetClasses = Object.keys(parsed).map((k) => k.toUpperCase());
+
+      // Fraction guard — catch common mistake of entering 0.6 instead of 60
+      const values = Object.values(parsed).map(Number);
+      const hasfractions = values.some((v) => v > 0 && v < 1);
+      if (hasfractions) {
+        setFormError(
+          'Values must be whole percentages (e.g. 60), not decimals (e.g. 0.6). ' +
+          'Example: {"BOND": 60, "MUTUAL_FUND": 25, "ETF": 15}'
+        );
+        return;
+      }
+
+      // Sum check
+      const total = values.reduce((s, v) => s + v, 0);
+      if (Math.round(total) !== 100) {
+        setFormError(`Allocation percentages must sum to 100%. Current total: ${total}%`);
+        return;
+      }
+
+      // Suitability rule constraints
+      if (riskClass === 'CONSERVATIVE' && assetClasses.includes('EQUITY')) {
+        setFormError(
+          '⛔ Conservative portfolio cannot contain EQUITY — Conservative clients are blocked from buying equity by Suitability Rule 1. Remove EQUITY from the allocation.'
+        );
+        return;
+      }
+      if (riskClass === 'CONSERVATIVE' && assetClasses.includes('STRUCTURED')) {
+        setFormError(
+          '⛔ Conservative portfolio cannot contain STRUCTURED products — Structured products are UHNI-only (Rule 6). Remove STRUCTURED from the allocation.'
+        );
         return;
       }
     }
@@ -87,7 +122,7 @@ export default function ModelPortfolios() {
         name: name.trim(),
         riskClass,
         status,
-        allocationJson: allocationJson.trim() || null,
+        weightsJson: allocationJson.trim(),  // backend expects weightsJson
       };
 
       if (editingId !== null) {
@@ -167,10 +202,29 @@ export default function ModelPortfolios() {
             </thead>
             <tbody>
               {portfolios.map((p: any) => {
-                const alloc = p.allocationJson ? parseAlloc(p.allocationJson) : null;
+                const alloc = p.weightsJson ? parseAlloc(p.weightsJson) : null;
+
+                // Detect stale/invalid allocation — Conservative portfolio
+                // should never contain EQUITY or STRUCTURED (old data from before
+                // backend validation was added). Flag those rows so Admin can fix them.
+                const invalidAssets: string[] = [];
+                if (p.riskClass === 'CONSERVATIVE' && alloc) {
+                  const keys = Object.keys(alloc).map((k) => k.toUpperCase());
+                  if (keys.includes('EQUITY'))     invalidAssets.push('EQUITY');
+                  if (keys.includes('STRUCTURED')) invalidAssets.push('STRUCTURED');
+                }
+                const hasInvalidAlloc = invalidAssets.length > 0;
+
                 return (
-                  <tr key={p.portfolioId} className="border-t border-border-hairline">
-                    <td className="px-5 py-3 font-medium">{p.name}</td>
+                  <tr key={p.portfolioId} className={'border-t border-border-hairline' + (hasInvalidAlloc ? ' bg-danger-soft/40' : '')}>
+                    <td className="px-5 py-3">
+                      <p className="font-medium">{p.name}</p>
+                      {hasInvalidAlloc && (
+                        <p className="text-xs text-danger font-medium mt-0.5">
+                          ⚠ Contains {invalidAssets.join(', ')} — must be removed for Conservative. Click Edit to fix.
+                        </p>
+                      )}
+                    </td>
                     <td className="px-5 py-3">
                       <span className={'pill ' + getRiskPill(p.riskClass)}>{p.riskClass}</span>
                     </td>
@@ -182,12 +236,24 @@ export default function ModelPortfolios() {
                     <td className="px-5 py-3">
                       {alloc ? (
                         <div className="flex flex-wrap gap-1">
-                          {Object.entries(alloc).map(([asset, pct]) => (
-                            <span key={asset} className="text-xs bg-surface border border-border rounded px-2 py-0.5">
-                              <span className="font-medium">{asset}</span>
-                              <span className="text-text-2 ml-1">{String(pct)}%</span>
-                            </span>
-                          ))}
+                          {Object.entries(alloc).map(([asset, pct]) => {
+                            const isInvalid = invalidAssets.includes((asset as string).toUpperCase());
+                            return (
+                              <span
+                                key={asset}
+                                className={
+                                  'text-xs rounded px-2 py-0.5 border ' +
+                                  (isInvalid
+                                    ? 'bg-danger/10 border-danger/40 text-danger line-through'
+                                    : 'bg-surface border-border')
+                                }
+                              >
+                                <span className="font-medium">{asset}</span>
+                                <span className="ml-1 opacity-70">{String(pct)}%</span>
+                                {isInvalid && <span className="ml-1">⛔</span>}
+                              </span>
+                            );
+                          })}
                         </div>
                       ) : (
                         <span className="text-text-3 text-xs italic">No allocation defined</span>
@@ -195,7 +261,9 @@ export default function ModelPortfolios() {
                     </td>
                     <td className="px-5 py-3 text-right">
                       <div className="flex gap-2 justify-end">
-                        <button onClick={() => openEdit(p)} className="btn btn-ghost btn-sm">Edit</button>
+                        <button onClick={() => openEdit(p)} className={'btn btn-sm ' + (hasInvalidAlloc ? 'btn-danger' : 'btn-ghost')}>
+                          {hasInvalidAlloc ? '⚠ Fix' : 'Edit'}
+                        </button>
                         <button onClick={() => handleDelete(p)} className="btn btn-danger btn-sm">Delete</button>
                       </div>
                     </td>
@@ -243,15 +311,31 @@ export default function ModelPortfolios() {
               </div>
 
               <div className="mb-4">
-                <label className="label block mb-1">Allocation JSON <span className="text-text-3">(optional)</span></label>
+                <label className="label block mb-1">Allocation <span className="text-text-3">(% per asset class, must sum to 100)</span></label>
                 <textarea
                   className="input mono text-xs resize-none"
                   rows={3}
-                  placeholder={'{"EQUITY": 60, "BOND": 30, "CASH": 10}'}
+                  placeholder={'{"EQUITY": 60, "BOND": 30, "MUTUAL_FUND": 10}'}
                   value={allocationJson}
                   onChange={(e) => setAllocationJson(e.target.value)}
                 />
-                <p className="text-xs text-text-3 mt-1">Enter asset class percentages as JSON. Must sum to 100.</p>
+                {/* Suitability hint — changes based on selected risk class */}
+                {riskClass === 'CONSERVATIVE' && (
+                  <div className="mt-1.5 bg-danger-soft border border-danger/20 rounded px-2 py-1.5 text-xs text-danger">
+                    ⛔ Conservative portfolios cannot contain <strong>EQUITY</strong> or <strong>STRUCTURED</strong>.
+                    Allowed: BOND, MUTUAL_FUND, ETF.
+                  </div>
+                )}
+                {riskClass === 'BALANCED' && (
+                  <p className="text-xs text-text-3 mt-1">
+                    Allowed: EQUITY, BOND, MUTUAL_FUND, ETF. Avoid STRUCTURED (UHNI-only).
+                  </p>
+                )}
+                {riskClass === 'AGGRESSIVE' && (
+                  <p className="text-xs text-text-3 mt-1">
+                    Allowed: EQUITY, BOND, MUTUAL_FUND, ETF. Avoid STRUCTURED unless targeting UHNI clients.
+                  </p>
+                )}
               </div>
 
               {formError && (

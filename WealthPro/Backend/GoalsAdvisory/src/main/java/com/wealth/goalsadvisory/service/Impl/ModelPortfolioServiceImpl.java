@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +38,7 @@ public class ModelPortfolioServiceImpl implements ModelPortfolioService {
         }
 
         validateWeightsJson(request.getWeightsJson());
+        validateSuitabilityConstraints(request.getRiskClass(), request.getWeightsJson());
 
         ModelPortfolio portfolio = new ModelPortfolio();
         portfolio.setName(request.getName());
@@ -109,6 +112,7 @@ public class ModelPortfolioServiceImpl implements ModelPortfolioService {
         }
 
         validateWeightsJson(request.getWeightsJson());
+        validateSuitabilityConstraints(request.getRiskClass(), request.getWeightsJson());
 
         portfolio.setName(request.getName());
         portfolio.setRiskClass(request.getRiskClass());
@@ -165,6 +169,52 @@ public class ModelPortfolioServiceImpl implements ModelPortfolioService {
             throw e;
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid weights JSON format: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Validates that the asset classes in weightsJson are compatible with the
+     * given risk class based on the active suitability rules.
+     *
+     * <ul>
+     *   <li>CONSERVATIVE portfolio must not contain EQUITY
+     *       (Rule 1 — Conservative clients cannot buy equity).</li>
+     *   <li>CONSERVATIVE portfolio must not contain STRUCTURED
+     *       (Rule 6 — Structured products restricted to UHNI clients only;
+     *        since UHNI is a segment not a risk class, including STRUCTURED in
+     *        a Conservative portfolio would cause all non-UHNI Conservative
+     *        clients to be rejected).</li>
+     * </ul>
+     */
+    private void validateSuitabilityConstraints(RiskClass riskClass, String weightsJson) {
+        if (riskClass == null || weightsJson == null || weightsJson.isBlank()) return;
+        try {
+            Map<String, BigDecimal> weights = objectMapper.readValue(weightsJson,
+                    new TypeReference<Map<String, BigDecimal>>() {});
+
+            Set<String> assetClasses = weights.keySet().stream()
+                    .map(String::toUpperCase)
+                    .collect(Collectors.toSet());
+
+            if (riskClass == RiskClass.CONSERVATIVE) {
+                if (assetClasses.contains("EQUITY")) {
+                    throw new IllegalArgumentException(
+                            "A Conservative portfolio cannot contain EQUITY. " +
+                            "Conservative clients are blocked from buying equity securities " +
+                            "by Suitability Rule 1. Remove EQUITY from the allocation.");
+                }
+                if (assetClasses.contains("STRUCTURED")) {
+                    throw new IllegalArgumentException(
+                            "A Conservative portfolio cannot contain STRUCTURED products. " +
+                            "Structured products are restricted to UHNI clients only " +
+                            "(Suitability Rule 6) and most Conservative clients are not UHNI. " +
+                            "Remove STRUCTURED from the allocation.");
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception ignored) {
+            // JSON parse errors are already caught by validateWeightsJson
         }
     }
 }

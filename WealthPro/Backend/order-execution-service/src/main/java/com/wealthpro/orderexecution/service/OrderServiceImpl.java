@@ -9,6 +9,7 @@ import com.wealthpro.orderexecution.feign.PborFeignClient;
 import com.wealthpro.orderexecution.feign.ProductCatalogFeignClient;
 import com.wealthpro.orderexecution.feign.WealthproFeignClient;
 import com.wealthpro.orderexecution.feign.dto.CashLedgerRequestDTO;
+import com.wealthpro.orderexecution.feign.dto.ClientDTO;
 import com.wealthpro.orderexecution.feign.dto.HoldingRequestDTO;
 import com.wealthpro.orderexecution.feign.dto.NotificationRequestDTO;
 import com.wealthpro.orderexecution.repository.*;
@@ -491,6 +492,14 @@ public class OrderServiceImpl implements OrderService {
                     var riskProfile = wealthproFeignClient.getRiskProfileByClientId(order.getClientId());
                     var security    = productCatalogFeignClient.getSecurityById(order.getSecurityId());
 
+                    // Fetch client for segment / status context variables
+                    ClientDTO client = null;
+                    try {
+                        client = wealthproFeignClient.getClientById(order.getClientId());
+                    } catch (FeignException ignored) {
+                        log.warn("[SUITABILITY] Could not fetch client {} for context", order.getClientId());
+                    }
+
                     // Build evaluation context from order + client + security data
                     Map<String, String> ctx = new HashMap<>();
                     ctx.put("riskClass",  riskProfile != null && riskProfile.getRiskClass() != null
@@ -502,6 +511,17 @@ public class OrderServiceImpl implements OrderService {
                     ctx.put("priceType",  order.getPriceType() != null
                             ? order.getPriceType().name().toUpperCase() : "");
                     ctx.put("quantity",   String.valueOf(order.getQuantity()));
+                    ctx.put("segment",    client != null && client.getSegment() != null
+                            ? client.getSegment() : "");
+                    ctx.put("status",     client != null && client.getStatus() != null
+                            ? client.getStatus() : "");
+                    ctx.put("currency",   security != null && security.getCurrency() != null
+                            ? security.getCurrency().toUpperCase() : "");
+                    // orderValue = quantity × price  (use limitPrice when set; fall back to current market price)
+                    double unitPrice = order.getLimitPrice() != null ? order.getLimitPrice()
+                            : (security != null && security.getCurrentPrice() != null
+                                    ? security.getCurrentPrice().doubleValue() : 0.0);
+                    ctx.put("orderValue", String.valueOf(order.getQuantity() * unitPrice));
 
                     // Fetch and evaluate all active suitability rules
                     var allRules = wealthproFeignClient.getAllSuitabilityRules();

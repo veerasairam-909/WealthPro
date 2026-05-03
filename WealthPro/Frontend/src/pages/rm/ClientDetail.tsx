@@ -9,13 +9,18 @@ import { getGoalsByClientId, updateGoalStatus, deleteGoal } from '@/api/goals';
 import {
   getRecommendationsByClientId,
   createRecommendation,
-  updateRecommendationStatus,
   deleteRecommendation,
+  getAllModelPortfolios,
 } from '@/api/recommendations';
+import { getAccountsByClientId, createAccount } from '@/api/accounts';
+import {
+  getBalanceByAccountId,
+  getCashLedgerByAccountId,
+  createCashLedgerEntry,
+} from '@/api/cashLedger';
 import { useAuth } from '@/auth/store';
 
-const TABS = ['Profile', 'KYC', 'Risk Profile', 'Goals', 'Recommendations'];
-const RISK_CLASSES = ['CONSERVATIVE', 'BALANCED', 'AGGRESSIVE'];
+const TABS = ['Profile', 'KYC', 'Risk Profile', 'Goals', 'Recommendations', 'Account & Funds'];
 
 export default function ClientDetail() {
   const { id } = useParams();
@@ -36,11 +41,12 @@ export default function ClientDetail() {
 
   // recommendations tab
   const [recos, setRecos] = useState<any[]>([]);
-  const [recoRiskClass, setRecoRiskClass] = useState('BALANCED');
-  const [recoProposal, setRecoProposal] = useState('');
-  const [recoSubmitting, setRecoSubmitting] = useState(false);
-  const [recoError, setRecoError] = useState('');
-  const [recoMsg, setRecoMsg] = useState('');
+  const [modelPortfolios, setModelPortfolios] = useState<any[]>([]);
+
+  // account & funds tab
+  const [account, setAccount] = useState<any>(null);
+  const [cashBalance, setCashBalance] = useState<number>(0);
+  const [ledgerEntries, setLedgerEntries] = useState<any[]>([]);
 
   useEffect(() => {
     loadAll();
@@ -49,13 +55,15 @@ export default function ClientDetail() {
   async function loadAll() {
     setLoading(true);
     try {
-      // Fetch all 5 data sources in parallel instead of one-by-one
-      const [clientRes, kycRes, riskRes, goalsRes, recosRes] = await Promise.allSettled([
+      // Fetch all data sources in parallel
+      const [clientRes, kycRes, riskRes, goalsRes, recosRes, accountsRes, modelsRes] = await Promise.allSettled([
         getClientById(clientId),
         getKycDocs(clientId),
         getRiskProfile(clientId),
         getGoalsByClientId(clientId),
         getRecommendationsByClientId(clientId),
+        getAccountsByClientId(clientId),
+        getAllModelPortfolios(),
       ]);
 
       if (clientRes.status === 'fulfilled') setClient(clientRes.value);
@@ -63,38 +71,30 @@ export default function ClientDetail() {
       setRisk(riskRes.status === 'fulfilled' ? riskRes.value : null);
       setGoals(goalsRes.status === 'fulfilled' && Array.isArray(goalsRes.value) ? goalsRes.value : []);
       setRecos(recosRes.status === 'fulfilled' && Array.isArray(recosRes.value) ? recosRes.value : []);
+      setModelPortfolios(modelsRes.status === 'fulfilled' && Array.isArray(modelsRes.value) ? modelsRes.value : []);
+
+      // account & funds
+      if (accountsRes.status === 'fulfilled' && Array.isArray(accountsRes.value) && accountsRes.value.length > 0) {
+        const acc = accountsRes.value[0];
+        setAccount(acc);
+        // fetch balance and ledger in parallel
+        const [balRes, ledgerRes] = await Promise.allSettled([
+          getBalanceByAccountId(acc.accountId),
+          getCashLedgerByAccountId(acc.accountId),
+        ]);
+        if (balRes.status === 'fulfilled') setCashBalance(Number(balRes.value) || 0);
+        if (ledgerRes.status === 'fulfilled' && Array.isArray(ledgerRes.value)) {
+          setLedgerEntries(ledgerRes.value);
+        }
+      } else {
+        setAccount(null);
+        setCashBalance(0);
+        setLedgerEntries([]);
+      }
 
     } catch (e) {
     }
     setLoading(false);
-  }
-
-  async function handleCreateReco(e: React.FormEvent) {
-    e.preventDefault();
-    setRecoError('');
-    setRecoMsg('');
-    if (!recoProposal.trim()) {
-      setRecoError('Proposal text is required');
-      return;
-    }
-    setRecoSubmitting(true);
-    try {
-      await createRecommendation({
-        clientId,
-        riskClass: recoRiskClass,
-        proposalJson: JSON.stringify({ text: recoProposal }),
-        proposedDate: new Date().toISOString().slice(0, 10),
-        status: 'SUBMITTED',
-      });
-      setRecoMsg('Recommendation submitted to client.');
-      setRecoProposal('');
-      const r = await getRecommendationsByClientId(clientId);
-      setRecos(Array.isArray(r) ? r : []);
-    } catch (err: any) {
-      const d = err.response?.data;
-      setRecoError(typeof d === 'string' ? d : (d?.message || 'Failed to create recommendation'));
-    }
-    setRecoSubmitting(false);
   }
 
   async function handleDeleteReco(recoId: number) {
@@ -202,16 +202,25 @@ export default function ClientDetail() {
       {activeTab === 'Recommendations' && (
         <RecommendationsTab
           recos={recos}
-          riskClass={recoRiskClass}
-          proposal={recoProposal}
-          submitting={recoSubmitting}
-          error={recoError}
-          msg={recoMsg}
+          modelPortfolios={modelPortfolios}
+          clientRiskClass={risk?.riskClass || null}
+          clientSegment={client?.segment || null}
+          clientId={clientId}
           canEdit={isRM}
-          onRiskClassChange={setRecoRiskClass}
-          onProposalChange={setRecoProposal}
-          onSubmit={handleCreateReco}
           onDelete={handleDeleteReco}
+          onRecosUpdated={(updated) => setRecos(updated)}
+        />
+      )}
+
+      {/* Account & Funds tab */}
+      {activeTab === 'Account & Funds' && (
+        <AccountFundsTab
+          clientId={clientId}
+          account={account}
+          cashBalance={cashBalance}
+          ledgerEntries={ledgerEntries}
+          canEdit={isRM}
+          onUpdated={loadAll}
         />
       )}
     </div>
@@ -728,22 +737,131 @@ function GoalsTab(props: { goals: any[]; onDeleteGoal: (id: number) => void }) {
   );
 }
 
-// ─── RECOMMENDATIONS TAB (RM creates, client reviews) ────────
+// ─── RECOMMENDATIONS TAB (RM picks model portfolio, client reviews) ────────
 function RecommendationsTab(props: {
   recos: any[];
-  riskClass: string;
-  proposal: string;
-  submitting: boolean;
-  error: string;
-  msg: string;
+  modelPortfolios: any[];
+  clientRiskClass: string | null;
+  clientSegment: string | null;
+  clientId: number;
   canEdit: boolean;
-  onRiskClassChange: (v: string) => void;
-  onProposalChange: (v: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
   onDelete: (id: number) => void;
+  onRecosUpdated: (recos: any[]) => void;
 }) {
-  const { recos, riskClass, proposal, submitting, error, msg, canEdit,
-    onRiskClassChange, onProposalChange, onSubmit, onDelete } = props;
+  const { recos, modelPortfolios, clientRiskClass, clientSegment, clientId, canEdit, onDelete, onRecosUpdated } = props;
+
+  // form state — all self-contained
+  const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
+  const [customNotes, setCustomNotes] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [msg, setMsg] = useState('');
+
+  // split portfolios: matching risk class first, then others
+  // NOTE: Wealthpro service uses Title Case ("Balanced") while GoalsAdvisory uses
+  // UPPER_CASE ("BALANCED") — compare case-insensitively to handle both
+  const activePortfolios = modelPortfolios.filter((p) => p.status === 'ACTIVE');
+  const normalizedClientRisk = clientRiskClass?.toUpperCase() ?? null;
+  const matchingPortfolios = activePortfolios.filter(
+    (p) => normalizedClientRisk && p.riskClass?.toUpperCase() === normalizedClientRisk,
+  );
+  const otherPortfolios = activePortfolios.filter(
+    (p) => !normalizedClientRisk || p.riskClass?.toUpperCase() !== normalizedClientRisk,
+  );
+
+  const selectedPortfolio = activePortfolios.find((p) => p.modelId === selectedModelId) || null;
+
+  function parseWeights(json: string) {
+    try { return JSON.parse(json); } catch { return null; }
+  }
+
+  function getRiskBadge(rc: string) {
+    const u = rc?.toUpperCase();
+    if (u === 'CONSERVATIVE') return 'pill-info';
+    if (u === 'BALANCED') return 'pill-warn';
+    return 'pill-danger';
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    setMsg('');
+
+    if (!selectedPortfolio) {
+      setError('Please select a model portfolio first.');
+      return;
+    }
+
+    // Hard block: portfolio risk class must match the client's risk class.
+    // A Conservative client must not receive an Aggressive portfolio — the
+    // resulting orders will always be rejected by pre-trade SUITABILITY checks.
+    if (normalizedClientRisk && selectedPortfolio.riskClass?.toUpperCase() !== normalizedClientRisk) {
+      setError(
+        `Cannot send this recommendation — "${selectedPortfolio.name}" is a ` +
+        `${selectedPortfolio.riskClass} portfolio but this client is ${clientRiskClass}. ` +
+        `Please select a portfolio that matches the client's risk class.`
+      );
+      return;
+    }
+
+    // Layer 2 — weights-level suitability check.
+    // Even if the risk class tag matches, validate that the actual allocation
+    // doesn't contain asset classes that are blocked for this client's
+    // risk class or segment (mirrors Suitability Rules 1 & 6).
+    const weightsPreCheck = parseWeights(selectedPortfolio.weightsJson);
+    if (weightsPreCheck) {
+      const assetClasses = Object.keys(weightsPreCheck).map((k: string) => k.toUpperCase());
+
+      // Rule 1 — Conservative clients cannot buy EQUITY
+      if (normalizedClientRisk === 'CONSERVATIVE' && assetClasses.includes('EQUITY')) {
+        setError(
+          `⛔ Cannot send — "${selectedPortfolio.name}" contains EQUITY but this client is Conservative. ` +
+          `Conservative clients are blocked from buying equity (Suitability Rule 1). ` +
+          `Ask Admin to remove EQUITY from this portfolio's allocation.`
+        );
+        return;
+      }
+
+      // Rule 6 — STRUCTURED products are restricted to UHNI clients only
+      if (clientSegment?.toUpperCase() !== 'UHNI' && assetClasses.includes('STRUCTURED')) {
+        setError(
+          `⛔ Cannot send — "${selectedPortfolio.name}" contains STRUCTURED products but this client is not UHNI. ` +
+          `Structured products are restricted to UHNI clients only (Suitability Rule 6). ` +
+          `Ask Admin to remove STRUCTURED from this portfolio's allocation.`
+        );
+        return;
+      }
+    }
+
+    const weights = parseWeights(selectedPortfolio.weightsJson);
+    const proposalJson = JSON.stringify({
+      modelPortfolioId: selectedPortfolio.modelId,
+      name: selectedPortfolio.name,
+      riskClass: selectedPortfolio.riskClass,
+      allocation: weights,
+      notes: customNotes.trim() || undefined,
+    });
+
+    setSubmitting(true);
+    try {
+      await createRecommendation({
+        clientId,
+        riskClass: selectedPortfolio.riskClass,
+        proposalJson,
+        proposedDate: new Date().toISOString().slice(0, 10),
+        status: 'SUBMITTED',
+      });
+      setMsg(`Recommendation based on "${selectedPortfolio.name}" submitted to client.`);
+      setSelectedModelId(null);
+      setCustomNotes('');
+      const updated = await getRecommendationsByClientId(clientId);
+      onRecosUpdated(Array.isArray(updated) ? updated : []);
+    } catch (err: any) {
+      const d = err.response?.data;
+      setError(typeof d === 'string' ? d : (d?.message || 'Failed to create recommendation'));
+    }
+    setSubmitting(false);
+  }
 
   function getStatusPill(s: string) {
     if (s === 'APPROVED') return 'pill-success';
@@ -755,46 +873,27 @@ function RecommendationsTab(props: {
   function renderProposal(json: string) {
     let p: any;
     try { p = JSON.parse(json); } catch { return <p className="text-sm text-text-2">{json}</p>; }
-
-    // plain text proposal (our format)
     if (p.text) return <p className="text-sm text-text-2">{p.text}</p>;
 
-    // single-field summary
-    if (p.summary && Object.keys(p).length === 1)
-      return <p className="text-sm text-text-2">{p.summary}</p>;
-
-    // structured proposal — render as readable chips
+    // new structured format from model portfolio
     return (
       <div className="text-sm space-y-2">
-        {p.summary && <p className="text-text-2">{p.summary}</p>}
-        <div className="flex flex-wrap gap-2">
-          {p.targetReturn !== undefined && (
-            <span className="bg-surface border border-border px-2 py-0.5 rounded text-xs">
-              Target return: <span className="font-medium">{p.targetReturn}%</span>
-            </span>
-          )}
-          {p.timeHorizon && (
-            <span className="bg-surface border border-border px-2 py-0.5 rounded text-xs">
-              Horizon: <span className="font-medium">{p.timeHorizon}</span>
-            </span>
-          )}
-          {p.SIP && (
-            <span className="bg-surface border border-border px-2 py-0.5 rounded text-xs">
-              SIP: <span className="font-medium">₹{Number(p.SIP).toLocaleString('en-IN')}/mo</span>
-            </span>
-          )}
-        </div>
+        {p.name && (
+          <p className="font-medium text-text">
+            📊 {p.name}
+          </p>
+        )}
         {p.allocation && (
-          <div>
-            <p className="text-xs text-text-3 mb-1">Allocation</p>
-            <div className="flex flex-wrap gap-1.5">
-              {Object.entries(p.allocation).map(([k, v]) => (
-                <span key={k} className="bg-primary-soft text-primary px-2 py-0.5 rounded text-xs font-medium">
-                  {k} {String(v)}%
-                </span>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-1.5">
+            {Object.entries(p.allocation).map(([asset, pct]) => (
+              <span key={asset} className="bg-primary-soft text-primary px-2 py-0.5 rounded text-xs font-medium">
+                {asset} {String(pct)}%
+              </span>
+            ))}
           </div>
+        )}
+        {p.notes && (
+          <p className="text-text-2 text-xs border-l-2 border-border pl-2 mt-1">{p.notes}</p>
         )}
       </div>
     );
@@ -805,62 +904,217 @@ function RecommendationsTab(props: {
       {/* Create form — RM only */}
       {canEdit && (
         <div className="panel">
-          <div className="panel-h"><h3>New recommendation</h3></div>
-          <form onSubmit={onSubmit} className="panel-b">
-            <p className="text-sm text-text-2 mb-4">
-              Write an investment proposal for this client based on their goals and risk profile.
-            </p>
+          <div className="panel-h">
+            <h3>New recommendation</h3>
+            {clientRiskClass && (
+              <span className={'pill ' + getRiskBadge(clientRiskClass)}>
+                Client: {clientRiskClass}
+              </span>
+            )}
+          </div>
+          <form onSubmit={handleSubmit} className="panel-b space-y-5">
 
-            <div className="mb-3">
-              <label className="label block mb-1">Risk class</label>
-              <div className="flex gap-2">
-                {RISK_CLASSES.map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => onRiskClassChange(r)}
-                    className={
-                      'flex-1 py-2 px-3 text-sm rounded border font-medium ' +
-                      (riskClass === r
-                        ? 'bg-primary text-white border-primary'
-                        : 'bg-white text-text-2 border-border')
-                    }
-                  >
-                    {r}
-                  </button>
-                ))}
+            {/* No risk profile warning */}
+            {!clientRiskClass && (
+              <div className="bg-warn-soft border border-warn/30 rounded-lg p-3 text-sm text-warn font-medium">
+                ⚠ This client doesn't have a risk profile yet. Complete the Risk Profile tab before sending a recommendation.
               </div>
-            </div>
+            )}
 
-            <div className="mb-4">
-              <label className="label block mb-1">Investment proposal</label>
-              <textarea
-                className="input"
-                rows={4}
-                placeholder="e.g. Based on the client's BALANCED risk profile and 5-year WEALTH goal of ₹50L, I recommend a 60% equity / 30% debt / 10% gold allocation via SBI Bluechip Fund, HDFC Bank, and Kotak Gold Fund..."
-                value={proposal}
-                onChange={(e) => onProposalChange(e.target.value)}
-              />
-            </div>
+            {/* No active portfolios warning */}
+            {activePortfolios.length === 0 && (
+              <div className="bg-surface border border-border rounded-lg p-4 text-center text-sm text-text-2">
+                No active model portfolios found. Ask your Admin to create model portfolios first.
+              </div>
+            )}
 
-            {error && <div className="pill pill-danger block mb-3 text-center w-full">{error}</div>}
-            {msg && <div className="pill pill-success block mb-3 text-center w-full">{msg}</div>}
+            {/* Matching portfolios */}
+            {matchingPortfolios.length > 0 && (
+              <div>
+                <p className="label mb-2">
+                  ✅ Portfolios matching client's risk class ({clientRiskClass})
+                </p>
+                <div className="grid gap-2">
+                  {matchingPortfolios.map((p) => {
+                    const weights = parseWeights(p.weightsJson);
+                    const isSelected = selectedModelId === p.modelId;
 
-            <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
-              {submitting ? 'Submitting...' : 'Submit recommendation'}
+                    // Determine which asset classes in this portfolio are
+                    // blocked for this client (stale data from before backend fix).
+                    // Conservative → EQUITY and STRUCTURED are blocked.
+                    const blockedInPortfolio: string[] = [];
+                    if (weights && normalizedClientRisk === 'CONSERVATIVE') {
+                      const keys = Object.keys(weights).map((k) => k.toUpperCase());
+                      if (keys.includes('EQUITY'))     blockedInPortfolio.push('EQUITY');
+                      if (keys.includes('STRUCTURED')) blockedInPortfolio.push('STRUCTURED');
+                    }
+                    const hasBlockedAssets = blockedInPortfolio.length > 0;
+
+                    return (
+                      <button
+                        key={p.modelId}
+                        type="button"
+                        onClick={() => { if (!hasBlockedAssets) setSelectedModelId(isSelected ? null : p.modelId); }}
+                        className={
+                          'w-full text-left rounded-lg border-2 p-3 transition-all ' +
+                          (hasBlockedAssets
+                            ? 'border-danger/40 bg-danger-soft cursor-not-allowed'
+                            : isSelected
+                            ? 'border-primary bg-primary-soft'
+                            : 'border-border bg-white hover:border-primary/40 hover:bg-surface')
+                        }
+                        title={hasBlockedAssets
+                          ? `This portfolio contains ${blockedInPortfolio.join(', ')} which is not allowed for Conservative clients. Ask Admin to fix the allocation.`
+                          : undefined}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-sm">{p.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className={'pill text-xs ' + getRiskBadge(p.riskClass)}>
+                              {p.riskClass}
+                            </span>
+                            {hasBlockedAssets && (
+                              <span className="text-xs text-danger font-semibold">⚠ Invalid allocation</span>
+                            )}
+                            {isSelected && !hasBlockedAssets && (
+                              <span className="text-primary text-xs font-bold">✓ Selected</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Blocked asset warning banner inside the card */}
+                        {hasBlockedAssets && (
+                          <div className="text-xs text-danger bg-white border border-danger/30 rounded px-2 py-1.5 mb-2">
+                            ⛔ This portfolio contains <strong>{blockedInPortfolio.join(', ')}</strong> which{' '}
+                            Conservative clients cannot buy (Suitability Rule 1).{' '}
+                            Ask Admin to remove {blockedInPortfolio.join(' & ')} from this portfolio's allocation.
+                          </div>
+                        )}
+
+                        {weights && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {Object.entries(weights).map(([asset, pct]) => {
+                              const isBlocked = blockedInPortfolio.includes(asset.toUpperCase());
+                              return (
+                                <span
+                                  key={asset}
+                                  className={
+                                    'rounded px-2 py-0.5 text-xs border ' +
+                                    (isBlocked
+                                      ? 'bg-danger/10 border-danger/40 text-danger line-through'
+                                      : 'bg-white border-border')
+                                  }
+                                >
+                                  <span className="font-medium">{asset}</span>
+                                  <span className="ml-1 opacity-70">{String(pct)}%</span>
+                                  {isBlocked && <span className="ml-1">⛔</span>}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Other portfolios (risk class mismatch) — shown for reference only, cannot be selected */}
+            {otherPortfolios.length > 0 && (
+              <div>
+                <p className="label mb-1 text-text-3">
+                  ⛔ Incompatible portfolios — cannot send to this client
+                </p>
+                <p className="text-xs text-text-3 mb-2">
+                  These portfolios have a different risk class from the client ({clientRiskClass}).
+                  Sending them would cause all orders to be rejected by pre-trade checks.
+                </p>
+                <div className="grid gap-2">
+                  {otherPortfolios.map((p) => {
+                    const weights = parseWeights(p.weightsJson);
+                    return (
+                      <div
+                        key={p.modelId}
+                        className="w-full text-left rounded-lg border-2 p-3 border-border bg-surface opacity-50 cursor-not-allowed select-none"
+                        title={`Cannot select — ${p.riskClass} portfolio does not match client's ${clientRiskClass} risk class`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-sm text-text-2">{p.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className={'pill text-xs ' + getRiskBadge(p.riskClass)}>
+                              {p.riskClass}
+                            </span>
+                            <span className="text-xs text-danger font-medium">⛔ Blocked</span>
+                          </div>
+                        </div>
+                        {weights && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {Object.entries(weights).map(([asset, pct]) => (
+                              <span
+                                key={asset}
+                                className="bg-white border border-border rounded px-2 py-0.5 text-xs"
+                              >
+                                <span className="font-medium">{asset}</span>
+                                <span className="text-text-2 ml-1">{String(pct)}%</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Selected portfolio preview + notes */}
+            {selectedPortfolio && (
+              <div className="bg-surface rounded-lg p-4 border border-border">
+                <p className="text-xs font-semibold text-text-2 uppercase mb-2">Selected portfolio preview</p>
+                <p className="font-semibold mb-1">{selectedPortfolio.name}</p>
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {Object.entries(parseWeights(selectedPortfolio.weightsJson) || {}).map(([asset, pct]) => (
+                    <span key={asset} className="bg-primary-soft text-primary px-2 py-0.5 rounded text-xs font-medium">
+                      {asset} {String(pct)}%
+                    </span>
+                  ))}
+                </div>
+                <label className="label block mb-1">
+                  Additional notes for client <span className="text-text-3">(optional)</span>
+                </label>
+                <textarea
+                  className="input resize-none"
+                  rows={3}
+                  placeholder="e.g. Based on your 5-year wealth goal, I suggest this allocation. We can review quarterly..."
+                  value={customNotes}
+                  onChange={(e) => setCustomNotes(e.target.value)}
+                />
+              </div>
+            )}
+
+            {error && <div className="pill pill-danger block text-center w-full">{error}</div>}
+            {msg   && <div className="pill pill-success block text-center w-full">{msg}</div>}
+
+            <button
+              type="submit"
+              className="btn btn-primary btn-sm"
+              disabled={submitting || !selectedPortfolio}
+            >
+              {submitting ? 'Submitting...' : 'Submit recommendation to client'}
             </button>
           </form>
         </div>
       )}
 
-      {/* Existing recommendations */}
+      {/* Existing recommendations history */}
       <div className="panel">
         <div className="panel-h">
-          <h3>Recommendations ({recos.length})</h3>
+          <h3>Sent recommendations ({recos.length})</h3>
         </div>
         {recos.length === 0 ? (
           <div className="panel-b text-center text-text-2 py-8">
-            No recommendations yet.
+            No recommendations sent yet.
           </div>
         ) : (
           <div className="divide-y divide-border-hairline">
@@ -868,9 +1122,11 @@ function RecommendationsTab(props: {
               <div key={r.recoId} className="panel-b">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-text-3 text-xs mono">REC-{String(r.recoId).padStart(4, '0')}</span>
+                    <span className="font-medium text-text-3 text-xs mono">
+                      REC-{String(r.recoId).padStart(4, '0')}
+                    </span>
                     <span className={'pill ' + getStatusPill(r.status)}>{r.status}</span>
-                    <span className="pill pill-info">{r.riskClass}</span>
+                    <span className={'pill ' + getRiskBadge(r.riskClass)}>{r.riskClass}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-text-3">{r.proposedDate}</span>
@@ -888,6 +1144,256 @@ function RecommendationsTab(props: {
               </div>
             ))}
           </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── ACCOUNT & FUNDS TAB (RM creates PBOR account and deposits funds) ──────
+function AccountFundsTab(props: {
+  clientId: number;
+  account: any;
+  cashBalance: number;
+  ledgerEntries: any[];
+  canEdit: boolean;
+  onUpdated: () => void;
+}) {
+  const { clientId, account, cashBalance, ledgerEntries, canEdit, onUpdated } = props;
+
+  const [creatingAccount, setCreatingAccount] = useState(false);
+  const [createError, setCreateError] = useState('');
+
+  const [depositAmount, setDepositAmount] = useState('');
+  const [depositNarrative, setDepositNarrative] = useState('');
+  const [depositing, setDepositing] = useState(false);
+  const [depositError, setDepositError] = useState('');
+  const [depositMsg, setDepositMsg] = useState('');
+
+  function fmt(n: number) {
+    return Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  async function handleCreateAccount() {
+    setCreateError('');
+    setCreatingAccount(true);
+    try {
+      await createAccount({
+        clientId,
+        accountType: 'INDIVIDUAL',
+        baseCurrency: 'INR',
+        status: 'ACTIVE',
+      });
+      onUpdated();
+    } catch (err: any) {
+      setCreateError(err.response?.data?.message || 'Failed to create account');
+    }
+    setCreatingAccount(false);
+  }
+
+  async function handleDeposit(e: React.FormEvent) {
+    e.preventDefault();
+    setDepositError('');
+    setDepositMsg('');
+    const amt = parseFloat(depositAmount);
+    if (!depositAmount || isNaN(amt) || amt <= 0) {
+      setDepositError('Enter a valid positive amount');
+      return;
+    }
+    if (amt > 10_000_000) {
+      setDepositError('Maximum single deposit is ₹1 Crore');
+      return;
+    }
+    setDepositing(true);
+    try {
+      await createCashLedgerEntry({
+        accountId: account.accountId,
+        amount: amt,
+        txnType: 'CREDIT',
+        narrative: depositNarrative.trim() || 'RM fund deposit',
+      });
+      setDepositMsg(`₹${fmt(amt)} deposited successfully.`);
+      setDepositAmount('');
+      setDepositNarrative('');
+      onUpdated();
+    } catch (err: any) {
+      setDepositError(err.response?.data?.message || 'Deposit failed');
+    }
+    setDepositing(false);
+  }
+
+  // No account yet
+  if (!account) {
+    return (
+      <div className="space-y-4">
+        <div className="panel">
+          <div className="panel-b text-center py-12">
+            <p className="text-3xl mb-3">🏦</p>
+            <p className="font-semibold text-lg mb-1">No PBOR account found</p>
+            <p className="text-sm text-text-2 mb-5">
+              This client doesn't have a portfolio account yet. Create one to enable cash deposits and order placement.
+            </p>
+            {canEdit && (
+              <>
+                {createError && (
+                  <p className="text-danger text-sm mb-3">{createError}</p>
+                )}
+                <button
+                  onClick={handleCreateAccount}
+                  disabled={creatingAccount}
+                  className="btn btn-primary"
+                >
+                  {creatingAccount ? 'Creating...' : 'Create Portfolio Account'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Account summary card */}
+      <div className="panel">
+        <div className="panel-h">
+          <h3>Portfolio Account</h3>
+          <span className="pill pill-success">{account.status || 'ACTIVE'}</span>
+        </div>
+        <div className="panel-b">
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <p className="label">Account ID</p>
+              <p className="font-semibold mono text-lg">{account.accountId}</p>
+            </div>
+            <div>
+              <p className="label">Account type</p>
+              <p className="font-medium">{account.accountType || 'INDIVIDUAL'}</p>
+            </div>
+            <div>
+              <p className="label">Base currency</p>
+              <p className="font-medium">{account.baseCurrency || 'INR'}</p>
+            </div>
+          </div>
+
+          {/* Balance highlight */}
+          <div className="mt-5 bg-surface rounded-xl p-5 flex items-center gap-4">
+            <div className="text-3xl">💰</div>
+            <div>
+              <p className="text-xs text-text-2 uppercase font-semibold tracking-wider mb-0.5">
+                Available Cash Balance
+              </p>
+              <p className={
+                'text-3xl font-bold mono ' +
+                (cashBalance > 0 ? 'text-success' : cashBalance < 0 ? 'text-danger' : 'text-text-2')
+              }>
+                ₹{fmt(cashBalance)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Deposit funds panel (RM only) */}
+      {canEdit && (
+        <div className="panel">
+          <div className="panel-h">
+            <h3>Add Funds</h3>
+            <p className="text-sm text-text-2">Credit cash to client's portfolio account</p>
+          </div>
+          <form onSubmit={handleDeposit} className="panel-b">
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="label block mb-1">Deposit amount (₹)</label>
+                <input
+                  className="input"
+                  type="number"
+                  min="1"
+                  max="10000000"
+                  step="0.01"
+                  placeholder="e.g. 500000"
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                />
+                <p className="text-xs text-text-3 mt-1">Min ₹1 · Max ₹1,00,00,000</p>
+              </div>
+              <div>
+                <label className="label block mb-1">Narrative / Reference (optional)</label>
+                <input
+                  className="input"
+                  type="text"
+                  placeholder="e.g. Initial funding, Bank transfer ref 123"
+                  value={depositNarrative}
+                  onChange={(e) => setDepositNarrative(e.target.value)}
+                  maxLength={200}
+                />
+              </div>
+            </div>
+
+            {depositError && (
+              <div className="pill pill-danger block mb-3 text-center w-full">{depositError}</div>
+            )}
+            {depositMsg && (
+              <div className="pill pill-success block mb-3 text-center w-full">{depositMsg}</div>
+            )}
+
+            <button type="submit" className="btn btn-primary btn-sm" disabled={depositing}>
+              {depositing ? 'Processing...' : '+ Deposit Funds'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Transaction history */}
+      <div className="panel">
+        <div className="panel-h">
+          <h3>Transaction History</h3>
+          <span className="text-xs text-text-2">{ledgerEntries.length} entries</span>
+        </div>
+        {ledgerEntries.length === 0 ? (
+          <div className="panel-b text-center text-text-2 py-10">
+            No transactions yet.
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-surface">
+              <tr>
+                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">ID</th>
+                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Type</th>
+                <th className="text-right px-5 py-3 text-xs uppercase font-medium text-text-2">Amount (₹)</th>
+                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Narrative</th>
+                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...ledgerEntries].reverse().map((entry: any) => (
+                <tr key={entry.ledgerId || entry.id} className="border-t border-border-hairline hover:bg-surface transition-colors">
+                  <td className="px-5 py-3 mono text-xs text-text-2">{entry.ledgerId || entry.id}</td>
+                  <td className="px-5 py-3">
+                    <span className={
+                      'pill ' +
+                      (entry.txnType === 'CREDIT' ? 'pill-success' : 'pill-danger')
+                    }>
+                      {entry.txnType}
+                    </span>
+                  </td>
+                  <td className={
+                    'px-5 py-3 mono text-right font-semibold ' +
+                    (entry.txnType === 'CREDIT' ? 'text-success' : 'text-danger')
+                  }>
+                    {entry.txnType === 'CREDIT' ? '+' : '-'}₹{fmt(Number(entry.amount))}
+                  </td>
+                  <td className="px-5 py-3 text-text-2 max-w-xs truncate">
+                    {entry.narrative || entry.description || '—'}
+                  </td>
+                  <td className="px-5 py-3 mono text-xs text-text-2">
+                    {entry.txnDate || entry.transactionDate || entry.createdDate || '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>

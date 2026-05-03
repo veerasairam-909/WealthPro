@@ -55,11 +55,14 @@ public class CashLedgerServiceImpl implements CashLedgerService {
             calculatedAmount = request.getQuantity().multiply(request.getPrice());
             processRedemption(account, request);
 
-        } else if (request.getTxnType() == TxnType.DIVIDEND) {
+        } else if (request.getTxnType() == TxnType.DIVIDEND
+                || request.getTxnType() == TxnType.CREDIT) {
+            // Inflows: stored as positive
             validateAmount(request);
             calculatedAmount = request.getAmount();
 
         } else {
+            // DEBIT, FEE: outflows stored as negative
             validateAmount(request);
             calculatedAmount = request.getAmount().negate();
         }

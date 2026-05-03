@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/auth/store';
+import { useNavigate } from 'react-router-dom';
 import { getGoalsByClientId, createGoal, deleteGoal, updateGoalStatus } from '@/api/goals';
 import { getRecommendationsByClientId } from '@/api/recommendations';
 import { getAccountsByClientId } from '@/api/accounts';
@@ -14,6 +15,7 @@ const GOAL_TYPES = ['RETIREMENT', 'EDUCATION', 'WEALTH', 'CUSTOM'];
 export default function Goals() {
   const user = useAuth((s) => s.user);
   const clientId = user?.clientId;
+  const navigate = useNavigate();
 
   const [goals, setGoals] = useState<any[]>([]);
   const [recos, setRecos] = useState<any[]>([]);
@@ -370,16 +372,29 @@ export default function Goals() {
 
       {/* recommendations from RM */}
       <div className="panel">
-        <div className="panel-h">
-          <h3>RM Recommendations ({recos.length})</h3>
+        <div className="panel-h flex items-center justify-between">
+          <h3>
+            RM Recommendations ({recos.length})
+            {recos.filter((r: any) => r.status === 'SUBMITTED').length > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center bg-primary text-white rounded-full w-5 h-5 text-xs font-bold">
+                {recos.filter((r: any) => r.status === 'SUBMITTED').length}
+              </span>
+            )}
+          </h3>
+          <button
+            onClick={() => navigate('/me/recommendations')}
+            className="btn btn-ghost btn-sm text-primary"
+          >
+            View all →
+          </button>
         </div>
         {recos.length === 0 ? (
           <div className="panel-b text-center text-text-2 py-8 text-sm">
-            No recommendations from your RM yet. Your RM will send suggestions based on your goals.
+            No recommendations from your RM yet. Your RM will send suggestions based on your goals and risk profile.
           </div>
         ) : (
           <div className="divide-y divide-border-hairline">
-            {recos.map((r: any) => (
+            {recos.slice(0, 3).map((r: any) => (
               <div key={r.recoId} className="panel-b">
                 <div className="flex items-center gap-2 mb-2">
                   <span className={'pill ' + getRecoPill(r.status)}>{r.status}</span>
@@ -387,8 +402,39 @@ export default function Goals() {
                   <span className="text-xs text-text-3 ml-auto">{r.proposedDate}</span>
                 </div>
                 {renderProposal(r.proposalJson)}
+                {r.status === 'SUBMITTED' && (
+                  <div className="flex gap-2 mt-3 pt-3 border-t border-border-hairline">
+                    <button
+                      onClick={() => navigate('/me/recommendations')}
+                      className="btn btn-primary btn-sm"
+                    >
+                      ✓ Review & Accept
+                    </button>
+                    <button
+                      onClick={() => navigate('/me/recommendations')}
+                      className="btn btn-ghost btn-sm"
+                    >
+                      View details
+                    </button>
+                  </div>
+                )}
+                {r.status === 'APPROVED' && (
+                  <div className="mt-2">
+                    <span className="text-xs text-success font-medium">✓ Accepted — order placed</span>
+                  </div>
+                )}
               </div>
             ))}
+            {recos.length > 3 && (
+              <div className="panel-b text-center">
+                <button
+                  onClick={() => navigate('/me/recommendations')}
+                  className="text-sm text-primary hover:underline"
+                >
+                  View all {recos.length} recommendations →
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

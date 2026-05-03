@@ -34,6 +34,7 @@ import Products from './pages/client/Products';
 import MyOrders from './pages/client/MyOrders';
 import Holdings from './pages/client/Holdings';
 import Goals from './pages/client/Goals';
+import ClientRecommendations from './pages/client/ClientRecommendations';
 import Notifications from './pages/client/Notifications';
 import Reviews from './pages/client/Reviews';
 
@@ -118,6 +119,7 @@ export default function App() {
           <Route path="/me/orders" element={<MyOrders />} />
           <Route path="/me/holdings" element={<Holdings />} />
           <Route path="/me/goals" element={<Goals />} />
+          <Route path="/me/recommendations" element={<ClientRecommendations />} />
           <Route path="/me/notifications" element={<Notifications />} />
           <Route path="/me/reviews" element={<Reviews />} />
         </Route>
