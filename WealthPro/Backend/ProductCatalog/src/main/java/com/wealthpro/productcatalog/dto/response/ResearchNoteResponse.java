@@ -21,4 +21,6 @@ public class ResearchNoteResponse {
     private ResearchRating rating;
     private LocalDate publishedDate;
     private String contentUri;
+    private String analyst;
+    private String content;
 }

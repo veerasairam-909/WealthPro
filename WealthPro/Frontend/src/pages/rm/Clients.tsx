@@ -8,6 +8,12 @@ import { Users } from 'lucide-react';
 
 const SEGMENTS = ['ALL', 'Retail', 'HNI', 'UHNI'];
 const STATUSES = ['ALL', 'Active', 'Inactive', 'PENDING_KYC'];
+
+// Display label — backend value stays PENDING_KYC, user sees "Pending"
+function statusLabel(status: string): string {
+  if (status === 'PENDING_KYC') return 'Pending';
+  return status;
+}
 const PAGE_SIZE = 12;
 
 export default function Clients() {
@@ -110,7 +116,7 @@ export default function Clients() {
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
                 {STATUSES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>{statusLabel(s)}</option>
                 ))}
               </select>
             </div>
@@ -153,7 +159,7 @@ export default function Clients() {
                       <span className={'pill ' + getSegmentClass(c.segment)}>{c.segment}</span>
                     </td>
                     <td className="px-5 py-3">
-                      <span className={'pill ' + getStatusClass(c.status)}>{c.status}</span>
+                      <span className={'pill ' + getStatusClass(c.status)}>{statusLabel(c.status)}</span>
                     </td>
                     <td className="px-5 py-3 text-right">
                       <Link

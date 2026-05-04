@@ -38,4 +38,10 @@ public class ResearchNote {
 
     @Column(name = "content_uri", nullable = false, length = 500)
     private String contentUri;
+
+    @Column(name = "analyst", length = 100)
+    private String analyst;
+
+    @Column(name = "content", columnDefinition = "TEXT")
+    private String content;
 }

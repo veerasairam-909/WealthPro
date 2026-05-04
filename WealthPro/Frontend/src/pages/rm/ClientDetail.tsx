@@ -360,7 +360,7 @@ function ProfileTab(props: {
             <Field label="Email" value={contact.email || '—'} />
             <Field label="Phone" value={contact.phone || '—'} />
             <Field label="Segment" value={client.segment} />
-            <Field label="Status" value={client.status} />
+            <Field label="Status" value={client.status === 'PENDING_KYC' ? 'Pending' : client.status} />
           </div>
 
           {/* Activation checklist - only shown for PENDING_KYC clients */}
@@ -464,7 +464,7 @@ function ProfileTab(props: {
                 Active{!canActivate && client.status !== 'Active' ? ' (KYC + risk required)' : ''}
               </option>
               <option value="Inactive">Inactive</option>
-              <option value="PENDING_KYC">PENDING_KYC</option>
+              <option value="PENDING_KYC">Pending</option>
             </select>
             {!canActivate && client.status !== 'Active' && (
               <p className="text-xs text-text-3 mt-1">
@@ -1314,7 +1314,19 @@ function AccountFundsTab(props: {
                   step="0.01"
                   placeholder="e.g. 500000"
                   value={depositAmount}
-                  onChange={(e) => setDepositAmount(e.target.value)}
+                  onKeyDown={(e) => {
+                    // Block minus key and 'e' (scientific notation) in number inputs
+                    if (e.key === '-' || e.key === 'e' || e.key === 'E') {
+                      e.preventDefault();
+                    }
+                  }}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    // Block negative values — only accept empty or non-negative numbers
+                    if (val === '' || Number(val) >= 0) {
+                      setDepositAmount(val);
+                    }
+                  }}
                 />
                 <p className="text-xs text-text-3 mt-1">Min ₹1 · Max ₹1,00,00,000</p>
               </div>

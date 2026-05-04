@@ -126,7 +126,7 @@ export default function RmAnalytics() {
       if (perfRes.status === 'fulfilled' && Array.isArray(perfRes.value)) {
         // sort chronologically
         const sorted = [...perfRes.value].sort((a, b) =>
-          (a.asOfDate || '').localeCompare(b.asOfDate || '')
+          (a.endDate || '').localeCompare(b.endDate || '')
         );
         setPerfRecords(sorted);
       } else {
@@ -138,7 +138,7 @@ export default function RmAnalytics() {
         const latestMap: Record<string, any> = {};
         for (const r of riskRes.value) {
           const existing = latestMap[r.measureType];
-          if (!existing || (r.asOfDate || '') > (existing.asOfDate || '')) {
+          if (!existing || (r.calculatedAt || '') > (existing.calculatedAt || '')) {
             latestMap[r.measureType] = r;
           }
         }
@@ -154,19 +154,20 @@ export default function RmAnalytics() {
 
   // ── chart data ────────────────────────────────────────────────────────────
   const chartData = perfRecords.map((r) => ({
-    period:    periodLabel(r.period, r.asOfDate),
-    Return:    r.returnPct    != null ? Number(r.returnPct)    : null,
-    Benchmark: r.benchmarkPct != null ? Number(r.benchmarkPct) : null,
+    period:    periodLabel(r.period, r.endDate),
+    Return:    r.returnPercentage           != null ? Number(r.returnPercentage)           : null,
+    Benchmark: r.benchmarkReturnPercentage  != null ? Number(r.benchmarkReturnPercentage)  : null,
   }));
 
   // summary stats
   const latestPerf = perfRecords[perfRecords.length - 1];
   const avgReturn   = perfRecords.length
-    ? perfRecords.reduce((s, r) => s + (Number(r.returnPct) || 0), 0) / perfRecords.length
+    ? perfRecords.reduce((s, r) => s + (Number(r.returnPercentage) || 0), 0) / perfRecords.length
     : null;
-  const avgBench    = perfRecords.length && perfRecords.some((r) => r.benchmarkPct != null)
-    ? perfRecords.filter((r) => r.benchmarkPct != null).reduce((s, r) => s + Number(r.benchmarkPct), 0) /
-      perfRecords.filter((r) => r.benchmarkPct != null).length
+  const avgBench    = perfRecords.length && perfRecords.some((r) => r.benchmarkReturnPercentage != null)
+    ? perfRecords.filter((r) => r.benchmarkReturnPercentage != null)
+        .reduce((s, r) => s + Number(r.benchmarkReturnPercentage), 0) /
+      perfRecords.filter((r) => r.benchmarkReturnPercentage != null).length
     : null;
   const alpha = avgReturn != null && avgBench != null ? avgReturn - avgBench : null;
 
@@ -203,7 +204,7 @@ export default function RmAnalytics() {
                   <option value="">— Select a client —</option>
                   {clients.map((c) => (
                     <option key={c.clientId} value={c.clientId}>
-                      {c.name} (ID: {c.clientId})
+                      {c.name}
                     </option>
                   ))}
                 </select>
@@ -276,13 +277,13 @@ export default function RmAnalytics() {
                 <p className="label">Latest Return</p>
                 {latestPerf ? (
                   <p className={'text-2xl font-semibold mono mt-1 ' +
-                    (Number(latestPerf.returnPct) >= 0 ? 'text-success' : 'text-danger')}>
-                    {fmtPct(latestPerf.returnPct)}
+                    (Number(latestPerf.returnPercentage) >= 0 ? 'text-success' : 'text-danger')}>
+                    {fmtPct(latestPerf.returnPercentage)}
                   </p>
                 ) : (
                   <p className="text-2xl font-semibold text-text-3 mt-1">—</p>
                 )}
-                <p className="text-xs text-text-3 mt-0.5">{latestPerf?.period || latestPerf?.asOfDate?.slice(0, 7) || 'no data'}</p>
+                <p className="text-xs text-text-3 mt-0.5">{latestPerf?.period || latestPerf?.endDate?.slice(0, 7) || 'no data'}</p>
               </div>
             </div>
 
@@ -396,9 +397,9 @@ export default function RmAnalytics() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {riskMeasures.map((rm: any) => {
                     const color = measureColor(rm.measureType);
-                    const val   = rm.value != null ? Number(rm.value).toFixed(4) : '—';
+                    const val   = rm.measureValue != null ? Number(rm.measureValue).toFixed(4) : '—';
                     return (
-                      <div key={rm.riskId} className="bg-surface rounded-lg p-4 border border-border-hairline">
+                      <div key={rm.measureId} className="bg-surface rounded-lg p-4 border border-border-hairline">
                         <div
                           className="w-8 h-8 rounded-full flex items-center justify-center mb-3"
                           style={{ background: color + '20' }}
@@ -407,8 +408,8 @@ export default function RmAnalytics() {
                         </div>
                         <p className="text-xs text-text-2 mb-1">{measureLabel(rm.measureType)}</p>
                         <p className="text-xl font-bold mono" style={{ color }}>{val}</p>
-                        {rm.asOfDate && (
-                          <p className="text-xs text-text-3 mt-1">as of {rm.asOfDate.slice(0, 10)}</p>
+                        {rm.calculatedAt && (
+                          <p className="text-xs text-text-3 mt-1">as of {rm.calculatedAt.slice(0, 10)}</p>
                         )}
                       </div>
                     );
@@ -437,13 +438,13 @@ export default function RmAnalytics() {
                 </thead>
                 <tbody>
                   {[...perfRecords].reverse().map((r: any) => {
-                    const ret   = r.returnPct    != null ? Number(r.returnPct)    : null;
-                    const bench = r.benchmarkPct != null ? Number(r.benchmarkPct) : null;
+                    const ret   = r.returnPercentage          != null ? Number(r.returnPercentage)          : null;
+                    const bench = r.benchmarkReturnPercentage != null ? Number(r.benchmarkReturnPercentage) : null;
                     const al    = ret != null && bench != null ? ret - bench : null;
                     return (
-                      <tr key={r.perfId} className="border-t border-border-hairline hover:bg-surface">
+                      <tr key={r.recordId} className="border-t border-border-hairline hover:bg-surface">
                         <td className="px-5 py-3 font-medium">{r.period || '—'}</td>
-                        <td className="px-5 py-3 mono text-xs text-text-2">{r.asOfDate?.slice(0, 10) || '—'}</td>
+                        <td className="px-5 py-3 mono text-xs text-text-2">{r.endDate?.slice(0, 10) || '—'}</td>
                         <td className={'px-5 py-3 mono text-right font-medium ' +
                           (ret == null ? 'text-text-3' : ret >= 0 ? 'text-success' : 'text-danger')}>
                           {fmtPct(ret)}

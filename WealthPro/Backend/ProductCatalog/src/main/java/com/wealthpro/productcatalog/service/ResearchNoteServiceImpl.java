@@ -42,6 +42,8 @@ public class ResearchNoteServiceImpl implements ResearchNoteService {
         response.setRating(note.getRating());
         response.setPublishedDate(note.getPublishedDate());
         response.setContentUri(note.getContentUri());
+        response.setAnalyst(note.getAnalyst());
+        response.setContent(note.getContent());
         return response;
     }
 
@@ -54,6 +56,8 @@ public class ResearchNoteServiceImpl implements ResearchNoteService {
         note.setRating(request.getRating());
         note.setPublishedDate(request.getPublishedDate());
         note.setContentUri(request.getContentUri());
+        note.setAnalyst(request.getAnalyst());
+        note.setContent(request.getContent());
         ResearchNote saved = researchNoteRepository.save(note);
         return toResponse(saved);
     }
@@ -145,6 +149,8 @@ public class ResearchNoteServiceImpl implements ResearchNoteService {
         existing.setRating(request.getRating());
         existing.setPublishedDate(request.getPublishedDate());
         existing.setContentUri(request.getContentUri());
+        existing.setAnalyst(request.getAnalyst());
+        existing.setContent(request.getContent());
         ResearchNote updated = researchNoteRepository.save(existing);
         return toResponse(updated);
     }

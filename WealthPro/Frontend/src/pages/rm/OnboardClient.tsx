@@ -284,7 +284,7 @@ export default function OnboardClient() {
           </div>
 
           <p className="text-xs text-text-3 mb-3 pt-2 border-t border-border-hairline mt-2">
-            ⓘ Client starts in <b>PENDING_KYC</b>. Activate them after their KYC and risk
+            ⓘ Client starts as <b>Pending</b>. Activate them after their KYC and risk
             profile are completed.
           </p>
 

@@ -17,6 +17,9 @@ public class SecurityResponse {
 
     private long securityId;
     private String symbol;
+    private String name;
+    private String exchange;
+    private String isin;
     private AssetClass assetClass;
     private String currency;
     private String country;

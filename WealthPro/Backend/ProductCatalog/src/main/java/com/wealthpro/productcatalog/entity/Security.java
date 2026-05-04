@@ -27,6 +27,15 @@ public class Security {
     @Column(name = "symbol", nullable = false, unique = true, length = 20)
     private String symbol;
 
+    @Column(name = "name", length = 150)
+    private String name;
+
+    @Column(name = "exchange", length = 20)
+    private String exchange;
+
+    @Column(name = "isin", length = 12)
+    private String isin;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "asset_class", nullable = false)
     private AssetClass assetClass;

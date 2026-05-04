@@ -116,6 +116,9 @@ public class SecurityServiceImpl implements SecurityService {
         }
 
         existing.setSymbol(request.getSymbol());
+        existing.setName(request.getName());
+        existing.setExchange(request.getExchange());
+        existing.setIsin(request.getIsin());
         existing.setAssetClass(request.getAssetClass());
         existing.setCurrency(request.getCurrency());
         existing.setCountry(request.getCountry());

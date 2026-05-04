@@ -27,6 +27,15 @@ public class SecurityRequest {
     @ValidSymbol
     private String symbol;
 
+    @Size(max = 150, message = "Name must not exceed 150 characters")
+    private String name;
+
+    @Size(max = 20, message = "Exchange must not exceed 20 characters")
+    private String exchange;
+
+    @Size(min = 12, max = 12, message = "ISIN must be exactly 12 characters")
+    private String isin;
+
     @NotNull(message = "Asset class is required")
     private AssetClass assetClass;
 

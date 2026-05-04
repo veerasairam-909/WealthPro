@@ -554,8 +554,12 @@ export default function Dashboard() {
             {riskMeasures.map((r: any) => (
               <div key={r.measureId} className="panel-b text-center">
                 <p className="label">{r.measureType?.replace(/_/g, ' ')}</p>
-                <p className="text-2xl font-bold mono mt-1">{Number(r.value).toFixed(2)}</p>
-                <p className="text-xs text-text-3 mt-0.5">{r.period}</p>
+                <p className="text-2xl font-bold mono mt-1">
+                  {r.measureValue != null ? Number(r.measureValue).toFixed(2) : '—'}
+                </p>
+                <p className="text-xs text-text-3 mt-0.5">
+                  {r.calculatedAt ? r.calculatedAt.slice(0, 10) : ''}
+                </p>
               </div>
             ))}
           </div>

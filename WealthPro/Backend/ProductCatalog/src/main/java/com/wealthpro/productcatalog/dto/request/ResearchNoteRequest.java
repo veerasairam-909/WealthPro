@@ -35,4 +35,9 @@ public class ResearchNoteRequest {
     @Size(max = 500, message = "Content URI must not exceed 500 characters")
     @ValidContentUri
     private String contentUri;
+
+    @Size(max = 100, message = "Analyst name must not exceed 100 characters")
+    private String analyst;
+
+    private String content;
 }
