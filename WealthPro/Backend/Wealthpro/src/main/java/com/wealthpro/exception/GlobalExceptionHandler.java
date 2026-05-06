@@ -104,6 +104,13 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    // 400 - Business rule violation (e.g. invalid AML flag status transition)
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalStateException(
+            IllegalStateException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     // 500 - Any other unexpected exception
     // Safety net — catches everything not handled above
     @ExceptionHandler(Exception.class)

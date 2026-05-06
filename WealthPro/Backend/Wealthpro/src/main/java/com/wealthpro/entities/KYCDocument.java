@@ -43,6 +43,11 @@ public class KYCDocument {
     @Column(name = "VerifiedDate")
     private LocalDate verifiedDate;
 
+    // Set to verifiedDate + 1 year when document is verified.
+    // Null for Pending documents. Scheduler marks document Expired when this date passes.
+    @Column(name = "ExpiryDate")
+    private LocalDate expiryDate;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false, length = 10)
     private KycStatus status;

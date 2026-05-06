@@ -34,8 +34,11 @@ public class AmlFlag {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false, length = 15)
+    @Column(name = "Status", nullable = false, length = 20)
     private AmlFlagStatus status;
+
+    @Column(name = "RaisedByUserId")
+    private Long raisedByUserId;
 
     @Column(name = "FlaggedDate", nullable = false)
     private LocalDate flaggedDate;

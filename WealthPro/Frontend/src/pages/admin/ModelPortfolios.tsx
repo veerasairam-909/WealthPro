@@ -84,6 +84,14 @@ export default function ModelPortfolios() {
 
       // Fraction guard — catch common mistake of entering 0.6 instead of 60
       const values = Object.values(parsed).map(Number);
+
+      // Negative values guard
+      const hasNegative = values.some((v) => v < 0);
+      if (hasNegative) {
+        setFormError('Allocation percentages cannot be negative. All values must be positive whole numbers.');
+        return;
+      }
+
       const hasfractions = values.some((v) => v > 0 && v < 1);
       if (hasfractions) {
         setFormError(
@@ -216,7 +224,7 @@ export default function ModelPortfolios() {
                 const hasInvalidAlloc = invalidAssets.length > 0;
 
                 return (
-                  <tr key={p.portfolioId} className={'border-t border-border-hairline' + (hasInvalidAlloc ? ' bg-danger-soft/40' : '')}>
+                  <tr key={p.modelId ?? p.portfolioId} className={'border-t border-border-hairline' + (hasInvalidAlloc ? ' bg-danger-soft/40' : '')}>
                     <td className="px-5 py-3">
                       <p className="font-medium">{p.name}</p>
                       {hasInvalidAlloc && (

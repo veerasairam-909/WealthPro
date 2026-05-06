@@ -1,6 +1,0 @@
-com\wealthpro\orderexecution\repository\OrderRepositoryTest.class
-com\wealthpro\orderexecution\service\OrderServiceImplTest.class
-com\wealthpro\orderexecution\controller\OrderControllerImplTest.class
-com\wealthpro\orderexecution\repository\ExecutionFillRepositoryTest.class
-com\wealthpro\orderexecution\repository\AllocationRepositoryTest.class
-com\wealthpro\orderexecution\repository\PreTradeCheckRepositoryTest.class

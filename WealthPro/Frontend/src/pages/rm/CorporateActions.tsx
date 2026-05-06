@@ -110,11 +110,10 @@ export default function CorporateActions() {
               <thead className="bg-surface">
                 <tr>
                   <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Type</th>
-                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Account</th>
+                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Security ID</th>
                   <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Record Date</th>
                   <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Ex-Date</th>
                   <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Pay Date</th>
-                  <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Effective Date</th>
                   <th className="text-right px-5 py-3 text-xs uppercase font-medium text-text-2">Details</th>
                 </tr>
               </thead>
@@ -128,11 +127,10 @@ export default function CorporateActions() {
                         <td className="px-5 py-3">
                           <span className={'pill ' + getTypePill(a.caType)}>{a.caType}</span>
                         </td>
-                        <td className="px-5 py-3 mono text-xs">{a.accountId}</td>
+                        <td className="px-5 py-3 mono text-xs text-text-2">{a.securityId || '—'}</td>
                         <td className="px-5 py-3 mono text-xs text-text-2">{a.recordDate || '—'}</td>
                         <td className="px-5 py-3 mono text-xs text-text-2">{a.exDate || '—'}</td>
                         <td className="px-5 py-3 mono text-xs text-text-2">{a.payDate || '—'}</td>
-                        <td className="px-5 py-3 mono text-xs text-text-2">{a.effectiveDate || '—'}</td>
                         <td className="px-5 py-3 text-right">
                           {(a.termsJson || a.description) && (
                             <button
@@ -146,7 +144,7 @@ export default function CorporateActions() {
                       </tr>
                       {isExpanded && (
                         <tr className="bg-surface border-t border-border-hairline">
-                          <td colSpan={7} className="px-5 py-4">
+                          <td colSpan={6} className="px-5 py-4">
                             {parsed ? (
                               <div className="flex flex-wrap gap-4">
                                 {Object.entries(parsed).map(([k, v]) => (

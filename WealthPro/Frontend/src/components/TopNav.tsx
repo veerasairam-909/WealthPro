@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { useAuth } from '@/auth/store';
+import { logoutApi } from '@/api/auth';
 import Logo from './Logo';
 
 interface Props {
@@ -13,6 +14,11 @@ export default function TopNav({ onMenuClick }: Props) {
   const navigate = useNavigate();
 
   function handleLogout() {
+    // Fire the blocklist request without awaiting — the HTTP request is
+    // dispatched synchronously with the current token still in localStorage.
+    // logout() then clears local state immediately so navigate('/login')
+    // is called on the same tick, keeping the function synchronous for tests.
+    logoutApi();
     logout();
     navigate('/login');
   }

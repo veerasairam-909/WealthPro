@@ -6,6 +6,11 @@ import com.reviewservice.entity.Review;
 import com.reviewservice.enums.PeriodType;
 import com.reviewservice.enums.ReviewStatus;
 import com.reviewservice.exception.ResourceNotFoundException;
+import com.reviewservice.feign.NotificationFeignClient;
+import com.reviewservice.feign.PborFeignClient;
+import com.reviewservice.feign.WealthproFeignClient;
+import com.reviewservice.feign.dto.AccountDTO;
+import com.reviewservice.feign.dto.ClientDTO;
 import com.reviewservice.repository.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,6 +40,15 @@ class ReviewServiceTest {
     @Mock
     private ReviewRepository reviewRepository;
 
+    @Mock
+    private PborFeignClient pborFeignClient;
+
+    @Mock
+    private WealthproFeignClient wealthproFeignClient;
+
+    @Mock
+    private NotificationFeignClient notificationFeignClient;
+
     @InjectMocks
     private ReviewServiceImpl reviewService;
 
@@ -41,6 +57,11 @@ class ReviewServiceTest {
 
     @BeforeEach
     void setUp() {
+        AccountDTO accountDTO = new AccountDTO();
+        accountDTO.setClientId(1L);
+        lenient().when(pborFeignClient.getAccountById(anyLong())).thenReturn(accountDTO);
+        lenient().when(wealthproFeignClient.getClientById(anyLong())).thenReturn(new ClientDTO());
+
         review = Review.builder()
                 .reviewId(1L)
                 .accountId(101L)

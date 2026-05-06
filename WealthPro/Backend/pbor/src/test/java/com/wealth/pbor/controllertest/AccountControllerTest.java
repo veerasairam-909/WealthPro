@@ -8,6 +8,7 @@ import com.wealth.pbor.dto.response.AccountResponse;
 import com.wealth.pbor.enums.AccountStatus;
 import com.wealth.pbor.enums.AccountType;
 import com.wealth.pbor.exception.ResourceNotFoundException;
+import com.wealth.pbor.security.OwnershipGuard;
 import com.wealth.pbor.service.AccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,9 @@ class AccountControllerTest {
 
     @MockBean
     private AccountService accountService;
+
+    @MockBean
+    private OwnershipGuard ownershipGuard;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -140,7 +144,6 @@ class AccountControllerTest {
         doNothing().when(accountService).deleteAccount(1L);
 
         mockMvc.perform(delete("/api/accounts/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Account deleted successfully."));
+                .andExpect(status().isNoContent());
     }
 }

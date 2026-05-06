@@ -6,8 +6,9 @@ import com.wealth.pbor.entity.Account;
 import com.wealth.pbor.entity.Holding;
 import com.wealth.pbor.enums.AccountStatus;
 import com.wealth.pbor.enums.AccountType;
-import com.wealth.pbor.exception.BadRequestException;
 import com.wealth.pbor.exception.ResourceNotFoundException;
+import com.wealth.pbor.feign.ProductCatalogFeignClient;
+import com.wealth.pbor.feign.dto.SecurityDTO;
 import com.wealth.pbor.repository.AccountRepository;
 import com.wealth.pbor.repository.HoldingRepository;
 import com.wealth.pbor.service.impl.HoldingServiceImpl;
@@ -40,6 +41,9 @@ class HoldingServiceTest {
 
     @Mock
     private ModelMapper mapper;
+
+    @Mock
+    private ProductCatalogFeignClient productCatalogFeignClient;
 
     @InjectMocks
     private HoldingServiceImpl holdingService;
@@ -84,7 +88,8 @@ class HoldingServiceTest {
     @Test
     void testCreateHolding_Success() {
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
-        when(holdingRepository.existsByAccountAccountIdAndSecurityId(1L, 101L)).thenReturn(false);
+        when(productCatalogFeignClient.getSecurityById(101L)).thenReturn(new SecurityDTO());
+        when(holdingRepository.findByAccountAccountIdAndSecurityId(1L, 101L)).thenReturn(Optional.empty());
         when(holdingRepository.save(any(Holding.class))).thenReturn(holding);
         when(mapper.map(holding, HoldingResponse.class)).thenReturn(response);
 
@@ -104,12 +109,17 @@ class HoldingServiceTest {
     }
 
     @Test
-    void testCreateHolding_DuplicateThrowsBadRequest() {
+    void testCreateHolding_ExistingHoldingMerges() {
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
-        when(holdingRepository.existsByAccountAccountIdAndSecurityId(1L, 101L)).thenReturn(true);
+        when(productCatalogFeignClient.getSecurityById(101L)).thenReturn(new SecurityDTO());
+        when(holdingRepository.findByAccountAccountIdAndSecurityId(1L, 101L)).thenReturn(Optional.of(holding));
+        when(holdingRepository.save(any(Holding.class))).thenReturn(holding);
+        when(mapper.map(holding, HoldingResponse.class)).thenReturn(response);
 
-        assertThrows(BadRequestException.class, () -> holdingService.createHolding(request));
-        verify(holdingRepository, never()).save(any());
+        HoldingResponse result = holdingService.createHolding(request);
+
+        assertThat(result).isNotNull();
+        verify(holdingRepository, times(1)).save(any(Holding.class));
     }
 
     @Test

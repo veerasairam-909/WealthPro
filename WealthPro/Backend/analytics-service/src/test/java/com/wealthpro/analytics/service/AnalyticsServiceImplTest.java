@@ -4,6 +4,10 @@ import com.wealthpro.analytics.dto.*;
 import com.wealthpro.analytics.entities.*;
 import com.wealthpro.analytics.enums.*;
 import com.wealthpro.analytics.exception.ResourceNotFoundException;
+import com.wealthpro.analytics.feign.NotificationFeignClient;
+import com.wealthpro.analytics.feign.PborFeignClient;
+import com.wealthpro.analytics.feign.WealthproFeignClient;
+import com.wealthpro.analytics.feign.dto.AccountDTO;
 import com.wealthpro.analytics.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +24,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -33,8 +38,18 @@ class AnalyticsServiceImplTest {
     @Mock private RiskMeasureRepository riskMeasureRepository;
     @Mock private ComplianceBreachRepository complianceBreachRepository;
     @Mock private ModelMapper modelMapper;
+    @Mock private PborFeignClient pborFeignClient;
+    @Mock private WealthproFeignClient wealthproFeignClient;
+    @Mock private NotificationFeignClient notificationFeignClient;
 
     @InjectMocks private AnalyticsServiceImpl analyticsService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(pborFeignClient.getAccountById(anyLong())).thenReturn(new AccountDTO());
+        lenient().when(pborFeignClient.getHoldingsByAccountId(anyLong())).thenReturn(List.of());
+        lenient().when(wealthproFeignClient.getAllSuitabilityRules()).thenReturn(List.of());
+    }
 
     @Test
     void testCalculateDailyReturn_positive() {

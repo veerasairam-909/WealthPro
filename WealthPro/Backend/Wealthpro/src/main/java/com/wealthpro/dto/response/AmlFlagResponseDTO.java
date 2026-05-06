@@ -20,4 +20,5 @@ public class AmlFlagResponseDTO {
     private String reviewedBy;
     private LocalDate reviewedDate;
     private String notes;
+    private Long raisedByUserId;
 }

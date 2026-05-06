@@ -3,6 +3,7 @@ package com.wealthpro.analytics.controller;
 import com.wealthpro.analytics.dto.*;
 import com.wealthpro.analytics.enums.*;
 import com.wealthpro.analytics.exception.ResourceNotFoundException;
+import com.wealthpro.analytics.security.OwnershipGuard;
 import com.wealthpro.analytics.service.AnalyticsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ class AnalyticsControllerImplTest {
 
     @Autowired private MockMvc mockMvc;
     @MockitoBean private AnalyticsService analyticsService;
+    @MockitoBean private OwnershipGuard ownershipGuard;
 
     @Test
     void testCalculateDailyReturn_positive() throws Exception {
@@ -32,7 +34,8 @@ class AnalyticsControllerImplTest {
         when(analyticsService.calculateDailyReturn(1L, 1L)).thenReturn(dto);
 
         mockMvc.perform(post("/api/analytics/accounts/1/daily-return")
-                        .param("portfolioId", "1"))
+                        .param("portfolioId", "1")
+                        .header("X-Auth-Roles", "ROLE_ADMIN"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.returnPercentage").value(2.5));
     }
@@ -43,7 +46,8 @@ class AnalyticsControllerImplTest {
         dto.setMeasureType(MeasureType.VOLATILITY);
         when(analyticsService.runRiskAssessment(1L)).thenReturn(List.of(dto));
 
-        mockMvc.perform(post("/api/analytics/accounts/1/risk-assessment"))
+        mockMvc.perform(post("/api/analytics/accounts/1/risk-assessment")
+                        .header("X-Auth-Roles", "ROLE_ADMIN"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.length()").value(1));
     }
@@ -51,7 +55,8 @@ class AnalyticsControllerImplTest {
     @Test
     void testRunComplianceScan_positive() throws Exception {
         when(analyticsService.runComplianceScan(1L)).thenReturn(List.of());
-        mockMvc.perform(post("/api/analytics/accounts/1/compliance-scan"))
+        mockMvc.perform(post("/api/analytics/accounts/1/compliance-scan")
+                        .header("X-Auth-Roles", "ROLE_ADMIN"))
                 .andExpect(status().isOk());
     }
 
@@ -61,7 +66,8 @@ class AnalyticsControllerImplTest {
         dto.setStatus(BreachStatus.ACKNOWLEDGED);
         when(analyticsService.acknowledgeBreach(1L)).thenReturn(dto);
 
-        mockMvc.perform(patch("/api/compliance-breaches/1/acknowledge"))
+        mockMvc.perform(patch("/api/compliance-breaches/1/acknowledge")
+                        .header("X-Auth-Roles", "ROLE_ADMIN"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("ACKNOWLEDGED"));
     }
@@ -69,7 +75,8 @@ class AnalyticsControllerImplTest {
     @Test
     void testCloseBreach_notFound() throws Exception {
         when(analyticsService.closeBreach(999L)).thenThrow(new ResourceNotFoundException("Breach", 999L));
-        mockMvc.perform(patch("/api/compliance-breaches/999/close"))
+        mockMvc.perform(patch("/api/compliance-breaches/999/close")
+                        .header("X-Auth-Roles", "ROLE_ADMIN"))
                 .andExpect(status().isNotFound());
     }
 

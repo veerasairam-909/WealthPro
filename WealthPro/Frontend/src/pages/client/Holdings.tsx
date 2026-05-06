@@ -684,7 +684,7 @@ export default function Holdings() {
                       className="input mono"
                       type="number"
                       step="0.05"
-                      min="0"
+                      min="0.01"
                       placeholder="e.g. 1648.50"
                       value={sellPrice}
                       onChange={(e) => setSellPrice(e.target.value)}

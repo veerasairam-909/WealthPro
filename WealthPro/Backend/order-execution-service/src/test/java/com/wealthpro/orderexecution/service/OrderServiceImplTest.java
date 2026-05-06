@@ -6,6 +6,13 @@ import com.wealthpro.orderexecution.entities.PreTradeCheck;
 import com.wealthpro.orderexecution.entities.ExecutionFill;
 import com.wealthpro.orderexecution.enums.*;
 import com.wealthpro.orderexecution.exception.ResourceNotFoundException;
+import com.wealthpro.orderexecution.feign.NotificationFeignClient;
+import com.wealthpro.orderexecution.feign.PborFeignClient;
+import com.wealthpro.orderexecution.feign.ProductCatalogFeignClient;
+import com.wealthpro.orderexecution.feign.WealthproFeignClient;
+import com.wealthpro.orderexecution.feign.dto.ClientDTO;
+import com.wealthpro.orderexecution.feign.dto.RiskProfileDTO;
+import com.wealthpro.orderexecution.feign.dto.SecurityDTO;
 import com.wealthpro.orderexecution.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +28,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 /**
@@ -34,6 +42,11 @@ class OrderServiceImplTest {
     @Mock private ExecutionFillRepository executionFillRepository;
     @Mock private AllocationRepository allocationRepository;
     @Mock private ModelMapper modelMapper;
+    @Mock private WealthproFeignClient wealthproFeignClient;
+    @Mock private ProductCatalogFeignClient productCatalogFeignClient;
+    @Mock private PborFeignClient pborFeignClient;
+    @Mock private NotificationFeignClient notificationFeignClient;
+    @Mock private SuitabilityRuleEvaluator suitabilityRuleEvaluator;
 
     @InjectMocks private OrderServiceImpl orderService;
 
@@ -43,6 +56,12 @@ class OrderServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(wealthproFeignClient.getClientById(anyLong())).thenReturn(new ClientDTO());
+        lenient().when(productCatalogFeignClient.getSecurityById(anyLong())).thenReturn(new SecurityDTO());
+        lenient().when(wealthproFeignClient.getRiskProfileByClientId(anyLong())).thenReturn(new RiskProfileDTO());
+        lenient().when(wealthproFeignClient.getAllSuitabilityRules()).thenReturn(List.of());
+        lenient().when(pborFeignClient.getAccountsByClientId(anyLong())).thenReturn(List.of());
+
         sampleOrder = Order.builder()
                 .orderId(1L).clientId(10L).securityId(100L)
                 .side(Side.BUY).quantity(50).priceType(PriceType.MARKET)

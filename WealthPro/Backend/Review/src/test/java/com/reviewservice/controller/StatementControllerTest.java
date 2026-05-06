@@ -7,6 +7,7 @@ import com.reviewservice.dto.response.StatementResponse;
 import com.reviewservice.enums.PeriodType;
 import com.reviewservice.enums.StatementStatus;
 import com.reviewservice.exception.ResourceNotFoundException;
+import com.reviewservice.security.OwnershipGuard;
 import com.reviewservice.service.StatementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +41,9 @@ class StatementControllerTest {
 
     @MockitoBean
     private StatementService statementService;
+
+    @MockitoBean
+    private OwnershipGuard ownershipGuard;
 
     private ObjectMapper objectMapper;
     private StatementRequest statementRequest;

@@ -53,7 +53,7 @@ class SecurityRepositoryTest {
 
     @Test
     void shouldFindBySymbol() {
-        Optional<Security> found = securityRepository.findBySymbol("AAPL");
+        Optional<Security> found = securityRepository.findBySymbolIgnoreCase("AAPL");
 
         assertTrue(found.isPresent());
         assertEquals(AssetClass.EQUITY, found.get().getAssetClass());
@@ -61,21 +61,21 @@ class SecurityRepositoryTest {
 
     @Test
     void shouldReturnEmptyWhenSymbolNotFound() {
-        Optional<Security> found = securityRepository.findBySymbol("UNKNOWN");
+        Optional<Security> found = securityRepository.findBySymbolIgnoreCase("UNKNOWN");
 
         assertFalse(found.isPresent());
     }
 
     @Test
     void shouldReturnTrueWhenSymbolExists() {
-        boolean exists = securityRepository.existsBySymbol("AAPL");
+        boolean exists = securityRepository.existsBySymbolIgnoreCase("AAPL");
 
         assertTrue(exists);
     }
 
     @Test
     void shouldReturnFalseWhenSymbolDoesNotExist() {
-        boolean exists = securityRepository.existsBySymbol("NOTEXIST");
+        boolean exists = securityRepository.existsBySymbolIgnoreCase("NOTEXIST");
 
         assertFalse(exists);
     }

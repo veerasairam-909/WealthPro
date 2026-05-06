@@ -19,20 +19,20 @@ function fmtPct(v: number | null | undefined) {
 
 function measureLabel(type: string) {
   const MAP: Record<string, string> = {
-    VOLATILITY:    'Volatility (σ)',
-    DRAWDOWN:      'Max Drawdown',
-    TRACKINGERROR: 'Tracking Error',
-    VARPROXY:      'VaR Proxy',
+    VOLATILITY:     'Volatility (σ)',
+    MAX_DRAWDOWN:   'Max Drawdown',
+    TRACKING_ERROR: 'Tracking Error',
+    VAR_95:         'VaR (95%)',
   };
   return MAP[type] || type;
 }
 
 function measureColor(type: string) {
   const MAP: Record<string, string> = {
-    VOLATILITY:    '#387ED1',
-    DRAWDOWN:      '#EB5B3C',
-    TRACKINGERROR: '#F4A41E',
-    VARPROXY:      '#a855f7',
+    VOLATILITY:     '#387ED1',
+    MAX_DRAWDOWN:   '#EB5B3C',
+    TRACKING_ERROR: '#F4A41E',
+    VAR_95:         '#a855f7',
   };
   return MAP[type] || '#94a3b8';
 }

@@ -6,6 +6,8 @@ import com.wealth.goalsadvisory.entity.Goal;
 import com.wealth.goalsadvisory.enums.GoalStatus;
 import com.wealth.goalsadvisory.enums.GoalType;
 import com.wealth.goalsadvisory.exception.ResourceNotFoundException;
+import com.wealth.goalsadvisory.feign.WealthproFeignClient;
+import com.wealth.goalsadvisory.feign.dto.ClientDTO;
 import com.wealth.goalsadvisory.repository.GoalRepository;
 import com.wealth.goalsadvisory.service.Impl.GoalServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +26,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -36,6 +39,9 @@ class GoalServiceCreateReadTest {
     @Mock
     private ModelMapper mapper;
 
+    @Mock
+    private WealthproFeignClient wealthproFeignClient;
+
     @InjectMocks
     private GoalServiceImpl goalService;
 
@@ -45,6 +51,8 @@ class GoalServiceCreateReadTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(wealthproFeignClient.getClientById(anyLong())).thenReturn(new ClientDTO());
+
         sampleGoal = new Goal();
         sampleGoal.setGoalId(1L);
         sampleGoal.setClientId(101L);

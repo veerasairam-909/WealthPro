@@ -69,7 +69,7 @@ class SecurityServiceTest {
 
     @Test
     void shouldCreateSecuritySuccessfully() {
-        when(securityRepository.existsBySymbol("AAPL")).thenReturn(false);
+        when(securityRepository.existsBySymbolIgnoreCase("AAPL")).thenReturn(false);
         when(modelMapper.map(request, Security.class)).thenReturn(security);
         when(securityRepository.save(security)).thenReturn(security);
         when(modelMapper.map(security, SecurityResponse.class)).thenReturn(response);
@@ -83,7 +83,7 @@ class SecurityServiceTest {
 
     @Test
     void shouldThrowDuplicateExceptionWhenSymbolExists() {
-        when(securityRepository.existsBySymbol("AAPL")).thenReturn(true);
+        when(securityRepository.existsBySymbolIgnoreCase("AAPL")).thenReturn(true);
 
         assertThrows(DuplicateResourceException.class,
                 () -> securityService.createSecurity(request));
@@ -112,7 +112,7 @@ class SecurityServiceTest {
 
     @Test
     void shouldGetSecurityBySymbolSuccessfully() {
-        when(securityRepository.findBySymbol("AAPL")).thenReturn(Optional.of(security));
+        when(securityRepository.findBySymbolIgnoreCase("AAPL")).thenReturn(Optional.of(security));
         when(modelMapper.map(security, SecurityResponse.class)).thenReturn(response);
 
         SecurityResponse result = securityService.getSecurityBySymbol("AAPL");
@@ -123,7 +123,7 @@ class SecurityServiceTest {
 
     @Test
     void shouldThrowNotFoundWhenSymbolNotFound() {
-        when(securityRepository.findBySymbol("UNKNOWN")).thenReturn(Optional.empty());
+        when(securityRepository.findBySymbolIgnoreCase("UNKNOWN")).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
                 () -> securityService.getSecurityBySymbol("UNKNOWN"));
@@ -189,7 +189,7 @@ class SecurityServiceTest {
         updateRequest.setStatus(SecurityStatus.ACTIVE);
 
         when(securityRepository.findById(1L)).thenReturn(Optional.of(security));
-        when(securityRepository.existsBySymbol("TSLA")).thenReturn(true);
+        when(securityRepository.existsBySymbolIgnoreCase("TSLA")).thenReturn(true);
 
         assertThrows(DuplicateResourceException.class,
                 () -> securityService.updateSecurity(1L, updateRequest));

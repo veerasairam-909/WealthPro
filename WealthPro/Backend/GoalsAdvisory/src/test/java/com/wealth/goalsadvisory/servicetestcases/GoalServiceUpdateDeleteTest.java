@@ -6,6 +6,7 @@ import com.wealth.goalsadvisory.entity.Goal;
 import com.wealth.goalsadvisory.enums.GoalStatus;
 import com.wealth.goalsadvisory.enums.GoalType;
 import com.wealth.goalsadvisory.exception.ResourceNotFoundException;
+import com.wealth.goalsadvisory.feign.WealthproFeignClient;
 import com.wealth.goalsadvisory.repository.GoalRepository;
 import com.wealth.goalsadvisory.service.Impl.GoalServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,9 @@ class GoalServiceUpdateDeleteTest {
 
     @Mock
     private ModelMapper mapper;
+
+    @Mock
+    private WealthproFeignClient wealthproFeignClient;
 
     @InjectMocks
     private GoalServiceImpl goalService;

@@ -39,6 +39,10 @@ export default function AdminSecurities() {
   const [status, setStatus]           = useState('ACTIVE');
   const [currentPrice, setCurrentPrice] = useState('');
 
+  // price adjustment
+  const [updatingId, setUpdatingId]   = useState<number | null>(null);
+  const [priceFlash, setPriceFlash]   = useState<{ id: number; dir: 'up' | 'down' } | null>(null);
+
   // search
   const [search, setSearch]           = useState('');
   const [assetFilter, setAssetFilter] = useState('ALL');
@@ -52,6 +56,40 @@ export default function AdminSecurities() {
       if (Array.isArray(data)) setSecurities(data);
     } catch { /* service may be down */ }
     setLoading(false);
+  }
+
+  // ── price adjustment ───────────────────────────────────────────────────────
+  async function adjustPrice(s: any, pct: number) {
+    if (s.currentPrice == null) return;
+    const newPrice = Math.round(s.currentPrice * (1 + pct / 100) * 100) / 100;
+    if (newPrice <= 0) return;
+
+    setUpdatingId(s.securityId);
+    try {
+      await updateSecurity(s.securityId, {
+        symbol: s.symbol,
+        name: s.name ?? null,
+        exchange: s.exchange ?? null,
+        isin: s.isin ?? null,
+        assetClass: s.assetClass,
+        currency: s.currency,
+        country: s.country,
+        status: s.status,
+        currentPrice: newPrice,
+      });
+      // Optimistic update — no full reload needed
+      setSecurities((prev) =>
+        prev.map((sec) =>
+          sec.securityId === s.securityId ? { ...sec, currentPrice: newPrice } : sec
+        )
+      );
+      setPriceFlash({ id: s.securityId, dir: pct > 0 ? 'up' : 'down' });
+      setTimeout(() => setPriceFlash(null), 1500);
+    } catch {
+      setGlobalError('Price update failed. Please try again.');
+      setTimeout(() => setGlobalError(''), 4000);
+    }
+    setUpdatingId(null);
   }
 
   // ── filtered view ──────────────────────────────────────────────────────────
@@ -93,12 +131,21 @@ export default function AdminSecurities() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!symbol.trim()) { setFormError('Symbol is required'); return; }
+    const symbolValue = symbol.trim().toUpperCase();
+    if (!symbolValue) { setFormError('Symbol is required'); return; }
+    if (!/^[A-Z0-9&._-]+$/.test(symbolValue)) {
+      setFormError('Symbol can only contain letters, numbers and the characters & . _ -');
+      return;
+    }
+    if (symbolValue.length > 20) {
+      setFormError('Symbol must be 20 characters or fewer');
+      return;
+    }
 
     let price: number | null = null;
     if (currentPrice.trim() !== '') {
       price = parseFloat(currentPrice);
-      if (isNaN(price) || price < 0) { setFormError('Price must be a non-negative number'); return; }
+      if (isNaN(price) || price <= 0) { setFormError('Price must be greater than zero'); return; }
     }
 
     setSaving(true);
@@ -245,11 +292,39 @@ export default function AdminSecurities() {
                   </td>
                   <td className="px-5 py-3 text-text-2">{s.currency}</td>
                   <td className="px-5 py-3 text-text-2">{s.country}</td>
-                  <td className="px-5 py-3 mono text-right font-medium">
-                    {s.currentPrice != null
-                      ? '₹' + Number(s.currentPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                      : <span className="text-text-3 text-xs">—</span>
-                    }
+                  <td className="px-5 py-3 text-right">
+                    {s.currentPrice != null ? (
+                      <div>
+                        <span className={
+                          'mono font-medium transition-colors duration-500 ' +
+                          (priceFlash?.id === s.securityId
+                            ? priceFlash.dir === 'up' ? 'text-success' : 'text-danger'
+                            : '')
+                        }>
+                          ₹{Number(s.currentPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                        <div className="flex gap-1 justify-end mt-1.5">
+                          {[-5, -1, 1, 5].map((pct) => (
+                            <button
+                              key={pct}
+                              onClick={() => adjustPrice(s, pct)}
+                              disabled={updatingId === s.securityId}
+                              title={`${pct > 0 ? '+' : ''}${pct}% → ₹${(Math.round(s.currentPrice * (1 + pct / 100) * 100) / 100).toFixed(2)}`}
+                              className={
+                                'text-xs px-1.5 py-0.5 rounded border font-mono disabled:opacity-40 ' +
+                                (pct < 0
+                                  ? 'text-danger border-danger/40 hover:bg-danger/10'
+                                  : 'text-success border-success/40 hover:bg-success/10')
+                              }
+                            >
+                              {pct > 0 ? '+' : ''}{pct}%
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-text-3 text-xs">— no price set</span>
+                    )}
                   </td>
                   <td className="px-5 py-3">
                     <span className={'pill ' + (s.status === 'ACTIVE' ? 'pill-success' : 'pill-danger')}>
@@ -286,6 +361,7 @@ export default function AdminSecurities() {
                   className="input mono"
                   type="text"
                   placeholder="e.g. HDFCBANK"
+                  maxLength={20}
                   value={symbol}
                   onChange={(e) => setSymbol(e.target.value)}
                   autoFocus
@@ -320,7 +396,7 @@ export default function AdminSecurities() {
                   className="input mono"
                   type="number"
                   step="0.01"
-                  min="0"
+                  min="0.01"
                   placeholder="Leave blank for suspended securities"
                   value={currentPrice}
                   onChange={(e) => setCurrentPrice(e.target.value)}

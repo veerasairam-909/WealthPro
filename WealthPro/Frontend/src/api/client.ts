@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuth } from '@/auth/store';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9999';
 
@@ -15,12 +16,13 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// handle 401 - logout and go to login
+// handle 401 - clear auth state and redirect to login
 api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response && err.response.status === 401) {
-      localStorage.removeItem('token');
+      // clears token from localStorage AND resets Zustand user state
+      useAuth.getState().logout();
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }

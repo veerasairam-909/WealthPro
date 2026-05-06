@@ -1,6 +1,0 @@
-com\reviewservice\controller\StatementControllerTest.class
-com\reviewservice\service\StatementServiceTest.class
-com\reviewservice\repository\ReviewRepositoryTest.class
-com\reviewservice\repository\StatementRepositoryTest.class
-com\reviewservice\service\ReviewServiceTest.class
-com\reviewservice\controller\ReviewControllerTest.class

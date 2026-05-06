@@ -7,6 +7,7 @@ import com.wealth.pbor.controller.impl.HoldingControllerImpl;
 import com.wealth.pbor.dto.request.HoldingRequest;
 import com.wealth.pbor.dto.response.HoldingResponse;
 import com.wealth.pbor.exception.ResourceNotFoundException;
+import com.wealth.pbor.security.OwnershipGuard;
 import com.wealth.pbor.service.HoldingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ class HoldingControllerTest {
 
     @MockBean
     private HoldingService holdingService;
+
+    @MockBean
+    private OwnershipGuard ownershipGuard;
 
     private ObjectMapper objectMapper;
     private HoldingRequest request;

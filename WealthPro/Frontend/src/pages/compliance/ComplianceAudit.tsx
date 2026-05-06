@@ -1,15 +1,54 @@
 import { useState, useEffect } from 'react';
 import { getAuditLogs } from '@/api/admin';
 
-// Compliance-relevant HTTP methods: mutations + all reads that touch sensitive endpoints
 const METHODS = ['ALL', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
 
-// Compliance cares about: client data changes, KYC, orders, recommendations
-const COMPLIANCE_PATHS = ['/api/clients', '/api/orders', '/api/recommendations', '/api/goals', '/auth'];
+// Paths compliance cares about — admin/system paths are excluded
+const COMPLIANCE_RELEVANT_PREFIXES = [
+  '/api/clients',
+  '/api/orders',
+  '/api/aml-flags',
+  '/api/recommendations',
+  '/api/goals',
+  '/api/holdings',
+  '/api/accounts',
+  '/api/cash-ledger',
+  '/api/compliance-breaches',
+  '/api/suitability-rules',
+  '/api/analytics',
+  '/auth/login',   // login events for security monitoring
+];
+
+// Sub-paths excluded from compliance view — internal dealer/system operations
+const EXCLUDED_SUBPATHS = [
+  'pre-trade-checks',   // dealer internal — POST /api/orders/{id}/pre-trade-checks
+  '/fills',             // dealer fill recording
+  '/allocations',       // dealer allocation recording
+  '/route',             // dealer routing
+];
+
+const PATH_FILTERS = [
+  { label: 'All',            value: 'ALL' },
+  { label: 'Clients',        value: '/api/clients' },
+  { label: 'Orders',         value: '/api/orders' },
+  { label: 'AML Flags',      value: '/api/aml-flags' },
+  { label: 'Recommendations',value: '/api/recommendations' },
+  { label: 'Goals',          value: '/api/goals' },
+  { label: 'Holdings',       value: '/api/holdings' },
+  { label: 'Breaches',       value: '/api/compliance-breaches' },
+];
+
+function isComplianceRelevant(path: string): boolean {
+  const relevant = COMPLIANCE_RELEVANT_PREFIXES.some((prefix) => path.startsWith(prefix));
+  if (!relevant) return false;
+  const excluded = EXCLUDED_SUBPATHS.some((sub) => path.includes(sub));
+  return !excluded;
+}
 
 export default function ComplianceAudit() {
   const [audits, setAudits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchUser, setSearchUser] = useState('');
   const [methodFilter, setMethodFilter] = useState('ALL');
   const [pathFilter, setPathFilter] = useState('ALL');
@@ -20,11 +59,22 @@ export default function ComplianceAudit() {
 
   async function loadAudits(filters?: any) {
     setLoading(true);
+    setError('');
     try {
       const data = await getAuditLogs(filters || { limit: 500 });
-      setAudits(Array.isArray(data) ? data : []);
-    } catch (e) {
+      // Keep only compliance-relevant paths — exclude admin/system/internal calls
+      const relevant = Array.isArray(data)
+        ? data.filter((a: any) => isComplianceRelevant(a.path || ''))
+        : [];
+      setAudits(relevant);
+    } catch (e: any) {
       setAudits([]);
+      const status = e?.response?.status;
+      if (status === 403) {
+        setError('Access denied — the API Gateway needs to be restarted to apply the latest permissions. Ask your admin to restart the gateway service.');
+      } else {
+        setError('Failed to load audit log. Please try again.');
+      }
     }
     setLoading(false);
   }
@@ -57,10 +107,10 @@ export default function ComplianceAudit() {
     return (a.path || '').startsWith(pathFilter);
   });
 
-  // Counts for summary
-  const mutationCount = audits.filter((a) => ['POST', 'PUT', 'PATCH', 'DELETE'].includes(a.method)).length;
-  const clientChanges = audits.filter((a) => (a.path || '').startsWith('/api/clients') && a.method !== 'GET').length;
-  const orderEvents = audits.filter((a) => (a.path || '').startsWith('/api/orders')).length;
+  // Compliance-specific summary counts
+  const clientChanges  = audits.filter((a) => (a.path || '').startsWith('/api/clients') && a.method !== 'GET').length;
+  const orderEvents    = audits.filter((a) => (a.path || '').startsWith('/api/orders')).length;
+  const amlEvents      = audits.filter((a) => (a.path || '').startsWith('/api/aml-flags')).length;
 
   return (
     <div>
@@ -72,14 +122,12 @@ export default function ComplianceAudit() {
         <p className="text-xs text-text-2">Showing {filtered.length} of {audits.length} entries</p>
       </div>
 
+      {error && (
+        <div className="pill pill-danger block mb-4 text-center">{error}</div>
+      )}
+
       {/* Summary strip */}
       <div className="grid grid-cols-3 gap-4 mb-4">
-        <div className="panel">
-          <div className="panel-b py-3">
-            <p className="label text-xs">Write operations</p>
-            <p className="text-xl font-semibold mt-0.5">{mutationCount}</p>
-          </div>
-        </div>
         <div className="panel">
           <div className="panel-b py-3">
             <p className="label text-xs">Client data changes</p>
@@ -90,6 +138,12 @@ export default function ComplianceAudit() {
           <div className="panel-b py-3">
             <p className="label text-xs">Order events</p>
             <p className="text-xl font-semibold mt-0.5">{orderEvents}</p>
+          </div>
+        </div>
+        <div className="panel">
+          <div className="panel-b py-3">
+            <p className="label text-xs">AML flag actions</p>
+            <p className="text-xl font-semibold mt-0.5">{amlEvents}</p>
           </div>
         </div>
       </div>
@@ -130,18 +184,18 @@ export default function ComplianceAudit() {
           {/* Path quick-filter */}
           <div className="flex gap-1 mt-2 flex-wrap">
             <span className="text-xs text-text-2 self-center mr-1">Path:</span>
-            {(['ALL', ...COMPLIANCE_PATHS] as string[]).map((p) => (
+            {PATH_FILTERS.map(({ label, value }) => (
               <button
-                key={p}
-                onClick={() => setPathFilter(p)}
+                key={value}
+                onClick={() => setPathFilter(value)}
                 className={
                   'px-2 py-0.5 text-xs rounded border ' +
-                  (pathFilter === p
+                  (pathFilter === value
                     ? 'bg-primary text-white border-primary'
                     : 'bg-white text-text-2 border-border')
                 }
               >
-                {p === 'ALL' ? 'All paths' : p}
+                {label}
               </button>
             ))}
           </div>
@@ -153,7 +207,9 @@ export default function ComplianceAudit() {
         {loading ? (
           <div className="panel-b text-center text-text-2 py-10">Loading audit log...</div>
         ) : filtered.length === 0 ? (
-          <div className="panel-b text-center text-text-2 py-10">No audit entries match current filters.</div>
+          <div className="panel-b text-center text-text-2 py-10">
+            {audits.length === 0 ? 'No audit entries recorded yet.' : 'No entries match current filters.'}
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-surface">

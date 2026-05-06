@@ -20,5 +20,7 @@ public interface AmlFlagService {
 
     AmlFlagResponseDTO reviewFlag(Long amlFlagId, AmlFlagReviewRequestDTO reviewDTO, String reviewedBy);
 
+    AmlFlagResponseDTO requestClosure(Long amlFlagId, String rmUsername);
+
     void deleteFlag(Long amlFlagId);
 }

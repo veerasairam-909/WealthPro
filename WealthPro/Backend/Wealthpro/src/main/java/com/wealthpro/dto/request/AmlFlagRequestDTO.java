@@ -21,4 +21,8 @@ public class AmlFlagRequestDTO {
     private String description;
 
     private String notes;
+
+    // Optional: userId of the compliance analyst raising the flag.
+    // Used to send a notification back when RM requests closure.
+    private Long raisedByUserId;
 }

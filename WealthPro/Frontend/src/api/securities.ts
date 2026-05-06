@@ -24,6 +24,9 @@ export async function createSecurity(data: {
 
 export async function updateSecurity(id: number, data: {
   symbol?: string;
+  name?: string | null;
+  exchange?: string | null;
+  isin?: string | null;
   assetClass?: string;
   currency?: string;
   country?: string;

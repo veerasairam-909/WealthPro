@@ -601,35 +601,41 @@ function KycTab(props: { clientId: number; kycDocs: any[]; canEdit: boolean; onU
                 <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Type</th>
                 <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Reference</th>
                 <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Verified Date</th>
+                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Expiry Date</th>
                 <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Status</th>
                 {canEdit && <th className="text-right px-5 py-3 text-xs uppercase font-medium text-text-2">Action</th>}
               </tr>
             </thead>
             <tbody>
               {kycDocs.map((d) => (
-                <tr key={d.kycId} className="border-t border-border-hairline">
+                <tr key={d.kycId} className={'border-t border-border-hairline' + (d.status === 'Expired' ? ' bg-danger/5' : '')}>
                   <td className="px-5 py-3 mono text-xs">{d.kycId}</td>
                   <td className="px-5 py-3 font-medium">{d.documentType}</td>
                   <td className="px-5 py-3 mono text-xs text-text-2 truncate max-w-xs">
                     {d.documentRefNumber || d.documentRef || '-'}
                   </td>
                   <td className="px-5 py-3 mono text-xs text-text-2">{d.verifiedDate || '-'}</td>
+                  <td className="px-5 py-3 mono text-xs text-text-2">{d.expiryDate || '-'}</td>
                   <td className="px-5 py-3">
                     <span className={
                       'pill ' +
                       (d.status === 'Verified' ? 'pill-success' :
-                       d.status === 'Pending' ? 'pill-warn' : 'pill-danger')
+                       d.status === 'Pending'  ? 'pill-warn'    :
+                       d.status === 'Expired'  ? 'pill-danger'  : 'pill-danger')
                     }>{d.status}</span>
                   </td>
                   {canEdit && (
                     <td className="px-5 py-3 text-right">
-                      {d.status !== 'Verified' && (
+                      {d.status === 'Pending' && (
                         <button
                           onClick={() => markVerified(d.kycId)}
                           className="text-xs text-success font-medium"
                         >
                           Mark verified
                         </button>
+                      )}
+                      {d.status === 'Expired' && (
+                        <span className="text-xs text-danger italic">Re-upload required</span>
                       )}
                     </td>
                   )}

@@ -20,5 +20,6 @@ public class KYCDocumentResponseDTO {
     private String documentRef;
     private String documentRefNumber;
     private LocalDate verifiedDate;
+    private LocalDate expiryDate;
     private KycStatus status;
 }

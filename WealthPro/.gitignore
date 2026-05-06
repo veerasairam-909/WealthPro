@@ -1,0 +1,39 @@
+# ── Maven build output ────────────────────────────────────────────────────────
+**/target/
+**/*.class
+**/*.jar
+**/*.war
+**/*.ear
+
+# ── Log files ─────────────────────────────────────────────────────────────────
+**/logs/
+**/*.log
+**/*.log.*
+logs/
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.env
+Frontend/.env.local
+Frontend/.env.*.local
+
+# ── IDE / Editor ──────────────────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Claude Code session files ─────────────────────────────────────────────────
+.claude/
+
+# ── Test coverage & reports ───────────────────────────────────────────────────
+**/jacoco.exec
+**/site/
+**/surefire-reports/
+
+# ── OS files ──────────────────────────────────────────────────────────────────
+desktop.ini

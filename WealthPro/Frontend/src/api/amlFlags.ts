@@ -16,8 +16,14 @@ export async function createAmlFlag(payload: {
   flagType: string;
   description: string;
   notes?: string;
+  raisedByUserId?: number;
 }) {
   const res = await api.post('/api/aml-flags', payload);
+  return res.data;
+}
+
+export async function requestClosureAmlFlag(amlFlagId: number) {
+  const res = await api.put(`/api/aml-flags/${amlFlagId}/request-closure`);
   return res.data;
 }
 

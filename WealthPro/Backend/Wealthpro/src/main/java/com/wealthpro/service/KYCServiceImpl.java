@@ -107,9 +107,10 @@ public class KYCServiceImpl implements KYCService{
 
         kycDocument.setStatus(newStatus);
 
-        // If being marked as Verified, set the verifiedDate to today
+        // If being marked as Verified, set verifiedDate to today and expiryDate to 1 year from now
         if (newStatus == KycStatus.Verified) {
             kycDocument.setVerifiedDate(LocalDate.now());
+            kycDocument.setExpiryDate(LocalDate.now().plusYears(1));
         }
 
         KYCDocument updated = kycDocumentRepository.save(kycDocument);
@@ -148,6 +149,7 @@ public class KYCServiceImpl implements KYCService{
         response.setDocumentType(kycDocument.getDocumentType());
         response.setDocumentRef(kycDocument.getDocumentRef());  //path of the image
         response.setVerifiedDate(kycDocument.getVerifiedDate());
+        response.setExpiryDate(kycDocument.getExpiryDate());
         response.setStatus(kycDocument.getStatus());
         return response;
     }

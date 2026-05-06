@@ -93,9 +93,9 @@ public class SecurityConfig {
                     .hasAnyRole("RM", "ADMIN")
 
                 // ── User Management ─────────────────────────────────────
-                .pathMatchers(HttpMethod.GET, "/auth/users").hasAnyRole("ADMIN", "COMPLIANCE")
+                .pathMatchers(HttpMethod.GET, "/auth/users").hasAnyRole("ADMIN", "COMPLIANCE", "RM")
                 .pathMatchers("/auth/users/**").hasRole("ADMIN")
-                .pathMatchers("/auth/audit/**").hasRole("ADMIN")
+                .pathMatchers("/auth/audit/**").hasAnyRole("ADMIN", "COMPLIANCE")
 
                 // ── Wealthpro: IAM & Client Onboarding / KYC ────────────
                 .pathMatchers(HttpMethod.GET, "/api/clients/by-username/**")
@@ -122,7 +122,7 @@ public class SecurityConfig {
                     .hasAnyRole("COMPLIANCE", "ADMIN")
 
                 .pathMatchers("/api/aml-flags/**")
-                    .hasAnyRole("COMPLIANCE", "ADMIN")
+                    .hasAnyRole("COMPLIANCE", "ADMIN", "RM")
 
                 // ── Analytics: Performance, Risk, Compliance ─────────────
                 .pathMatchers("/api/analytics/**")

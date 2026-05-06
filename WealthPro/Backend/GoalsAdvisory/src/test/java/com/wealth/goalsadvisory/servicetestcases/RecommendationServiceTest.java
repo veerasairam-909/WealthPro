@@ -8,6 +8,9 @@ import com.wealth.goalsadvisory.enums.ModelPortfolioStatus;
 import com.wealth.goalsadvisory.enums.RecommendationStatus;
 import com.wealth.goalsadvisory.enums.RiskClass;
 import com.wealth.goalsadvisory.exception.ResourceNotFoundException;
+import com.wealth.goalsadvisory.feign.WealthproFeignClient;
+import com.wealth.goalsadvisory.feign.dto.ClientDTO;
+import com.wealth.goalsadvisory.feign.dto.RiskProfileDTO;
 import com.wealth.goalsadvisory.repository.ModelPortfolioRepository;
 import com.wealth.goalsadvisory.repository.RecommendationRepository;
 import com.wealth.goalsadvisory.service.Impl.RecommendationServiceImpl;
@@ -25,6 +28,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -40,6 +44,9 @@ class RecommendationServiceTest {
     @Mock
     private ModelMapper mapper;
 
+    @Mock
+    private WealthproFeignClient wealthproFeignClient;
+
     @InjectMocks
     private RecommendationServiceImpl recommendationService;
 
@@ -50,6 +57,9 @@ class RecommendationServiceTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(wealthproFeignClient.getClientById(anyLong())).thenReturn(new ClientDTO());
+        lenient().when(wealthproFeignClient.getRiskProfileByClientId(anyLong())).thenReturn(new RiskProfileDTO());
+
         samplePortfolio = new ModelPortfolio();
         samplePortfolio.setModelId(1L);
         samplePortfolio.setName("Balanced Growth Portfolio");

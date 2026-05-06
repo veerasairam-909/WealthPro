@@ -88,6 +88,7 @@ export default function App() {
           <Route path="/rm/analytics" element={<RmAnalytics />} />
           <Route path="/rm/notifications" element={<RmNotifications />} />
           <Route path="/rm/corporate-actions" element={<CorporateActions />} />
+          <Route path="/rm/aml-flags" element={<AmlFlags />} />
         </Route>
 
         {/* DEALER routes */}
@@ -101,13 +102,14 @@ export default function App() {
 
         {/* COMPLIANCE routes */}
         <Route element={<ProtectedRoute allow="COMPLIANCE"><Layout /></ProtectedRoute>}>
-          <Route path="/compliance/breaches"      element={<Breaches />} />
-          <Route path="/compliance/kyc-approval"  element={<KYCApproval />} />
-          <Route path="/compliance/failed-orders" element={<FailedOrders />} />
-          <Route path="/compliance/risk-monitor"  element={<RiskMonitor />} />
-          <Route path="/compliance/rules"         element={<SuitabilityRules />} />
-          <Route path="/compliance/audit"         element={<ComplianceAudit />} />
-          <Route path="/compliance/aml-flags"     element={<AmlFlags />} />
+          <Route path="/compliance/breaches"       element={<Breaches />} />
+          <Route path="/compliance/kyc-approval"   element={<KYCApproval />} />
+          <Route path="/compliance/failed-orders"  element={<FailedOrders />} />
+          <Route path="/compliance/risk-monitor"   element={<RiskMonitor />} />
+          <Route path="/compliance/rules"          element={<SuitabilityRules />} />
+          <Route path="/compliance/audit"          element={<ComplianceAudit />} />
+          <Route path="/compliance/aml-flags"      element={<AmlFlags />} />
+          <Route path="/compliance/notifications"  element={<RmNotifications />} />
         </Route>
 
         {/* CLIENT routes */}

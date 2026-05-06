@@ -66,6 +66,17 @@ public class AmlFlagController {
         return ResponseEntity.ok(amlFlagService.reviewFlag(id, reviewDTO, reviewer));
     }
 
+    // PUT /api/aml-flags/{id}/request-closure
+    // RM calls this after investigating to request the compliance analyst close the flag.
+    // Does NOT change the flag status — only sends a notification to compliance.
+    @PutMapping("/{id}/request-closure")
+    public ResponseEntity<AmlFlagResponseDTO> requestClosure(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-Auth-Username", required = false) String rmUsername) {
+        String rm = (rmUsername != null && !rmUsername.isBlank()) ? rmUsername : "RM";
+        return ResponseEntity.ok(amlFlagService.requestClosure(id, rm));
+    }
+
     // DELETE /api/aml-flags/{id}
     // Delete an AML flag record
     @DeleteMapping("/{id}")

@@ -6,6 +6,7 @@ import com.wealthpro.entities.Client;
 import com.wealthpro.enums.ClientSegment;
 import com.wealthpro.enums.ClientStatus;
 import com.wealthpro.exception.ResourceNotFoundException;
+import com.wealthpro.feign.NotificationFeignClient;
 import com.wealthpro.repositories.ClientRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,9 @@ public class ClientServiceImplTest {
 
     @Mock
     private ModelMapper modelMapper;            // fake modelMapper
+
+    @Mock
+    private NotificationFeignClient notificationFeignClient;
 
     @InjectMocks
     private ClientServiceImpl clientService;    // real service

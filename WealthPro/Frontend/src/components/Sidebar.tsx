@@ -40,6 +40,7 @@ function buildMenu(role: Role): MenuItem[] {
       { to: '/rm/analytics',         label: 'Analytics',          Icon: TrendingUp },
       { to: '/rm/corporate-actions', label: 'Corporate Actions',  Icon: Building2 },
       { to: '/rm/notifications',     label: 'Notifications',      Icon: Bell },
+      { to: '/rm/aml-flags',         label: 'AML Flags',          Icon: Flag },
     ];
   }
   if (role === 'DEALER') {
@@ -52,13 +53,14 @@ function buildMenu(role: Role): MenuItem[] {
   }
   if (role === 'COMPLIANCE') {
     return [
-      { to: '/compliance/breaches',      label: 'Breaches',          Icon: AlertTriangle },
-      { to: '/compliance/kyc-approval',  label: 'KYC Approval',      Icon: CheckCircle },
-      { to: '/compliance/failed-orders', label: 'Failed Orders',     Icon: XCircle },
-      { to: '/compliance/risk-monitor',  label: 'Risk Monitor',      Icon: Activity },
-      { to: '/compliance/rules',         label: 'Suitability Rules', Icon: Scale },
-      { to: '/compliance/aml-flags',     label: 'AML Flags',         Icon: Flag },
-      { to: '/compliance/audit',         label: 'Audit Log',         Icon: History },
+      { to: '/compliance/breaches',       label: 'Breaches',          Icon: AlertTriangle },
+      { to: '/compliance/kyc-approval',   label: 'KYC Approval',      Icon: CheckCircle },
+      { to: '/compliance/failed-orders',  label: 'Failed Orders',     Icon: XCircle },
+      { to: '/compliance/risk-monitor',   label: 'Risk Monitor',      Icon: Activity },
+      { to: '/compliance/rules',          label: 'Suitability Rules', Icon: Scale },
+      { to: '/compliance/aml-flags',      label: 'AML Flags',         Icon: Flag },
+      { to: '/compliance/notifications',  label: 'Notifications',     Icon: Bell },
+      { to: '/compliance/audit',          label: 'Audit Log',         Icon: History },
     ];
   }
   // CLIENT

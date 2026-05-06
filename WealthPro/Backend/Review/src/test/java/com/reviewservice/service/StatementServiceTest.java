@@ -6,6 +6,9 @@ import com.reviewservice.entity.Statement;
 import com.reviewservice.enums.PeriodType;
 import com.reviewservice.enums.StatementStatus;
 import com.reviewservice.exception.ResourceNotFoundException;
+import com.reviewservice.feign.NotificationFeignClient;
+import com.reviewservice.feign.PborFeignClient;
+import com.reviewservice.feign.dto.AccountDTO;
 import com.reviewservice.repository.StatementRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,6 +38,12 @@ class StatementServiceTest {
     @Mock
     private StatementRepository statementRepository;
 
+    @Mock
+    private PborFeignClient pborFeignClient;
+
+    @Mock
+    private NotificationFeignClient notificationFeignClient;
+
     @InjectMocks
     private StatementServiceImpl statementService;
 
@@ -41,6 +52,8 @@ class StatementServiceTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(pborFeignClient.getAccountById(anyLong())).thenReturn(new AccountDTO());
+
         statement = Statement.builder()
                 .statementId(1L)
                 .accountId(201L)

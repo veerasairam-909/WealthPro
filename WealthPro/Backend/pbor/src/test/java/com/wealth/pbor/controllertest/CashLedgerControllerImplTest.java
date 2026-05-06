@@ -7,6 +7,7 @@ import com.wealth.pbor.dto.request.CashLedgerRequest;
 import com.wealth.pbor.dto.response.CashLedgerResponse;
 import com.wealth.pbor.enums.TxnType;
 import com.wealth.pbor.exception.ResourceNotFoundException;
+import com.wealth.pbor.security.OwnershipGuard;
 import com.wealth.pbor.service.CashLedgerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ class CashLedgerControllerImplTest {
 
     @MockBean
     private CashLedgerService cashLedgerService;
+
+    @MockBean
+    private OwnershipGuard ownershipGuard;
 
     private ObjectMapper objectMapper;
     private CashLedgerRequest request;

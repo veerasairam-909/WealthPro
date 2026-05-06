@@ -1,5 +1,17 @@
 import { api } from './client';
 
+export async function logoutApi(): Promise<void> {
+  // Tell the gateway to blocklist the current token so it cannot be reused
+  // even if someone captured it. Fire-and-forget — local state is cleared
+  // regardless of whether this call succeeds.
+  try {
+    await api.post('/auth/logout');
+  } catch {
+    // Ignore errors (network down, already expired, etc.)
+    // The frontend clears state either way.
+  }
+}
+
 export async function login(username: string, password: string) {
   const res = await api.post('/auth/login', { username, password });
 

@@ -11,6 +11,7 @@ import com.wealth.pbor.exception.BadRequestException;
 import com.wealth.pbor.exception.ResourceNotFoundException;
 import com.wealth.pbor.repository.AccountRepository;
 import com.wealth.pbor.repository.CashLedgerRepository;
+import com.wealth.pbor.repository.HoldingRepository;
 import com.wealth.pbor.service.impl.CashLedgerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,9 @@ class CashLedgerServiceTest {
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private HoldingRepository holdingRepository;
 
     @Mock
     private ModelMapper mapper;
@@ -74,6 +78,7 @@ class CashLedgerServiceTest {
         request.setAmount(new BigDecimal("5000.00"));
         request.setCurrency("INR");
         request.setSecurityId(101L);
+        request.setQuantity(new BigDecimal("10"));
         request.setPrice(new BigDecimal("500"));
         request.setAmount(new BigDecimal("5000.00"));
         request.setTxnDate(LocalDate.now().minusDays(1));
@@ -88,6 +93,7 @@ class CashLedgerServiceTest {
     @Test
     void testCreateCashLedgerEntry_Success() {
         when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+        when(holdingRepository.findByAccountAccountIdAndSecurityId(1L, 101L)).thenReturn(Optional.empty());
         when(cashLedgerRepository.save(any(CashLedger.class))).thenReturn(cashLedger);
         when(mapper.map(cashLedger, CashLedgerResponse.class)).thenReturn(response);
 

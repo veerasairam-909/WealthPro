@@ -5,6 +5,7 @@ import com.wealth.goalsadvisory.dto.response.ModelPortfolioResponse;
 import com.wealth.goalsadvisory.entity.ModelPortfolio;
 import com.wealth.goalsadvisory.enums.ModelPortfolioStatus;
 import com.wealth.goalsadvisory.enums.RiskClass;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wealth.goalsadvisory.exception.ResourceNotFoundException;
 import com.wealth.goalsadvisory.repository.ModelPortfolioRepository;
 import com.wealth.goalsadvisory.service.Impl.ModelPortfolioServiceImpl;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
@@ -32,6 +34,9 @@ class ModelPortfolioServiceTest {
 
     @Mock
     private ModelMapper mapper;
+
+    @Spy
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @InjectMocks
     private ModelPortfolioServiceImpl modelPortfolioService;

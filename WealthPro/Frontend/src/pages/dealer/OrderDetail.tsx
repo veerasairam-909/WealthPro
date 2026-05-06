@@ -420,7 +420,7 @@ export default function OrderDetail() {
                   className="input mono"
                   type="number"
                   step="0.05"
-                  min="0"
+                  min="0.01"
                   placeholder="e.g. 1648.50"
                   value={fillPrice}
                   onChange={(e) => setFillPrice(e.target.value)}
@@ -495,7 +495,7 @@ export default function OrderDetail() {
                       className="input mono"
                       type="number"
                       step="0.05"
-                      min="0"
+                      min="0.01"
                       placeholder="e.g. 1648.50"
                       value={allocPrice}
                       onChange={(e) => setAllocPrice(e.target.value)}

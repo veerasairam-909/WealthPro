@@ -7,7 +7,10 @@ import com.wealthpro.entities.AmlFlag;
 import com.wealthpro.enums.AmlFlagStatus;
 import com.wealthpro.enums.AmlFlagType;
 import com.wealthpro.exception.ResourceNotFoundException;
+import com.wealthpro.feign.NotificationFeignClient;
+import com.wealthpro.feign.dto.NotificationRequestDTO;
 import com.wealthpro.repositories.AmlFlagRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +18,20 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class AmlFlagServiceImpl implements AmlFlagService {
 
     private final AmlFlagRepository amlFlagRepository;
     private final ModelMapper modelMapper;
+    private final NotificationFeignClient notificationFeignClient;
 
-    public AmlFlagServiceImpl(AmlFlagRepository amlFlagRepository, ModelMapper modelMapper) {
+    public AmlFlagServiceImpl(AmlFlagRepository amlFlagRepository,
+                              ModelMapper modelMapper,
+                              NotificationFeignClient notificationFeignClient) {
         this.amlFlagRepository = amlFlagRepository;
         this.modelMapper = modelMapper;
+        this.notificationFeignClient = notificationFeignClient;
     }
 
     @Override
@@ -43,6 +51,7 @@ public class AmlFlagServiceImpl implements AmlFlagService {
         flag.setNotes(requestDTO.getNotes());
         flag.setStatus(AmlFlagStatus.OPEN);
         flag.setFlaggedDate(LocalDate.now());
+        flag.setRaisedByUserId(requestDTO.getRaisedByUserId()); // null-safe: optional field
 
         AmlFlag saved = amlFlagRepository.save(flag);
         return toResponse(saved);
@@ -69,7 +78,7 @@ public class AmlFlagServiceImpl implements AmlFlagService {
             flagStatus = AmlFlagStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid status: " + status
-                    + ". Valid values: OPEN, REVIEWED, CLEARED, ESCALATED");
+                    + ". Valid values: OPEN, REVIEWED, CLOSED");
         }
         return amlFlagRepository.findByStatus(flagStatus).stream()
                 .map(this::toResponse)
@@ -91,7 +100,7 @@ public class AmlFlagServiceImpl implements AmlFlagService {
             newStatus = AmlFlagStatus.valueOf(reviewDTO.getStatus().toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid status: " + reviewDTO.getStatus()
-                    + ". Valid values: REVIEWED, CLEARED, ESCALATED");
+                    + ". Valid values: REVIEWED, CLOSED");
         }
         flag.setStatus(newStatus);
         flag.setReviewedBy(reviewedBy);
@@ -102,6 +111,38 @@ public class AmlFlagServiceImpl implements AmlFlagService {
 
         AmlFlag updated = amlFlagRepository.save(flag);
         return toResponse(updated);
+    }
+
+    @Override
+    public AmlFlagResponseDTO requestClosure(Long amlFlagId, String rmUsername) {
+        AmlFlag flag = findOrThrow(amlFlagId);
+
+        if (flag.getStatus() == AmlFlagStatus.CLOSED) {
+            throw new IllegalStateException("AML flag is already CLOSED.");
+        }
+
+        // RM is requesting closure — do NOT change the status.
+        // Only the compliance analyst can actually close the flag.
+        // Just notify the compliance analyst who raised the flag.
+        if (flag.getRaisedByUserId() != null) {
+            try {
+                String message = String.format(
+                        "RM '%s' has investigated AML Flag %d (Client %d) and confirmed the case is resolved. " +
+                        "Please review and close the flag if you agree.",
+                        rmUsername, amlFlagId, flag.getClientId()
+                );
+                notificationFeignClient.sendNotification(new NotificationRequestDTO(
+                        flag.getRaisedByUserId(), message, "Compliance"
+                ));
+                log.info("[AML] Closure-request notification sent to compliance userId={} for flag {} by RM={}",
+                        flag.getRaisedByUserId(), amlFlagId, rmUsername);
+            } catch (Exception e) {
+                log.warn("[AML] Could not send closure-request notification for flag {}: {}", amlFlagId, e.getMessage());
+            }
+        }
+
+        // Return flag unchanged — status is not modified by RM
+        return toResponse(flag);
     }
 
     @Override
@@ -126,6 +167,7 @@ public class AmlFlagServiceImpl implements AmlFlagService {
         dto.setReviewedBy(flag.getReviewedBy());
         dto.setReviewedDate(flag.getReviewedDate());
         dto.setNotes(flag.getNotes());
+        dto.setRaisedByUserId(flag.getRaisedByUserId());
         return dto;
     }
 }
