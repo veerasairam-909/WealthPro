@@ -26,14 +26,6 @@ public class ClientController {
         this.clientService = clientService;
     }
 
-    // POST /api/clients — RM/COMPLIANCE/ADMIN create full client
-    @PostMapping
-    public ResponseEntity<ClientResponseDTO> createClient(
-            @Valid @RequestBody ClientRequestDTO requestDTO) {
-        ClientResponseDTO response = clientService.createClient(requestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
     /**
      * Internal endpoint: called by the API Gateway after a CLIENT self-registers.
      * Creates a stub Client row (status=PENDING_KYC) linked to the login username.

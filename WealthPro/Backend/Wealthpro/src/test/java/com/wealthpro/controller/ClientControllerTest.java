@@ -61,37 +61,6 @@ public class ClientControllerTest {
     }
 
 
-    // TEST 1: POST /api/clients — 201 Created
-    @Test
-    void testCreateClient_Returns201() throws Exception {
-        when(clientService.createClient(any(ClientRequestDTO.class)))
-                .thenReturn(responseDTO);
-
-        mockMvc.perform(post("/api/clients")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isCreated())                    // 201
-                .andExpect(jsonPath("$.clientId").value(1))
-                .andExpect(jsonPath("$.name").value("Murali Krishna"))
-                .andExpect(jsonPath("$.segment").value("HNI"))
-                .andExpect(jsonPath("$.status").value("Active"));
-
-        verify(clientService, times(1))
-                .createClient(any(ClientRequestDTO.class));
-    }
-
-    // TEST 2: POST /api/clients — 400 Validation error
-    @Test
-    void testCreateClient_InvalidBody_Returns400() throws Exception {
-        // Arrange — empty request body (missing required fields)
-        ClientRequestDTO emptyRequest = new ClientRequestDTO();
-
-        // Act + Assert
-        mockMvc.perform(post("/api/clients")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(emptyRequest)))
-                .andExpect(status().isBadRequest());                // 400
-    }
 
     // TEST 3: GET /api/clients — 200 OK
 

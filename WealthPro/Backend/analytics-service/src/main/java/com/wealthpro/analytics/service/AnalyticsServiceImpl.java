@@ -189,7 +189,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         measures.add(RiskMeasure.builder()
                 .accountId(accountId)
                 .measureType(MeasureType.VOLATILITY)
-                .measureValue(Math.round((5.0 + random.nextDouble() * 20.0) * 100.0) / 100.0)
+                .measureValue(Math.round((5.0 + random.nextDouble() * 20.0) * 100.0) / 100.0)  // 5 to 25%
                 .description("Annualised portfolio volatility based on " + holdingsCount + " holdings")
                 .calculatedAt(LocalDateTime.now())
                 .build());
@@ -197,7 +197,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         measures.add(RiskMeasure.builder()
                 .accountId(accountId)
                 .measureType(MeasureType.MAX_DRAWDOWN)
-                .measureValue(Math.round((-2.0 - random.nextDouble() * 18.0) * 100.0) / 100.0)
+                .measureValue(Math.round((-2.0 - random.nextDouble() * 18.0) * 100.0) / 100.0) // -2 to -20%
                 .description("Maximum peak-to-trough drawdown from simulated NAV series")
                 .calculatedAt(LocalDateTime.now())
                 .build());
@@ -205,7 +205,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         measures.add(RiskMeasure.builder()
                 .accountId(accountId)
                 .measureType(MeasureType.VAR_95)
-                .measureValue(Math.round((1.0 + random.nextDouble() * 4.0) * 100.0) / 100.0)
+                .measureValue(Math.round((1.0 + random.nextDouble() * 4.0) * 100.0) / 100.0) // 1 to 5 %
                 .description("Value-at-Risk at 95% confidence level using historical simulation")
                 .calculatedAt(LocalDateTime.now())
                 .build());
@@ -213,7 +213,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         measures.add(RiskMeasure.builder()
                 .accountId(accountId)
                 .measureType(MeasureType.TRACKING_ERROR)
-                .measureValue(Math.round((0.5 + random.nextDouble() * 3.5) * 100.0) / 100.0)
+                .measureValue(Math.round((0.5 + random.nextDouble() * 3.5) * 100.0) / 100.0) //0.5 to 4%
                 .description("Tracking error vs. benchmark calculated from return differentials")
                 .calculatedAt(LocalDateTime.now())
                 .build());

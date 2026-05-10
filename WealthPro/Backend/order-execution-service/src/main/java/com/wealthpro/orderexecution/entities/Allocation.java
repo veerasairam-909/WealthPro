@@ -12,7 +12,10 @@ import java.time.LocalDateTime;
  * @version 2.0
  */
 @Entity
-@Table(name = "allocations")
+@Table(name = "allocations",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_allocation_order_account",
+                columnNames = {"order_id", "account_id"}))
 @Getter
 @Setter
 @NoArgsConstructor

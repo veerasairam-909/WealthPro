@@ -72,30 +72,6 @@ public class ClientServiceImplTest {
     }
 
     // ─────────────────────────────────────────
-    // TEST 1: Create client — success
-    // ─────────────────────────────────────────
-    @Test
-    void testCreateClient_Success() {
-        // Arrange
-        // when modelMapper maps requestDTO → client entity
-        when(modelMapper.map(requestDTO, Client.class)).thenReturn(client);
-        // when repository saves → return saved client
-        when(clientRepository.save(any(Client.class))).thenReturn(client);
-        // when modelMapper maps client → responseDTO
-        when(modelMapper.map(client, ClientResponseDTO.class)).thenReturn(responseDTO);
-
-        // Act
-        ClientResponseDTO result = clientService.createClient(requestDTO);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals("Murali Krishna", result.getName());
-        assertEquals(ClientStatus.Active, result.getStatus());
-
-        // Verify save was called once
-        verify(clientRepository, times(1)).save(any(Client.class));
-    }
-
     // ─────────────────────────────────────────
     // TEST 2: Get client by ID — success
     // ─────────────────────────────────────────

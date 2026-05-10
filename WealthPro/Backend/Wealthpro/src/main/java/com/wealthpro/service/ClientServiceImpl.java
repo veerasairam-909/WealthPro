@@ -36,29 +36,6 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public ClientResponseDTO createClient(ClientRequestDTO requestDTO) {
-        Client client = modelMapper.map(requestDTO, Client.class);
-        client.setStatus(ClientStatus.Active);
-        Client saved = clientRepository.save(client);
-
-        // ── Feign: Send welcome notification to Notifications service ────────
-        try {
-            NotificationRequestDTO notification = new NotificationRequestDTO(
-                    saved.getClientId(),
-                    "Welcome to WealthPro, " + saved.getName() + "! Your client profile has been created successfully.",
-                    "Order"
-            );
-            notificationFeignClient.sendNotification(notification);
-            log.info("[FEIGN] Welcome notification sent to NOTIFICATIONS-SERVICE for clientId={}", saved.getClientId());
-        } catch (FeignException e) {
-            log.warn("[FEIGN] Could not send notification for clientId={}: {}", saved.getClientId(), e.getMessage());
-        }
-        // ────────────────────────────────────────────────────────────────────
-
-        return mapToResponse(saved);
-    }
-
-    @Override
     public ClientResponseDTO getClientById(Long clientId) {
         Client client = findClientOrThrow(clientId);
         return mapToResponse(client);

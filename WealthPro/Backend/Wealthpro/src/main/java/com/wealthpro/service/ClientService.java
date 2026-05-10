@@ -10,8 +10,6 @@ import java.util.Optional;
 
 public interface ClientService {
 
-    ClientResponseDTO createClient(ClientRequestDTO requestDTO);
-
     ClientResponseDTO getClientById(Long clientId);
 
     List<ClientResponseDTO> getAllClients();

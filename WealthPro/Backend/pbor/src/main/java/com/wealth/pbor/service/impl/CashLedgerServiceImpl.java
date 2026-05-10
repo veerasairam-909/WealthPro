@@ -17,7 +17,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,31 +96,9 @@ public class CashLedgerServiceImpl implements CashLedgerService {
     }
 
     private void processSubscription(Account account, CashLedgerRequest request) {
-        Optional<Holding> optionalHolding = holdingRepository.findByAccountAccountIdAndSecurityId(
-                account.getAccountId(), request.getSecurityId());
-
-        if (optionalHolding.isPresent()) {
-            Holding holding = optionalHolding.get();
-            BigDecimal oldQuantity = holding.getQuantity();
-            BigDecimal oldAvgCost = holding.getAvgCost();
-            BigDecimal newQuantity = oldQuantity.add(request.getQuantity());
-            BigDecimal newAvgCost = (oldQuantity.multiply(oldAvgCost)
-                    .add(request.getQuantity().multiply(request.getPrice())))
-                    .divide(newQuantity, 4, RoundingMode.HALF_UP);
-            holding.setQuantity(newQuantity);
-            holding.setAvgCost(newAvgCost);
-            holding.setLastValuationDate(request.getTxnDate());
-            holdingRepository.save(holding);
-        } else {
-            Holding holding = new Holding();
-            holding.setAccount(account);
-            holding.setSecurityId(request.getSecurityId());
-            holding.setQuantity(request.getQuantity());
-            holding.setAvgCost(request.getPrice());
-            holding.setValuationCurrency(account.getBaseCurrency());
-            holding.setLastValuationDate(request.getTxnDate());
-            holdingRepository.save(holding);
-        }
+        // Holding creation/merging is handled upstream by HoldingService before
+        // the cash ledger entry is written. Doing it here as well would double
+        // the holding quantity, so this method intentionally does nothing.
     }
 
     private void processRedemption(Account account, CashLedgerRequest request) {

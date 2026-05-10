@@ -306,15 +306,21 @@ public class OrderServiceImpl implements OrderService {
                     "Allocations can only be created for FILLED orders. Current status: " + order.getStatus());
         }
 
-        // Make sure we are not allocating more than what was actually filled
+        // Make sure we are not allocating more than what remains unallocated
         int totalFilled = executionFillRepository.findByOrder_OrderId(orderId)
                 .stream()
                 .mapToInt(ExecutionFill::getFillQuantity)
                 .sum();
-        if (requestDTO.getAllocQuantity() > totalFilled) {
+        int alreadyAllocated = allocationRepository.findByOrder_OrderId(orderId)
+                .stream()
+                .mapToInt(Allocation::getAllocQuantity)
+                .sum();
+        int remaining = totalFilled - alreadyAllocated;
+        if (requestDTO.getAllocQuantity() > remaining) {
             throw new IllegalStateException(
                     "Cannot allocate " + requestDTO.getAllocQuantity()
-                    + " units — only " + totalFilled + " units were filled.");
+                    + " units — only " + remaining + " unallocated units remain"
+                    + " (" + totalFilled + " filled, " + alreadyAllocated + " already allocated).");
         }
 
         Allocation allocation = Allocation.builder()

@@ -11,11 +11,6 @@ export async function getClientById(id: number) {
   return res.data;
 }
 
-export async function createClient(data: any) {
-  const res = await api.post('/api/clients', data);
-  return res.data;
-}
-
 export async function updateClient(id: number, data: any) {
   const res = await api.put('/api/clients/' + id, data);
   return res.data;
