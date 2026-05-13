@@ -51,6 +51,5 @@ public class TokenBlocklistService {
         int before = blockedTokens.size();
         blockedTokens.entrySet().removeIf(e -> e.getValue() < now);
         int removed = before - blockedTokens.size();
-        // purge complete — no console output in production
     }
 }

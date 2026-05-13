@@ -14,7 +14,6 @@ import reactor.core.publisher.Mono;
  * Reactive client used by the gateway to talk to the Wealthpro (KYC) service.
  *
  * Used for:
- *   - Auto-provisioning a stub Client record when a CLIENT self-registers.
  *   - Resolving username → clientId at login so we can bake it into the JWT.
  */
 @Component
@@ -27,7 +26,7 @@ public class WealthproClient {
 
     /**
      * Create a stub Client record with status PENDING_KYC.
-     * Called right after a successful CLIENT self-registration.
+     * Called right after a successful CLIENT registration.
      * Never throws — on failure we log and swallow so the user registration
      * still succeeds. An RM can manually link the user to a Client later.
      */

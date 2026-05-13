@@ -35,6 +35,14 @@ export async function updateKycStatus(kycId: number, status: string) {
   return res.data;
 }
 
+/** Fetch the raw KYC document file as a Blob (JWT token sent automatically). */
+export async function fetchKycDocument(kycId: number): Promise<Blob> {
+  const res = await api.get('/api/clients/kyc/' + kycId + '/document', {
+    responseType: 'blob',
+  });
+  return res.data;
+}
+
 // ─── Risk Profile ───
 export async function getRiskProfile(clientId: number) {
   // 404 means the client has no risk profile yet — return null instead of throwing

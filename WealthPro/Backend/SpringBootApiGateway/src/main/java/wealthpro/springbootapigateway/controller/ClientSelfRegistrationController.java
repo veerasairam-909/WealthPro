@@ -77,10 +77,6 @@ public class ClientSelfRegistrationController {
                     user.setRoles(Role.CLIENT.name());   // ── HARDCODED — self-registration is CLIENT only ──
                     user.setNew(true);
                     return usersRepository.save(user)
-                            // After the user row is saved, ask Wealthpro to create a
-                            // stub Client record (status=PENDING_KYC) linked to this
-                            // username. If the call fails we still return success —
-                            // an RM can link them manually later.
                             .flatMap(saved -> wealthproClient
                                     .provisionStubClient(
                                             saved.getUsername(),
@@ -88,7 +84,6 @@ public class ClientSelfRegistrationController {
                                             saved.getEmail(),
                                             saved.getPhone())
                                     .thenReturn(saved.getUsername()))
-                            // Re-fetch so R2DBC reads back the DB-generated userId
                             .flatMap(usersRepository::findByUsername)
                             .map(this::toResponse);
                 }));
@@ -96,7 +91,7 @@ public class ClientSelfRegistrationController {
 
     private UserResponse toResponse(Users user) {
         return new UserResponse(
-                user.getUserId(),   // Numeric surrogate key — DB-generated, read back after re-fetch
+                user.getUserId(),
                 user.getUsername(),
                 user.getName(),
                 user.getEmail(),

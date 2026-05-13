@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
  *
  * Responsibilities:
  *  1. Extract the bearer token, validate signature & expiry.
- *  2. Load UserDetails, populate ReactiveSecurityContext.
+ *  2. Load UserDetails, populate SecurityContext.
  *  3. Write an audit entry.
  *  4. Inject X-Auth-Username / X-Auth-Roles / X-Auth-Client-Id headers into
  *     the forwarded request so downstream microservices can perform

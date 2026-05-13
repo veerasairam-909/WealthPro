@@ -5,7 +5,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        // ───── WealthPro palette (Zerodha Kite + Groww inspired) ─────
         bg: '#FFFFFF',
         surface: {
           DEFAULT: '#FAFBFC',

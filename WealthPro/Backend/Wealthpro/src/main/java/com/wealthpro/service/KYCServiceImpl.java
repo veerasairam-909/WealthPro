@@ -118,6 +118,15 @@ public class KYCServiceImpl implements KYCService{
     }
 
 
+    // GET file path of a KYC document (used by the download endpoint)
+
+    @Override
+    public String getKycDocumentFilePath(Long kycId) {
+        KYCDocument doc = findKYCOrThrow(kycId);
+        return doc.getDocumentRef();
+    }
+
+
     // DELETE a KYC document
 
     public void deleteKYCDocument(Long kycId) {

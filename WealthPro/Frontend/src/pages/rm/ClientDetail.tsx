@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   getClientById, updateClient,
-  getKycDocs, uploadKyc, updateKycStatus,
+  getKycDocs, uploadKyc,
   getRiskProfile, createRiskProfile,
 } from '@/api/clients';
 import { getGoalsByClientId, updateGoalStatus, deleteGoal } from '@/api/goals';
@@ -538,15 +538,6 @@ function KycTab(props: { clientId: number; kycDocs: any[]; canEdit: boolean; onU
     setUploading(false);
   }
 
-  async function markVerified(kycId: number) {
-    try {
-      await updateKycStatus(kycId, 'Verified');
-      onUpdated();
-    } catch (err: any) {
-      alert('Failed: ' + (err.response?.data?.message || err.message));
-    }
-  }
-
   return (
     <div className="space-y-4">
       {/* Upload form (RM only) */}
@@ -603,7 +594,6 @@ function KycTab(props: { clientId: number; kycDocs: any[]; canEdit: boolean; onU
                 <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Verified Date</th>
                 <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Expiry Date</th>
                 <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Status</th>
-                {canEdit && <th className="text-right px-5 py-3 text-xs uppercase font-medium text-text-2">Action</th>}
               </tr>
             </thead>
             <tbody>
@@ -624,21 +614,6 @@ function KycTab(props: { clientId: number; kycDocs: any[]; canEdit: boolean; onU
                        d.status === 'Expired'  ? 'pill-danger'  : 'pill-danger')
                     }>{d.status}</span>
                   </td>
-                  {canEdit && (
-                    <td className="px-5 py-3 text-right">
-                      {d.status === 'Pending' && (
-                        <button
-                          onClick={() => markVerified(d.kycId)}
-                          className="text-xs text-success font-medium"
-                        >
-                          Mark verified
-                        </button>
-                      )}
-                      {d.status === 'Expired' && (
-                        <span className="text-xs text-danger italic">Re-upload required</span>
-                      )}
-                    </td>
-                  )}
                 </tr>
               ))}
             </tbody>

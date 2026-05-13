@@ -1,7 +1,13 @@
 import { useState, useEffect, Fragment } from 'react';
-import { getAllClients, getKycDocs, updateKycStatus } from '@/api/clients';
+import { getAllClients, getKycDocs, updateKycStatus, fetchKycDocument } from '@/api/clients';
 import { createNotification } from '@/api/notifications';
 import { cachedFetch, parallelLimit } from '@/lib/fetchUtils';
+
+function isImageType(mimeOrRef: string): boolean {
+  const lower = mimeOrRef.toLowerCase();
+  return ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp',
+          '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'].some((t) => lower.includes(t));
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -15,6 +21,7 @@ interface FlatDoc {
   documentType: string;
   documentRef: string;
   verifiedDate: string | null;
+  expiryDate: string | null;
   status: KycStatus;
 }
 
@@ -48,6 +55,11 @@ export default function KYCApproval() {
   const [rejectingId, setRejectingId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [actionMsg, setActionMsg] = useState<ActionMsg | null>(null);
+  const [viewingDoc, setViewingDoc]   = useState<FlatDoc | null>(null);
+  const [blobUrl, setBlobUrl]         = useState<string | null>(null);
+  const [docLoading, setDocLoading]   = useState(false);
+  const [docError, setDocError]       = useState('');
+  const [docMime, setDocMime]         = useState('');
 
   useEffect(() => {
     loadAll();
@@ -80,6 +92,7 @@ export default function KYCApproval() {
               documentType: d.documentType,
               documentRef: d.documentRefNumber ?? d.documentRef ?? '-',
               verifiedDate: d.verifiedDate ?? null,
+              expiryDate: d.expiryDate ?? null,
               status: d.status as KycStatus,
             });
           }
@@ -107,14 +120,23 @@ export default function KYCApproval() {
 
   async function handleApprove(doc: FlatDoc) {
     try {
-      await updateKycStatus(doc.kycId, 'Verified');
+      const updated = await updateKycStatus(doc.kycId, 'Verified');
       await createNotification({
         userId: doc.clientId,
         message: `Your ${doc.documentType} document has been verified by compliance.`,
         category: 'Compliance',
       });
       setDocs((prev) =>
-        prev.map((d) => (d.kycId === doc.kycId ? { ...d, status: 'Verified' } : d)),
+        prev.map((d) =>
+          d.kycId === doc.kycId
+            ? {
+                ...d,
+                status: 'Verified',
+                verifiedDate: updated.verifiedDate ?? null,
+                expiryDate: updated.expiryDate ?? null,
+              }
+            : d,
+        ),
       );
       showMsg(doc.kycId, 'Document approved and client notified.', 'success');
     } catch (e) {
@@ -277,8 +299,9 @@ export default function KYCApproval() {
                 <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Doc Type</th>
                 <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Reference</th>
                 <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">
-                  Uploaded / Verified Date
+                  Verified Date
                 </th>
+                <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Expiry Date</th>
                 <th className="text-left px-5 py-3 text-xs uppercase font-medium text-text-2">Status</th>
                 <th className="text-right px-5 py-3 text-xs uppercase font-medium text-text-2">Actions</th>
               </tr>
@@ -307,49 +330,83 @@ export default function KYCApproval() {
                     <td className="px-5 py-3 mono text-xs text-text-2">
                       {doc.verifiedDate ?? <span className="text-text-3 italic">—</span>}
                     </td>
+                    <td className="px-5 py-3 mono text-xs text-text-2">
+                      {doc.expiryDate ?? <span className="text-text-3 italic">—</span>}
+                    </td>
                     <td className="px-5 py-3">
                       <span className={'pill ' + statusPill(doc.status)}>{doc.status}</span>
                     </td>
                     <td className="px-5 py-3 text-right">
-                      {/* Inline toast */}
-                      {actionMsg && actionMsg.id === doc.kycId ? (
-                        <span
-                          className={
-                            'text-xs font-medium ' +
-                            (actionMsg.type === 'success' ? 'text-success' : 'text-danger')
-                          }
-                        >
-                          {actionMsg.msg}
-                        </span>
-                      ) : doc.status === 'Pending' ? (
-                        <div className="flex gap-2 justify-end">
+                      <div className="flex gap-2 justify-end flex-wrap items-center">
+                        {/* View Document — always visible when a ref exists */}
+                        {doc.documentRef && doc.documentRef !== '-' && (
                           <button
-                            onClick={() => handleApprove(doc)}
-                            className="btn btn-success btn-sm"
+                            onClick={async () => {
+                              // revoke any previous blob URL to free memory
+                              if (blobUrl) URL.revokeObjectURL(blobUrl);
+                              setViewingDoc(doc);
+                              setBlobUrl(null);
+                              setDocError('');
+                              setDocMime('');
+                              setDocLoading(true);
+                              try {
+                                const blob = await fetchKycDocument(doc.kycId);
+                                setDocMime(blob.type);
+                                setBlobUrl(URL.createObjectURL(blob));
+                              } catch (e: any) {
+                                setDocError(
+                                  e?.response?.status === 404
+                                    ? 'Document file not found on server.'
+                                    : 'Could not load document. Please try again.',
+                                );
+                              }
+                              setDocLoading(false);
+                            }}
+                            className="btn btn-ghost btn-sm"
+                            title="Preview the uploaded document"
                           >
-                            Approve
+                            🔍 View Doc
                           </button>
-                          <button
-                            onClick={() =>
-                              rejectingId === doc.kycId
-                                ? cancelReject()
-                                : openReject(doc.kycId)
+                        )}
+
+                        {/* Inline toast */}
+                        {actionMsg && actionMsg.id === doc.kycId ? (
+                          <span
+                            className={
+                              'text-xs font-medium ' +
+                              (actionMsg.type === 'success' ? 'text-success' : 'text-danger')
                             }
-                            className="btn btn-danger btn-sm"
                           >
-                            {rejectingId === doc.kycId ? 'Cancel' : 'Reject'}
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-text-3 italic">No actions</span>
-                      )}
+                            {actionMsg.msg}
+                          </span>
+                        ) : doc.status === 'Pending' ? (
+                          <>
+                            <button
+                              onClick={() => handleApprove(doc)}
+                              className="btn btn-success btn-sm"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() =>
+                                rejectingId === doc.kycId
+                                  ? cancelReject()
+                                  : openReject(doc.kycId)
+                              }
+                              className="btn btn-danger btn-sm"
+                            >
+                              {rejectingId === doc.kycId ? 'Cancel' : 'Reject'}
+                            </button>
+                          </>
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
 
                   {/* Inline rejection form — expands below the row */}
                   {rejectingId === doc.kycId && (
                     <tr className="border-t border-border-hairline bg-surface">
-                      <td colSpan={6} className="px-5 py-4">
+                      <td colSpan={7} className="px-5 py-4">
                         <div className="flex flex-col gap-2 max-w-xl">
                           <p className="text-xs font-medium text-text-2">
                             Rejection reason for{' '}
@@ -386,6 +443,97 @@ export default function KYCApproval() {
           </table>
         )}
       </div>
+      {/* ── Document Viewer Modal ───────────────────────────────────────────── */}
+      {viewingDoc && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col">
+
+            {/* Modal header */}
+            <div className="px-6 py-4 border-b border-border-hairline flex items-start justify-between shrink-0">
+              <div>
+                <h3 className="font-semibold text-base">
+                  {viewingDoc.documentType} — {viewingDoc.clientName}
+                </h3>
+                <p className="text-xs text-text-3 mt-0.5 mono break-all">
+                  {viewingDoc.documentRef}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 ml-4 shrink-0">
+                {blobUrl && (
+                  <a
+                    href={blobUrl}
+                    download={viewingDoc.documentType + '_' + viewingDoc.clientName}
+                    className="btn btn-ghost btn-sm text-xs"
+                    title="Download document"
+                  >
+                    ⬇ Download
+                  </a>
+                )}
+                <button
+                  onClick={() => {
+                    if (blobUrl) URL.revokeObjectURL(blobUrl);
+                    setViewingDoc(null);
+                    setBlobUrl(null);
+                  }}
+                  className="text-text-3 hover:text-text text-2xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/* Document content */}
+            <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-surface min-h-[300px]">
+              {docLoading ? (
+                <div className="text-center text-text-2">
+                  <p className="text-2xl mb-2">⏳</p>
+                  <p className="text-sm">Loading document...</p>
+                </div>
+              ) : docError ? (
+                <div className="text-center text-danger">
+                  <p className="text-2xl mb-2">⚠️</p>
+                  <p className="text-sm font-medium">{docError}</p>
+                  <p className="text-xs text-text-3 mt-1">
+                    Stored path: <span className="mono">{viewingDoc.documentRef}</span>
+                  </p>
+                </div>
+              ) : blobUrl && isImageType(docMime || viewingDoc.documentRef) ? (
+                <img
+                  src={blobUrl}
+                  alt={viewingDoc.documentType}
+                  className="max-w-full max-h-[65vh] object-contain rounded shadow"
+                />
+              ) : blobUrl ? (
+                <iframe
+                  src={blobUrl}
+                  title={viewingDoc.documentType}
+                  className="w-full h-[60vh] border-0 rounded"
+                />
+              ) : null}
+            </div>
+
+            {/* Modal footer */}
+            <div className="px-6 py-3 border-t border-border-hairline flex items-center justify-between text-xs text-text-3 shrink-0">
+              <span>
+                Status:{' '}
+                <span className={'pill ' + statusPill(viewingDoc.status) + ' ml-1'}>
+                  {viewingDoc.status}
+                </span>
+              </span>
+              <button
+                onClick={() => {
+                  if (blobUrl) URL.revokeObjectURL(blobUrl);
+                  setViewingDoc(null);
+                  setBlobUrl(null);
+                }}
+                className="btn btn-ghost btn-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

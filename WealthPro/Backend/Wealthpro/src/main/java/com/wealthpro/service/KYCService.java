@@ -20,4 +20,7 @@ public interface KYCService {
                                            KYCStatusUpdateRequestDTO requestDTO);
 
     void deleteKYCDocument(Long kycId);
+
+    /** Returns the local file-system path of the stored KYC document. */
+    String getKycDocumentFilePath(Long kycId);
 }
